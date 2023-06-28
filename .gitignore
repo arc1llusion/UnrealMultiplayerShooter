@@ -1,7 +1,14 @@
 # Rider
 Plugins/Developer
 .idea
-Content
+Content/Developers
+Content/ThirdPerson
+Content/Assets/BlockGame
+Content/Assets/LearningKit_Games
+Content/Assets/LearningKit_Robots
+Content/Assets/LevelPrototyping
+Content/Assets/MilitaryWeapSilver
+Content/Assets/Characters
 
 # Visual Studio 2015 user specific files
 .vs/
