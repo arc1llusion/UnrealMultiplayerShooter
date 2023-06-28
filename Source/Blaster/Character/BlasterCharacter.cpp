@@ -4,6 +4,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
@@ -29,6 +30,9 @@ ABlasterCharacter::ABlasterCharacter()
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	Combat->SetIsReplicated(true);
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -83,6 +87,14 @@ void ABlasterCharacter::LookAction(const FInputActionValue& Value)
 	}
 }
 
+void ABlasterCharacter::EquipAction(const FInputActionValue& Value)
+{
+	if(Combat && HasAuthority())
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if(IsLocallyControlled())
@@ -117,6 +129,15 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if(Combat)
+	{
+		Combat->Character = this;
+	}
+}
+
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -133,5 +154,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::LookAction);
+
+		EnhancedInputComponent->BindAction(EquipActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::EquipAction);
 	}
 }
