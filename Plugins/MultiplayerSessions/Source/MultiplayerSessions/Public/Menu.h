@@ -21,6 +21,8 @@ public:
 	void MenuSetup(	int32 InNumOfPublicConnections = 4,
 					FString InMatchType = FString(TEXT("FreeForAll")),
 					FString InLobbyPath = FString(TEXT("/Game/ThirdPerson/Maps/Lobby")));
+	
+	void MenuTearDown();
 
 protected:
 	virtual bool Initialize() override;
@@ -54,8 +56,6 @@ private:
 
 	UFUNCTION()
 	void JoinButtonClicked();
-
-	void MenuTearDown();
 	
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
