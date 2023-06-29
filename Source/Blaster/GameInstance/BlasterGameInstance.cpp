@@ -14,8 +14,20 @@ void UBlasterGameInstance::OnStart()
 {
 	Super::OnStart();
 
-	CreateMenuWidget();
-	NotifyPreClientTravelDelegates.AddUObject(this, &UBlasterGameInstance::OnGameInstancePreClientTravel);
+	if(const UWorld* World = GetWorld())
+	{
+		if(GEngine)
+		{
+			const FString MapName = FString::Printf(TEXT("Map Name: %s"), *World->GetMapName());
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, MapName);
+		}
+		
+		if(World->GetMapName().Contains("Main"))
+		{				
+			CreateMenuWidget();
+			NotifyPreClientTravelDelegates.AddUObject(this, &UBlasterGameInstance::OnGameInstancePreClientTravel);
+		}
+	}
 }
 
 void UBlasterGameInstance::CreateMenuWidget()

@@ -35,6 +35,9 @@ protected:
 
 	void CrouchAction(const FInputActionValue &Value);
 
+	void AimAction(const FInputActionValue &Value);
+	void StopAimAction(const FInputActionValue &Value);
+
 	/** Input Assets **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;
@@ -53,6 +56,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction *CrouchInputAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction *AimInputAsset;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -79,4 +85,5 @@ private:
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
+	bool IsAiming() const;
 };
