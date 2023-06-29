@@ -22,12 +22,18 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = true))
 	class ABlasterCharacter* BlasterCharacter;
 
-	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	float Speed;
 
-	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	bool bIsInAir;
 
-	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	bool bIsAccelerating;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
+	bool bIsWeaponEquipped;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
+	bool bIsCrouched;
 };

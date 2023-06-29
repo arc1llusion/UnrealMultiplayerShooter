@@ -7,6 +7,9 @@
 #include "InputActionValue.h"
 #include "BlasterCharacter.generated.h"
 
+class UInputMappingContext;
+class UInputAction;
+
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter
 {
@@ -30,21 +33,26 @@ protected:
 	
 	void EquipAction(const FInputActionValue &Value);
 
+	void CrouchAction(const FInputActionValue &Value);
+
 	/** Input Assets **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	class UInputMappingContext *DefaultMappingContext;
+	UInputMappingContext *DefaultMappingContext;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	class UInputAction *MoveActionAsset;
+	UInputAction *MoveActionAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	class UInputAction *LookActionAsset;
+	UInputAction *LookActionAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	class UInputAction *JumpActionAsset;
+	UInputAction *JumpActionAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	class UInputAction *EquipActionAsset;
+	UInputAction *EquipActionAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction *CrouchInputAsset;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -70,4 +78,5 @@ private:
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
+	bool IsWeaponEquipped() const;
 };

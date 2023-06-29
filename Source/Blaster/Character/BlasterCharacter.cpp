@@ -33,6 +33,8 @@ ABlasterCharacter::ABlasterCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -58,6 +60,41 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	// Set up action bindings
+	if (UEnhancedInputComponent *EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		// Jumping
+		EnhancedInputComponent->BindAction(JumpActionAsset, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpActionAsset, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		// Moving
+		EnhancedInputComponent->BindAction(MoveActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::MoveAction);
+
+		// Looking
+		EnhancedInputComponent->BindAction(LookActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::LookAction);
+
+		// Equip
+		EnhancedInputComponent->BindAction(EquipActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::EquipAction);
+
+		// Crouching
+		EnhancedInputComponent->BindAction(CrouchInputAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::CrouchAction);
+		
+	}
+}
+
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if(Combat)
+	{
+		Combat->Character = this;
+	}
 }
 
 void ABlasterCharacter::MoveAction(const FInputActionValue& Value)
@@ -99,6 +136,18 @@ void ABlasterCharacter::EquipAction(const FInputActionValue& Value)
 		{
 			ServerEquipButtonPressed();
 		}
+	}
+}
+
+void ABlasterCharacter::CrouchAction(const FInputActionValue& Value)
+{
+	if(bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Crouch();
 	}
 }
 
@@ -144,32 +193,7 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-void ABlasterCharacter::PostInitializeComponents()
+bool ABlasterCharacter::IsWeaponEquipped() const
 {
-	Super::PostInitializeComponents();
-	if(Combat)
-	{
-		Combat->Character = this;
-	}
-}
-
-void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	// Set up action bindings
-	if (UEnhancedInputComponent *EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		// Jumping
-		EnhancedInputComponent->BindAction(JumpActionAsset, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpActionAsset, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
-		EnhancedInputComponent->BindAction(MoveActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::MoveAction);
-
-		// Looking
-		EnhancedInputComponent->BindAction(LookActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::LookAction);
-
-		EnhancedInputComponent->BindAction(EquipActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::EquipAction);
-	}
+	return Combat && Combat->EquippedWeapon;
 }
