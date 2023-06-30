@@ -11,6 +11,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 ABlasterCharacter::ABlasterCharacter()
@@ -63,6 +64,8 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	AimOffset(DeltaTime);
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -179,6 +182,42 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
 	}
+}
+
+void ABlasterCharacter::AimOffset(float DeltaTime)
+{
+	if(Combat && Combat->EquippedWeapon == nullptr)
+	{
+		StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
+		return;
+	}
+	
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.0f;
+	const float Speed = Velocity.Size();
+	const bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if(Speed == 0.0f && !bIsInAir) // Standing still, not jumping
+	{
+		const FRotator CurrentAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
+		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+
+		UE_LOG(LogTemp, Warning, TEXT("Current AimRotation %s"), *CurrentAimRotation.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Starting AimRotation %s"), *StartingAimRotation.ToString());
+
+		AimOffsetYaw = DeltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false;
+
+		UE_LOG(LogTemp, Warning, TEXT("Aim Offset Yaw %f"), AimOffsetYaw);
+	}
+	if(Speed > 0.0f|| bIsInAir) //Running or jumping
+	{
+		StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
+		AimOffsetYaw = 0;
+		bUseControllerRotationYaw = true;
+	}
+
+	AimOffsetPitch = GetBaseAimRotation().Pitch;
 }
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)

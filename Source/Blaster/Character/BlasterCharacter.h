@@ -38,6 +38,8 @@ protected:
 	void AimAction(const FInputActionValue &Value);
 	void StopAimAction(const FInputActionValue &Value);
 
+	void AimOffset(float DeltaTime);
+
 	/** Input Assets **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;
@@ -82,8 +84,15 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 
+	float AimOffsetYaw;
+	float AimOffsetPitch;
+	FRotator StartingAimRotation;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
 	bool IsAiming() const;
+
+	FORCEINLINE float GetAimOffsetYaw() const { return AimOffsetYaw; }
+	FORCEINLINE float GetAimOffsetPitch() const { return AimOffsetPitch; }
 };

@@ -51,4 +51,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	const float Target = Delta.Yaw / DeltaSeconds;
 	const float Interpolation = FMath::FInterpTo(Lean, Target, DeltaSeconds, 6.0f);
 	Lean = FMath::Clamp(Interpolation, -180.0f, 180.0f);
+
+	AimOffsetYaw = BlasterCharacter->GetAimOffsetYaw();
+	AimOffsetPitch = BlasterCharacter->GetAimOffsetPitch();
 }
