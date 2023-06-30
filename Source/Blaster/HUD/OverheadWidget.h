@@ -22,7 +22,10 @@ public:
 	void SetDisplayText(const FString& TextToDisplay);
 	
 	UFUNCTION(BlueprintCallable)
-	void ShowPlayerNetRole(APawn* InPawn);
+	void ShowPlayerRemoteNetRole(APawn* InPawn);
+
+	UFUNCTION(BlueprintCallable)
+	void ShowPlayerLocalNetRole(APawn* InPawn);
 
 	UFUNCTION(BlueprintCallable)
 	void ShowPlayerName(APawn* InPawn);

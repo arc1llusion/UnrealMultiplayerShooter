@@ -14,7 +14,7 @@ void UOverheadWidget::SetDisplayText(const FString& TextToDisplay)
 	}
 }
 
-void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
+void UOverheadWidget::ShowPlayerRemoteNetRole(APawn* InPawn)
 {
 	if(!InPawn)
 	{
@@ -28,6 +28,23 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 
 	const FString EnumString = EnumText.ToString().Replace(TEXT("Role "), TEXT(""));
 	const FString Output = FString::Printf(TEXT("Remote Role: %s"), *EnumString);
+	SetDisplayText(Output);
+}
+
+void UOverheadWidget::ShowPlayerLocalNetRole(APawn* InPawn)
+{
+	if(!InPawn)
+	{
+		return;
+	}
+	
+	const ENetRole LocalRole = InPawn->GetLocalRole();
+
+	FText EnumText;
+	UEnum::GetDisplayValueAsText(LocalRole, EnumText);
+
+	const FString EnumString = EnumText.ToString().Replace(TEXT("Role "), TEXT(""));
+	const FString Output = FString::Printf(TEXT("Local Role: %s"), *EnumString);
 	SetDisplayText(Output);
 }
 
