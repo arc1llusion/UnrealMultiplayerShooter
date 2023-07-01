@@ -42,6 +42,8 @@ protected:
 
 	void AimOffset(float DeltaTime);
 
+	virtual void Jump() override;
+
 	/** Input Assets **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;
