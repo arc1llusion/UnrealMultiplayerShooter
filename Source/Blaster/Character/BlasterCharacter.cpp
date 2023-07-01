@@ -11,6 +11,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
@@ -326,3 +327,20 @@ bool ABlasterCharacter::IsAiming() const
 {
 	return Combat && Combat->bAiming;
 }
+
+// void ABlasterCharacter::AnimationNotifyCrouch() const
+// {
+// 	if(IsLocallyControlled())
+// 	{
+// 		UGameplayStatics::PlaySoundAtLocation(
+// 			GetWorld(), 
+// 			CrouchFootstepsSound,
+// 			GetActorLocation(),
+// 			GetActorRotation(),
+// 			CrouchFootstepVolumeMultiplier ,
+// 			1.0f,
+// 			0.0f,
+// 			CrouchFootstepsAttenuation
+// 		);
+// 	}
+// }
