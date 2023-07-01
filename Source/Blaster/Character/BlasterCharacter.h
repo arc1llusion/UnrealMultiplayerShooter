@@ -9,6 +9,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class AWeapon;
 
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter
@@ -73,7 +74,7 @@ private:
 	class UWidgetComponent* OverheadWidget;
 
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
-	class AWeapon* OverlappingWeapon;
+	AWeapon* OverlappingWeapon;
 
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
@@ -91,6 +92,8 @@ private:
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
+	AWeapon* GetEquippedWeapon() const;
+	
 	bool IsAiming() const;
 
 	FORCEINLINE float GetAimOffsetYaw() const { return AimOffsetYaw; }

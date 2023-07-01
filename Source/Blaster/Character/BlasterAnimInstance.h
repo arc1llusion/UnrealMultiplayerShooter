@@ -17,6 +17,10 @@ class BLASTER_API UBlasterAnimInstance : public UAnimInstance
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+	void SetAnimationVariables();
+	void CalculateYawOffset(float DeltaSeconds);
+	void CalculateLean(float DeltaSeconds);
+	void ApplyToWeaponSocket();
 private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = true))
@@ -33,6 +37,8 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	bool bIsWeaponEquipped;
+
+	class AWeapon* EquippedWeapon;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	bool bIsCrouched;
@@ -55,4 +61,10 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	float AimOffsetPitch;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
+	FTransform LeftHandTransform;
+
+	FName LeftHandSocket{TEXT("LeftHandSocket")};
+	FName CharacterBoneToApplyWeapon{TEXT("hand_r")};
 };

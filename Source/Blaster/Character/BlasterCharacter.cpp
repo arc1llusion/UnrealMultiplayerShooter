@@ -202,13 +202,8 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		const FRotator CurrentAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
 		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
 
-		UE_LOG(LogTemp, Warning, TEXT("Current AimRotation %s"), *CurrentAimRotation.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("Starting AimRotation %s"), *StartingAimRotation.ToString());
-
 		AimOffsetYaw = DeltaAimRotation.Yaw;
 		bUseControllerRotationYaw = false;
-
-		UE_LOG(LogTemp, Warning, TEXT("Aim Offset Yaw %f"), AimOffsetYaw);
 	}
 	if(Speed > 0.0f|| bIsInAir) //Running or jumping
 	{
@@ -218,6 +213,13 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	}
 
 	AimOffsetPitch = GetBaseAimRotation().Pitch;
+	if(AimOffsetPitch > 90.0f && !IsLocallyControlled()) 
+	{
+		//Map pitch from [270, 360) and [-90, 0)
+		const FVector2D InRange(270.0f, 360.0f);
+		const FVector2D OutRange(-90.0f, 0.0f);
+		AimOffsetPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AimOffsetPitch);
+	}
 }
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
@@ -257,6 +259,16 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 bool ABlasterCharacter::IsWeaponEquipped() const
 {
 	return Combat && Combat->EquippedWeapon;
+}
+
+AWeapon* ABlasterCharacter::GetEquippedWeapon() const
+{
+	if(!Combat)
+	{
+		return nullptr;
+	}
+
+	return Combat->EquippedWeapon;
 }
 
 bool ABlasterCharacter::IsAiming() const
