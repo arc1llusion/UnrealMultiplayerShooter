@@ -39,6 +39,8 @@ ABlasterCharacter::ABlasterCharacter()
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -188,6 +190,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 {
 	if(Combat && Combat->EquippedWeapon == nullptr)
 	{
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 		StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
 		return;
 	}
@@ -201,15 +204,22 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	{
 		const FRotator CurrentAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
 		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
-
 		AimOffsetYaw = DeltaAimRotation.Yaw;
-		bUseControllerRotationYaw = false;
+
+		if(TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
+			AimOffsetInterpolationYaw = AimOffsetYaw;
+		}
+		
+		bUseControllerRotationYaw = true;
+		TurnInPlace(DeltaTime);
 	}
 	if(Speed > 0.0f|| bIsInAir) //Running or jumping
 	{
 		StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
 		AimOffsetYaw = 0;
 		bUseControllerRotationYaw = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
 	AimOffsetPitch = GetBaseAimRotation().Pitch;
@@ -219,6 +229,31 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		const FVector2D InRange(270.0f, 360.0f);
 		const FVector2D OutRange(-90.0f, 0.0f);
 		AimOffsetPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AimOffsetPitch);
+	}
+}
+
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	if(AimOffsetYaw > 90.0f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+		
+	}
+	else if(AimOffsetYaw < -90.0f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+
+	if(TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
+		AimOffsetInterpolationYaw = FMath::FInterpTo(AimOffsetInterpolationYaw, 0.0f, DeltaTime, 4.0f);
+		AimOffsetYaw = AimOffsetInterpolationYaw;
+
+		if(FMath::Abs(AimOffsetYaw) < 15.0f)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
+		}
 	}
 }
 

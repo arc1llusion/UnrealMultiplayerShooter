@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "BlasterCharacter.generated.h"
 
 class UInputMappingContext;
@@ -86,8 +87,13 @@ private:
 	void ServerEquipButtonPressed();
 
 	float AimOffsetYaw;
+	float AimOffsetInterpolationYaw;
+	
 	float AimOffsetPitch;
 	FRotator StartingAimRotation;
+
+	ETurningInPlace TurningInPlace;
+	void TurnInPlace(float DeltaTime);
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -98,4 +104,5 @@ public:
 
 	FORCEINLINE float GetAimOffsetYaw() const { return AimOffsetYaw; }
 	FORCEINLINE float GetAimOffsetPitch() const { return AimOffsetPitch; }
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 };

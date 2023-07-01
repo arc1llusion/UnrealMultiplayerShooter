@@ -46,6 +46,7 @@ void UBlasterAnimInstance::SetAnimationVariables()
 	EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
+	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 
 	AimOffsetYaw = BlasterCharacter->GetAimOffsetYaw();
 	AimOffsetPitch = BlasterCharacter->GetAimOffsetPitch();
