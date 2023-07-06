@@ -4,7 +4,9 @@
 #include "Weapon.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Animation/AnimationAsset.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -110,6 +112,14 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 	if(PickupWidget)
 	{
 		PickupWidget->SetVisibility(bShowWidget);
+	}
+}
+
+void AWeapon::Fire(const FVector& HitTarget)
+{
+	if(FireAnimation)
+	{
+		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
 }
 

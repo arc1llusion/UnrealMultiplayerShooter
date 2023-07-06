@@ -5,15 +5,23 @@
 
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/Weapon/Weapon.h"
-#include "Components/SphereComponent.h"
-
 #include "Engine/SkeletalMeshSocket.h" 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 
 UCombatComponent::UCombatComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, bAiming);
 }
 
 void UCombatComponent::BeginPlay()
@@ -24,6 +32,14 @@ void UCombatComponent::BeginPlay()
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	}
+}
+
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FHitResult HitResult;
+	TraceUnderCrossHairs(HitResult);
 }
 
 void UCombatComponent::SetAiming(bool bInAiming)
@@ -58,27 +74,78 @@ void UCombatComponent::OnRep_EquippedWeapon()
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
-	if(Character && bPressed)
+
+	if(bFireButtonPressed)
 	{
-		Character->PlayFireMontage(bAiming);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Character"));
+		ServerFire();
 	}
 }
 
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UCombatComponent::TraceUnderCrossHairs(FHitResult& TraceHitResult)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if(!GEngine || !GEngine->GameViewport)
+	{
+		return;
+	}
+	
+	FVector2d ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+
+	const FVector2d CrossHairLocation(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f);
+
+	FVector CrossHairWorldPosition;
+	FVector CrossHairWorldDirection;
+	bool bScreenToWorldSuccessful = UGameplayStatics::DeprojectScreenToWorld(
+										UGameplayStatics::GetPlayerController(this, 0),
+										CrossHairLocation,
+										CrossHairWorldPosition,
+										CrossHairWorldDirection);
+
+	if(bScreenToWorldSuccessful)
+	{
+		FVector Start = CrossHairWorldPosition;
+		FVector End = Start + CrossHairWorldDirection * TRACE_LENGTH;
+
+		GetWorld()->LineTraceSingleByChannel(
+					TraceHitResult,
+					Start,
+					End,
+					ECollisionChannel::ECC_Visibility);
+
+		if(!TraceHitResult.bBlockingHit)
+		{
+			TraceHitResult.ImpactPoint = End;
+			HitTarget = End;
+		}
+		else
+		{
+			HitTarget = TraceHitResult.ImpactPoint;
+			
+			DrawDebugSphere(
+				GetWorld(),
+				TraceHitResult.ImpactPoint,
+				12.0f,
+				12,
+				FColor::Red);
+		}
+	}
 }
 
-void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UCombatComponent::ServerFire_Implementation()
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	MulticastFire();
+}
 
-	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
-	DOREPLIFETIME(UCombatComponent, bAiming);
+void UCombatComponent::MulticastFire_Implementation()
+{	
+	if(!EquippedWeapon || !Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Servr RPC - No Character or equipped weapon"));
+		return;
+	}
+
+	Character->PlayFireMontage(bAiming);
+	EquippedWeapon->Fire(HitTarget);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
