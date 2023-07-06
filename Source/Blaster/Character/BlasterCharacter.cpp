@@ -11,7 +11,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/GameplayStatics.h"
+#include "Animation/AnimMontage.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
@@ -101,6 +101,10 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 		// Aiming
 		EnhancedInputComponent->BindAction(AimInputAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::AimAction);
 		EnhancedInputComponent->BindAction(AimInputAsset, ETriggerEvent::Completed, this, &ABlasterCharacter::StopAimAction);
+
+		//Firing Weapon
+		EnhancedInputComponent->BindAction(FireInputAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::FireAction);
+		EnhancedInputComponent->BindAction(FireInputAsset, ETriggerEvent::Completed, this, &ABlasterCharacter::StopFireAction);
 	}
 }
 
@@ -110,6 +114,29 @@ void ABlasterCharacter::PostInitializeComponents()
 	if(Combat)
 	{
 		Combat->Character = this;
+	}
+}
+
+void ABlasterCharacter::PlayFireMontage(bool bAiming)
+{
+	if(!Combat || !Combat->EquippedWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Combat or Equipped Weapon"));
+		return;
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if(AnimInstance && FireWeaponMontage)
+	{
+		AnimInstance->Montage_Play(FireWeaponMontage);
+		const FName SectionName = bAiming ? FName(TEXT("RifleAim")) : FName(TEXT("RifleAim"));
+
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Anim instance or fire weapon montage"));
 	}
 }
 
@@ -180,6 +207,22 @@ void ABlasterCharacter::StopAimAction(const FInputActionValue& Value)
 	if(Combat)
 	{
 		Combat->SetAiming(false);
+	}
+}
+
+void ABlasterCharacter::FireAction(const FInputActionValue& Value)
+{
+	if(Combat)
+	{
+		Combat->FireButtonPressed(true);
+	}
+}
+
+void ABlasterCharacter::StopFireAction(const FInputActionValue& Value)
+{
+	if(Combat)
+	{
+		Combat->FireButtonPressed(false);
 	}
 }
 
@@ -327,20 +370,3 @@ bool ABlasterCharacter::IsAiming() const
 {
 	return Combat && Combat->bAiming;
 }
-
-// void ABlasterCharacter::AnimationNotifyCrouch() const
-// {
-// 	if(IsLocallyControlled())
-// 	{
-// 		UGameplayStatics::PlaySoundAtLocation(
-// 			GetWorld(), 
-// 			CrouchFootstepsSound,
-// 			GetActorLocation(),
-// 			GetActorRotation(),
-// 			CrouchFootstepVolumeMultiplier ,
-// 			1.0f,
-// 			0.0f,
-// 			CrouchFootstepsAttenuation
-// 		);
-// 	}
-// }

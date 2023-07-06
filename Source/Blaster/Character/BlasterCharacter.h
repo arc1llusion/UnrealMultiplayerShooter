@@ -10,6 +10,11 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UAnimMontage;
+class USpringArmComponent;
+class UCameraComponent;
+class UWidgetComponent;
+class UCombatComponent;
 class AWeapon;
 
 UCLASS()
@@ -22,8 +27,10 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;	
-	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void PostInitializeComponents() override;
+
+	void PlayFireMontage(bool bAiming);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -39,6 +46,9 @@ protected:
 
 	void AimAction(const FInputActionValue &Value);
 	void StopAimAction(const FInputActionValue &Value);
+
+	void FireAction(const FInputActionValue &Value);
+	void StopFireAction(const FInputActionValue &Value);
 
 	void AimOffset(float DeltaTime);
 
@@ -65,16 +75,19 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction *AimInputAsset;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+    UInputAction *FireInputAsset;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class USpringArmComponent* CameraBoom;
+	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class UCameraComponent* FollowCamera;
+	UCameraComponent* FollowCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UWidgetComponent* OverheadWidget;
+	UWidgetComponent* OverheadWidget;
 
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
 	AWeapon* OverlappingWeapon;
@@ -83,7 +96,7 @@ private:
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
 	UPROPERTY(VisibleAnywhere)
-	class UCombatComponent* Combat;
+	UCombatComponent* Combat;
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
@@ -96,6 +109,9 @@ private:
 
 	ETurningInPlace TurningInPlace;
 	void TurnInPlace(float DeltaTime);
+
+	UPROPERTY(EditAnywhere, Category = "Combat");
+	UAnimMontage* FireWeaponMontage;
 
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
