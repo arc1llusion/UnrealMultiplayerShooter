@@ -4,11 +4,15 @@
 #include "ProjectileWeapon.h"
 #include "Projectile.h"
 #include "Engine/SkeletalMeshSocket.h"
-#include "Kismet/GameplayStatics.h"
 
 void AProjectileWeapon::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
+
+	if(!HasAuthority())
+	{
+		return;
+	}
 
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 	
@@ -21,7 +25,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 	{
 		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 
-		//From muzzle flash socket to hit location from TraceUnderCrosshairs
+		//From muzzle flash socket to hit location from TraceUnderCrossHairs
 		const FVector ToTarget = HitTarget - SocketTransform.GetLocation();
 		const FRotator TargetRotation = ToTarget.Rotation();
 		
