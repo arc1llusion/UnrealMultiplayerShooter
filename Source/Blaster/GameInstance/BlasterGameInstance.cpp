@@ -43,7 +43,7 @@ void UBlasterGameInstance::CreateMenuWidget()
 void UBlasterGameInstance::OnGameInstancePreClientTravel(const FString& PendingURL, ETravelType TravelType,
 	bool bIsSeamlessTravel) const
 {	
-	if(OpeningWidget && bIsSeamlessTravel && PendingURL.Contains(TEXT("Lobby")))
+	if(OpeningWidget)
 	{		
 		OpeningWidget->MenuTearDown();
 	}

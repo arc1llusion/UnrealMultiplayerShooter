@@ -49,6 +49,18 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	LastSessionSettings->BuildUniqueId = 1;
 
+	if(GEngine)
+	{
+		UE_LOG(LogOnline, Warning, TEXT("Is Lan Match: %d"), LastSessionSettings->bIsLANMatch);
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Is Lan Match: %d"), LastSessionSettings->bIsLANMatch));
+
+		UE_LOG(LogOnline, Warning, TEXT("Num Public Connections: %d"), LastSessionSettings->NumPublicConnections);
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Num Public Connections: %d"), LastSessionSettings->NumPublicConnections));
+
+		UE_LOG(LogOnline, Warning, TEXT("Match Type Host: %s"), *MatchType);
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Match Type: %s"), *MatchType));
+	}
+
 	const ULocalPlayer *LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 
 	if(!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
@@ -74,6 +86,12 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	LastSessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == TEXT("NULL") ? true : false;
 	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
+	if(GEngine)
+	{
+		UE_LOG(LogOnline, Warning, TEXT("Is Lan Query: %d"), LastSessionSearch->bIsLanQuery);
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Is Lan Query: %d"), LastSessionSearch->bIsLanQuery));
+	}
+
 	const ULocalPlayer *LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if(!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef()))
 	{
@@ -96,6 +114,12 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 	const ULocalPlayer *LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if(!SessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SessionResult))
 	{
+		if(GEngine)
+        {
+			UE_LOG(LogOnline, Warning, TEXT("Couldn't Join Session Abruptly"));
+        	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString(TEXT("Couldn't Join Session Abruptly")));
+        }
+        	
 		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
 
 		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
@@ -167,6 +191,37 @@ void UMultiplayerSessionsSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 	if(SessionInterface.IsValid())
 	{
 		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
+	}
+
+	if(GEngine)
+	{
+		switch(Result)
+		{
+			case EOnJoinSessionCompleteResult::UnknownError:
+				UE_LOG(LogOnline, Warning, TEXT("Online Subsystem: Unknown Error"));
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString(TEXT("Unknown Error")));
+				break;
+			case EOnJoinSessionCompleteResult::AlreadyInSession:
+				UE_LOG(LogOnline, Warning, TEXT("Online Subsystem: Already in session"));
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString(TEXT("Already in Session")));
+				break;
+			case EOnJoinSessionCompleteResult::CouldNotRetrieveAddress:
+				UE_LOG(LogOnline, Warning, TEXT("Online Subsystem: Could not retrieve address"));
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString(TEXT("Could not retrieve address")));
+				break;
+			case EOnJoinSessionCompleteResult::SessionIsFull:
+				UE_LOG(LogOnline, Warning, TEXT("Online Subsystem: Session is full"));
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString(TEXT("Session is full")));
+				break;
+			case EOnJoinSessionCompleteResult::SessionDoesNotExist:
+				UE_LOG(LogOnline, Warning, TEXT("Online Subsystem: Session does not exist"));
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString(TEXT("Session Does Not Exist")));
+				break;
+			default:
+				UE_LOG(LogOnline, Warning, TEXT("Online Subsystem: Success perhaps"));
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString(TEXT("Success Maube?")));
+				break;
+		}	
 	}
 
 	MultiplayerOnJoinSessionComplete.Broadcast(Result);
