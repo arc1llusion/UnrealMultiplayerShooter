@@ -4,6 +4,7 @@
 #include "Casing.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Sound/SoundCue.h"
 
 ACasing::ACasing()
@@ -26,9 +27,10 @@ void ACasing::BeginPlay()
 {
 	Super::BeginPlay();
 
+	const FVector RandomShell = UKismetMathLibrary::RandomUnitVectorInConeInDegrees(GetActorForwardVector(), 20.0f);
 	CasingMesh->OnComponentHit.AddDynamic(this, &ACasing::OnHit);
 	
-	CasingMesh->AddImpulse(GetActorForwardVector() * ShellEjectionImpulse);
+	CasingMesh->AddImpulse(RandomShell * ShellEjectionImpulse);
 }
 
 void ACasing::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
