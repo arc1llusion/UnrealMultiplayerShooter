@@ -37,9 +37,6 @@ void UCombatComponent::BeginPlay()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	FHitResult HitResult;
-	TraceUnderCrossHairs(HitResult);
 }
 
 void UCombatComponent::SetAiming(bool bInAiming)
@@ -77,7 +74,9 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 	if(bFireButtonPressed)
 	{
-		ServerFire();
+		FHitResult HitResult;
+		TraceUnderCrossHairs(HitResult);
+		ServerFire(HitResult.ImpactPoint);
 	}
 }
 
@@ -103,8 +102,8 @@ void UCombatComponent::TraceUnderCrossHairs(FHitResult& TraceHitResult)
 
 	if(bScreenToWorldSuccessful)
 	{
-		FVector Start = CrossHairWorldPosition;
-		FVector End = Start + CrossHairWorldDirection * TRACE_LENGTH;
+		const FVector Start = CrossHairWorldPosition;
+		const FVector End = Start + CrossHairWorldDirection * TRACE_LENGTH;
 
 		GetWorld()->LineTraceSingleByChannel(
 					TraceHitResult,
@@ -115,28 +114,16 @@ void UCombatComponent::TraceUnderCrossHairs(FHitResult& TraceHitResult)
 		if(!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End;
-			HitTarget = End;
-		}
-		else
-		{
-			HitTarget = TraceHitResult.ImpactPoint;
-			
-			DrawDebugSphere(
-				GetWorld(),
-				TraceHitResult.ImpactPoint,
-				12.0f,
-				12,
-				FColor::Red);
 		}
 	}
 }
 
-void UCombatComponent::ServerFire_Implementation()
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-	MulticastFire();
+	MulticastFire(TraceHitTarget);
 }
 
-void UCombatComponent::MulticastFire_Implementation()
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {	
 	if(!EquippedWeapon || !Character)
 	{
@@ -145,7 +132,7 @@ void UCombatComponent::MulticastFire_Implementation()
 	}
 
 	Character->PlayFireMontage(bAiming);
-	EquippedWeapon->Fire(HitTarget);
+	EquippedWeapon->Fire(TraceHitTarget);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
