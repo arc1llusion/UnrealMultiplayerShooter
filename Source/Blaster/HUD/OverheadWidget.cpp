@@ -6,7 +6,7 @@
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
 
-void UOverheadWidget::SetDisplayText(const FString& TextToDisplay)
+void UOverheadWidget::SetDisplayText(const FString& TextToDisplay) const
 {
 	if(DisplayText)
 	{
@@ -61,35 +61,45 @@ void UOverheadWidget::ShowPlayerName(APawn* InPawn)
 		return;
 	}
 	
-	FTimerManager &TimerManager = World->GetTimerManager();
-	
+	FTimerManager &TimerManager = World->GetTimerManager();	
 	const APlayerState* PlayerState = InPawn->GetPlayerState();
+	
 	if(!PlayerState && TotalTime < PlayerStateTimerTimeout)
 	{
-		if(!PlayerStateTimerDelegate.IsBound())
-		{
-			PlayerStateTimerDelegate.BindUFunction(this, TEXT("ShowPlayerName"), InPawn);
-		}
-
-		if(PlayerStateTimerHandle.IsValid())
-		{
-			TimerManager.ClearTimer(PlayerStateTimerHandle);
-		}
-		
-		TimerManager.SetTimer(PlayerStateTimerHandle, PlayerStateTimerDelegate, PlayerStateTimerInterval, false);
-		TotalTime += PlayerStateTimerInterval;
+		BindAndTickPlayerStateTimer(TimerManager, InPawn);
 		return; //Once the timer is set we don't need to do anything else
 	}
 
-	PlayerStateTimerDelegate.Unbind();
-	if(PlayerStateTimerHandle.IsValid())
-	{
-		TimerManager.ClearTimer(PlayerStateTimerHandle);
-	}
+	ClearPlayerStateTimer(TimerManager);	
 
 	if(PlayerState)
 	{
 		SetDisplayText(PlayerState->GetPlayerName());
+	}
+}
+
+void UOverheadWidget::BindAndTickPlayerStateTimer(FTimerManager& TimerManager, APawn* InPawn)
+{
+	if(!PlayerStateTimerDelegate.IsBound())
+	{
+		PlayerStateTimerDelegate.BindUFunction(this, TEXT("ShowPlayerName"), InPawn);
+	}
+
+	if(PlayerStateTimerHandle.IsValid())
+	{
+		TimerManager.ClearTimer(PlayerStateTimerHandle);
+	}
+		
+	TimerManager.SetTimer(PlayerStateTimerHandle, PlayerStateTimerDelegate, PlayerStateTimerInterval, false);
+	TotalTime += PlayerStateTimerInterval;
+}
+
+void UOverheadWidget::ClearPlayerStateTimer(FTimerManager& TimerManager)
+{
+	PlayerStateTimerDelegate.Unbind();
+	if(PlayerStateTimerHandle.IsValid())
+	{
+		TimerManager.ClearTimer(PlayerStateTimerHandle);
 	}
 }
 

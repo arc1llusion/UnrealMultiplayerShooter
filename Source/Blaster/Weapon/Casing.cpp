@@ -14,6 +14,7 @@ ACasing::ACasing()
 	CasingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CasingMesh"));
 	SetRootComponent(CasingMesh);
 
+	// This makes it so the camera boom doesn't auto correct when in sight of the shell
 	CasingMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 	CasingMesh->SetSimulatePhysics(true);
@@ -27,6 +28,7 @@ void ACasing::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Get a random direction within a cone on the unit circle 
 	const FVector RandomShell = UKismetMathLibrary::RandomUnitVectorInConeInDegrees(GetActorForwardVector(), 20.0f);
 	CasingMesh->OnComponentHit.AddDynamic(this, &ACasing::OnHit);
 	
@@ -36,12 +38,16 @@ void ACasing::BeginPlay()
 void ACasing::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
+	// When the shell hits the ground once we'll do all the things, otherwise if it hits the ground again (and it will)
+	// While simulating physics and bouncing, don't play the sounds again
 	if(bHitOnce)
 	{
 		return;
 	}
 	
 	bHitOnce = true;
+
+	CasingMesh->OnComponentHit.RemoveDynamic(this, &ACasing::OnHit);
 	
 	if(ShellSound)
 	{
@@ -51,6 +57,8 @@ void ACasing::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 	const UWorld* World = GetWorld();
 	if(!World)
 	{
+		// If for some reason the world doesn't exist destroy it without binding to a timer
+		Destroy();
 		return;
 	}
 	
@@ -62,6 +70,7 @@ void ACasing::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 
 void ACasing::DestroyOnHit()
 {
+	// Clear the timer if we can
 	if(const UWorld* World = GetWorld())
 	{
 		DestroyOnHitTimerDelegate.Unbind();

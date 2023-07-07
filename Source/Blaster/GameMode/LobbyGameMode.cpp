@@ -20,3 +20,12 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 	// 	}
 	// }
 }
+
+void ALobbyGameMode::GoToMainLevel()
+{
+	if(UWorld* World = GetWorld())
+	{
+		//bUseSeamlessTravel = true;
+		World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
+	}
+}

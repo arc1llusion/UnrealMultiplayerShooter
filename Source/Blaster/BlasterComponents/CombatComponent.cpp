@@ -86,35 +86,43 @@ void UCombatComponent::TraceUnderCrossHairs(FHitResult& TraceHitResult)
 	{
 		return;
 	}
-	
+
+	FVector CrossHairWorldPosition;
+	FVector CrossHairWorldDirection;
+	if(GetCrossHairWorldVector(CrossHairWorldPosition, CrossHairWorldDirection))
+	{
+		PerformLineTrace(TraceHitResult, CrossHairWorldPosition, CrossHairWorldDirection);
+	}
+}
+
+bool UCombatComponent::GetCrossHairWorldVector(FVector& CrossHairWorldPosition, FVector& CrossHairWorldDirection) const
+{
 	FVector2d ViewportSize;
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
 
 	const FVector2d CrossHairLocation(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f);
 
-	FVector CrossHairWorldPosition;
-	FVector CrossHairWorldDirection;
-	bool bScreenToWorldSuccessful = UGameplayStatics::DeprojectScreenToWorld(
-										UGameplayStatics::GetPlayerController(this, 0),
-										CrossHairLocation,
-										CrossHairWorldPosition,
-										CrossHairWorldDirection);
+	return UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrossHairLocation,
+		CrossHairWorldPosition,
+		CrossHairWorldDirection);
+}
 
-	if(bScreenToWorldSuccessful)
+void UCombatComponent::PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection) const
+{
+	const FVector Start = CrossHairWorldPosition;
+	const FVector End = Start + CrossHairWorldDirection * TRACE_LENGTH;
+
+	GetWorld()->LineTraceSingleByChannel(
+		TraceHitResult,
+		Start,
+		End,
+		ECollisionChannel::ECC_Visibility);
+
+	if(!TraceHitResult.bBlockingHit)
 	{
-		const FVector Start = CrossHairWorldPosition;
-		const FVector End = Start + CrossHairWorldDirection * TRACE_LENGTH;
-
-		GetWorld()->LineTraceSingleByChannel(
-					TraceHitResult,
-					Start,
-					End,
-					ECollisionChannel::ECC_Visibility);
-
-		if(!TraceHitResult.bBlockingHit)
-		{
-			TraceHitResult.ImpactPoint = End;
-		}
+		TraceHitResult.ImpactPoint = End;
 	}
 }
 
@@ -145,14 +153,18 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	EquippedWeapon = WeaponToEquip;
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 
-	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName(TEXT("RightHandSocket")));
-	if(HandSocket)
-	{
-		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
-	}
+	AttachWeaponToHandSocket();
 
 	EquippedWeapon->SetOwner(Character);
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::AttachWeaponToHandSocket() const
+{
+	if(const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(RightHandSocketName))
+	{
+		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+	}
 }
 

@@ -22,7 +22,7 @@ public:
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
@@ -48,10 +48,18 @@ protected:
 	void TraceUnderCrossHairs(FHitResult &TraceHitResult);
 
 private:
+	bool GetCrossHairWorldVector(FVector& CrossHairWorldPosition, FVector& CrossHairWorldDirection) const;
+	void PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection) const;
+	
+	void AttachWeaponToHandSocket() const;
+
+private:
 	ABlasterCharacter* Character;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
+
+	FName RightHandSocketName{TEXT("RightHandSocket")};
 
 	UPROPERTY(Replicated)
 	bool bAiming;

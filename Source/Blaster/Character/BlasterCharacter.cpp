@@ -243,6 +243,13 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		return;
 	}
 	
+	CalculateAimOffsetYaw(DeltaTime);
+	CalculateAimOffsetPitch();
+}
+
+
+void ABlasterCharacter::CalculateAimOffsetYaw(float DeltaTime)
+{
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.0f;
 	const float Speed = Velocity.Size();
@@ -262,6 +269,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 		TurnInPlace(DeltaTime);
 	}
+	
 	if(Speed > 0.0f|| bIsInAir) //Running or jumping
 	{
 		StartingAimRotation = FRotator(0.0f, GetBaseAimRotation().Yaw, 0.0f);
@@ -269,7 +277,10 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
+}
 
+void ABlasterCharacter::CalculateAimOffsetPitch()
+{
 	AimOffsetPitch = GetBaseAimRotation().Pitch;
 	if(AimOffsetPitch > 90.0f && !IsLocallyControlled()) 
 	{

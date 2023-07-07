@@ -126,6 +126,11 @@ void AWeapon::Fire(const FVector& HitTarget)
 		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
 
+	DispenseShell();
+}
+
+void AWeapon::DispenseShell() const
+{
 	if(CasingClass)
 	{
 		if(const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh->GetSocketByName(FName(TEXT("AmmoEject"))))
@@ -139,4 +144,3 @@ void AWeapon::Fire(const FVector& HitTarget)
 		}
 	}
 }
-

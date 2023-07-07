@@ -19,16 +19,22 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* DisplayText;
 
-	void SetDisplayText(const FString& TextToDisplay);
+	void SetDisplayText(const FString& TextToDisplay) const;
 	
 	UFUNCTION(BlueprintCallable)
 	void ShowPlayerRemoteNetRole(APawn* InPawn);
 
 	UFUNCTION(BlueprintCallable)
 	void ShowPlayerLocalNetRole(APawn* InPawn);
+	void BindAndTickPlayerStateTimer(FTimerManager& TimerManager, APawn* InPawn);
 
 	UFUNCTION(BlueprintCallable)
 	void ShowPlayerName(APawn* InPawn);
+
+private:
+	
+	void ClearPlayerStateTimer(FTimerManager& TimerManager);
+	
 protected:
 	virtual void NativeDestruct() override;
 

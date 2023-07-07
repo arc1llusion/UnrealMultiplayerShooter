@@ -8,13 +8,14 @@
 void UMyAnimNotify_PlaySound::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                      const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(MeshComp, Animation, EventReference);
-
 	if(!MeshComp)
 	{
 		return;
 	}
 
+#if WITH_EDITORONLY_DATA
+	Super::Notify(MeshComp, Animation, EventReference);
+#else	
 	if(const ABlasterCharacter* Owner = Cast<ABlasterCharacter>(MeshComp->GetOwner()))
 	{
 		if(Owner->IsLocallyControlled())
@@ -22,4 +23,5 @@ void UMyAnimNotify_PlaySound::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 			Super::Notify(MeshComp, Animation, EventReference);
 		}
 	}
+#endif
 }
