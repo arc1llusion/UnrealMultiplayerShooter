@@ -4,6 +4,8 @@
 #include "CombatComponent.h"
 
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Engine/SkeletalMeshSocket.h" 
 #include "GameFramework/CharacterMovementComponent.h"
@@ -37,6 +39,35 @@ void UCombatComponent::BeginPlay()
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	SetHUDCrosshairs(DeltaTime);
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if(!Character || !Character->Controller)
+	{
+		return;
+	}
+
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+
+	if(Controller)
+	{
+		HUD = HUD == nullptr ? Cast<ABlasterHUD>(Controller->GetHUD()) : HUD;
+
+		if(HUD)
+		{
+			if(EquippedWeapon)
+			{
+				HUD->SetHUDPackage(EquippedWeapon->GetHUDPackage());
+			}
+			else
+			{
+				HUD->SetHUDPackage(FHUDPackage::NullPackage);
+			}
+		}
+	}
 }
 
 void UCombatComponent::SetAiming(bool bInAiming)
@@ -75,12 +106,12 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	if(bFireButtonPressed)
 	{
 		FHitResult HitResult;
-		TraceUnderCrossHairs(HitResult);
+		TraceUnderCrosshairs(HitResult);
 		ServerFire(HitResult.ImpactPoint);
 	}
 }
 
-void UCombatComponent::TraceUnderCrossHairs(FHitResult& TraceHitResult)
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
 	if(!GEngine || !GEngine->GameViewport)
 	{
@@ -89,13 +120,13 @@ void UCombatComponent::TraceUnderCrossHairs(FHitResult& TraceHitResult)
 
 	FVector CrossHairWorldPosition;
 	FVector CrossHairWorldDirection;
-	if(GetCrossHairWorldVector(CrossHairWorldPosition, CrossHairWorldDirection))
+	if(GetCrosshairWorldVector(CrossHairWorldPosition, CrossHairWorldDirection))
 	{
 		PerformLineTrace(TraceHitResult, CrossHairWorldPosition, CrossHairWorldDirection);
 	}
 }
 
-bool UCombatComponent::GetCrossHairWorldVector(FVector& CrossHairWorldPosition, FVector& CrossHairWorldDirection) const
+bool UCombatComponent::GetCrosshairWorldVector(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection) const
 {
 	FVector2d ViewportSize;
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
@@ -105,8 +136,8 @@ bool UCombatComponent::GetCrossHairWorldVector(FVector& CrossHairWorldPosition, 
 	return UGameplayStatics::DeprojectScreenToWorld(
 		UGameplayStatics::GetPlayerController(this, 0),
 		CrossHairLocation,
-		CrossHairWorldPosition,
-		CrossHairWorldDirection);
+		CrosshairWorldPosition,
+		CrosshairWorldDirection);
 }
 
 void UCombatComponent::PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection) const

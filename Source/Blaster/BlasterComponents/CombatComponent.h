@@ -8,6 +8,8 @@
 
 #define TRACE_LENGTH 80000.0f
 
+class ABlasterHUD;
+class ABlasterPlayerController;
 class ABlasterCharacter;
 class AWeapon;
 
@@ -45,16 +47,22 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
 	
-	void TraceUnderCrossHairs(FHitResult &TraceHitResult);
+	void TraceUnderCrosshairs(FHitResult &TraceHitResult);
+
+	void SetHUDCrosshairs(float DeltaTime);
 
 private:
-	bool GetCrossHairWorldVector(FVector& CrossHairWorldPosition, FVector& CrossHairWorldDirection) const;
+	bool GetCrosshairWorldVector(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection) const;
 	void PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection) const;
 	
 	void AttachWeaponToHandSocket() const;
 
 private:
 	ABlasterCharacter* Character;
+
+	ABlasterPlayerController* Controller;
+
+	ABlasterHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blaster/HUD/BlasterHUD.h"
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
@@ -11,6 +12,7 @@ class USphereComponent;
 class USkeletalMeshComponent;
 class UWidgetComponent;
 class UAnimationAsset;
+class UTexture2D;
 
 UENUM(BlueprintType)
 enum class EWeaponState : uint8
@@ -79,9 +81,30 @@ private:
 	TSubclassOf<ACasing> CasingClass;
 
 	void DispenseShell() const;
+	
+	/*
+	* Textures for the weapon crosshairs
+	*/
+
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	UTexture2D* CrosshairsCenter;
+
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	UTexture2D* CrosshairsLeft;
+
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	UTexture2D* CrosshairsRight;
+
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	UTexture2D* CrosshairsTop;
+
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	UTexture2D* CrosshairsBottom;
 
 public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+
+	FHUDPackage GetHUDPackage() const;
 };
