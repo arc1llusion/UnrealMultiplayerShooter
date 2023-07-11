@@ -249,7 +249,6 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	CalculateAimOffsetPitch();
 }
 
-
 void ABlasterCharacter::CalculateAimOffsetYaw(float DeltaTime)
 {
 	FVector Velocity = GetVelocity();
@@ -369,6 +368,11 @@ bool ABlasterCharacter::IsWeaponEquipped() const
 	return Combat && Combat->EquippedWeapon;
 }
 
+bool ABlasterCharacter::IsAiming() const
+{
+	return Combat && Combat->bAiming;
+}
+
 AWeapon* ABlasterCharacter::GetEquippedWeapon() const
 {
 	if(!Combat)
@@ -379,7 +383,12 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon() const
 	return Combat->EquippedWeapon;
 }
 
-bool ABlasterCharacter::IsAiming() const
+FVector ABlasterCharacter::GetHitTarget() const
 {
-	return Combat && Combat->bAiming;
+	if(!Combat)
+	{
+		return FVector::Zero();
+	}
+
+	return Combat->HitTarget;
 }

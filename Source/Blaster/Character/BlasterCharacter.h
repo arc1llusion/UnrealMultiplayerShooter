@@ -123,7 +123,8 @@ public:
 	FORCEINLINE float GetAimOffsetYaw() const { return AimOffsetYaw; }
 	FORCEINLINE float GetAimOffsetPitch() const { return AimOffsetPitch; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
-	
+
+	FVector GetHitTarget() const;
 private:
 	void CalculateAimOffsetYaw(float DeltaTime);
 	void CalculateAimOffsetPitch();
