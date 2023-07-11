@@ -106,5 +106,5 @@ public:
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 
-	FHUDPackage GetHUDPackage() const;
+	FHUDPackage GetHUDPackage(float CrosshairRangeFactor) const;
 };

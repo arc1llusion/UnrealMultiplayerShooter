@@ -20,7 +20,9 @@ public:
 	UTexture2D* CrosshairsTop;
 	UTexture2D* CrosshairsBottom;
 
-	inline static const FHUDPackage NullPackage{nullptr, nullptr, nullptr, nullptr, nullptr};
+	float CrosshairSpread;
+
+	BLASTER_API static const FHUDPackage NullPackage;
 };
 
 /**
@@ -37,6 +39,10 @@ public:
 private:
 	FHUDPackage HUDPackage;
 
+	UPROPERTY(EditAnywhere)
+	float CrosshairSpreadMax = 16.0f;
+
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 

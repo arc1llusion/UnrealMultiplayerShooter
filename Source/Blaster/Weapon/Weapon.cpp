@@ -99,9 +99,9 @@ void AWeapon::SetWeaponState(EWeaponState State)
     }
 }
 
-FHUDPackage AWeapon::GetHUDPackage() const
+FHUDPackage AWeapon::GetHUDPackage(float CrosshairRangeFactor) const
 {
-	return FHUDPackage{CrosshairsCenter, CrosshairsLeft, CrosshairsRight, CrosshairsTop, CrosshairsBottom};
+	return FHUDPackage{CrosshairsCenter, CrosshairsLeft, CrosshairsRight, CrosshairsTop, CrosshairsBottom, CrosshairRangeFactor};
 }
 
 void AWeapon::OnRep_WeaponState()

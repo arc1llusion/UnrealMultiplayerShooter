@@ -132,7 +132,7 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 	if(AnimInstance && FireWeaponMontage)
 	{
 		AnimInstance->Montage_Play(FireWeaponMontage);
-		const FName SectionName = bAiming ? FName(TEXT("RifleAim")) : FName(TEXT("RifleAim"));
+		const FName SectionName = bAiming ? FName(TEXT("RifleAim")) : FName(TEXT("RifleHip"));
 
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
