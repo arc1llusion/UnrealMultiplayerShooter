@@ -22,6 +22,8 @@ public:
 
 	float CrosshairSpread;
 
+	FLinearColor CrosshairsColor;
+
 	BLASTER_API static const FHUDPackage NullPackage;
 };
 
@@ -42,7 +44,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	float CrosshairSpreadMax = 16.0f;
 
-	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread);
+	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 

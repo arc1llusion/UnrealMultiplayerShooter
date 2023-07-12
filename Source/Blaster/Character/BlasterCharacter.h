@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
+#include "Blaster/Interfaces//InteractWithCrosshairsInterface.h"
 #include "BlasterCharacter.generated.h"
 
 class UInputMappingContext;
@@ -18,7 +19,7 @@ class UCombatComponent;
 class AWeapon;
 
 UCLASS()
-class BLASTER_API ABlasterCharacter : public ACharacter
+class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
 {
 	GENERATED_BODY()
 
@@ -125,6 +126,8 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 
 	FVector GetHitTarget() const;
+
+	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 private:
 	void CalculateAimOffsetYaw(float DeltaTime);
 	void CalculateAimOffsetPitch();

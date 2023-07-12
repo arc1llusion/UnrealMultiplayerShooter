@@ -21,7 +21,7 @@ public:
 	void SetAnimationVariables();
 	void CalculateYawOffset(float DeltaSeconds);
 	void CalculateLean(float DeltaSeconds);
-	void ApplyToWeaponSocket();
+	void ApplyToWeaponSocket(float DeltaSeconds);
 private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = true))

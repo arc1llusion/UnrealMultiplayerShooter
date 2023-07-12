@@ -31,7 +31,7 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	SetAnimationVariables();
 	CalculateYawOffset(DeltaSeconds);
 	CalculateLean(DeltaSeconds);
-	ApplyToWeaponSocket();
+	ApplyToWeaponSocket(DeltaSeconds);
 }
 
 void UBlasterAnimInstance::SetAnimationVariables()
@@ -73,7 +73,7 @@ void UBlasterAnimInstance::CalculateLean(float DeltaSeconds)
 	Lean = FMath::Clamp(Interpolation, -180.0f, 180.0f);
 }
 
-void UBlasterAnimInstance::ApplyToWeaponSocket()
+void UBlasterAnimInstance::ApplyToWeaponSocket(float DeltaSeconds)
 {
 	if(bIsWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
 	{
@@ -95,16 +95,18 @@ void UBlasterAnimInstance::ApplyToWeaponSocket()
 		{
 			bLocallyControlled = true;
 			const FTransform RightHandTransform = BlasterCharacter->GetMesh()->GetSocketTransform(FName(CharacterBoneToApplyWeapon), ERelativeTransformSpace::RTS_World);
-			RightHandRotation = UKismetMathLibrary::FindLookAtRotation
+			const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation
 			(
 				RightHandTransform.GetLocation(),
 				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())
 			);
+
+			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 15.0f);
 		}
 		
-		const FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName(TEXT("MuzzleFlash"), ERelativeTransformSpace::RTS_World));
-		const FVector MuzzleX{FRotationMatrix{MuzzleTipTransform.GetRotation().Rotator()}.GetUnitAxis(EAxis::X)};
-		DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), MuzzleTipTransform.GetLocation() + MuzzleX * 1000.0f, FColor::Red);
-		DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), BlasterCharacter->GetHitTarget(), FColor::Orange);
+		// const FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName(TEXT("MuzzleFlash"), ERelativeTransformSpace::RTS_World));
+		// const FVector MuzzleX{FRotationMatrix{MuzzleTipTransform.GetRotation().Rotator()}.GetUnitAxis(EAxis::X)};
+		// DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), MuzzleTipTransform.GetLocation() + MuzzleX * 1000.0f, FColor::Red);
+		// DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), BlasterCharacter->GetHitTarget(), FColor::Orange);
 	}
 }

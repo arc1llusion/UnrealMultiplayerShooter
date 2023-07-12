@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blaster/HUD/BlasterHUD.h"
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
@@ -53,7 +54,7 @@ protected:
 
 private:
 	bool GetCrosshairWorldVector(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection) const;
-	void PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection) const;
+	void PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection);
 	
 	void AttachWeaponToHandSocket() const;
 
@@ -84,8 +85,28 @@ private:
 	 * HUD and Crosshairs
 	 */
 	float CrosshairVelocityFactor;
-
 	float CrossHairInAirFactor;
+	float CrossHairAimFactor;
+	float CrosshairShootingFactor;
 
 	FVector HitTarget;
+
+	FHUDPackage HUDPackage;
+
+	/*
+	 * ZAiming and FOV
+	 */
+
+	//Field of view when not aiming; set to the camera's base FOV in BeginPlay
+	float DefaultFOV;
+
+	float CurrentFOV;
+
+	UPROPERTY(EditAnywhere, Category="Combat")
+	float ZoomedFOV = 30.0f;
+
+	UPROPERTY(EditAnywhere, Category="Combat")
+	float ZoomInterpolationSpeed = 20.0f;
+
+	void InterpolateFOV(float DeltaTime);
 };
