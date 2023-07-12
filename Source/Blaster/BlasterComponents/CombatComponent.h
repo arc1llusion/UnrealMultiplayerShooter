@@ -81,6 +81,9 @@ private:
 
 	bool bFireButtonPressed;
 
+	UPROPERTY(EditAnywhere)
+	float StartTraceBuffer = 100.0f;
+
 	/*
 	 * HUD and Crosshairs
 	 */

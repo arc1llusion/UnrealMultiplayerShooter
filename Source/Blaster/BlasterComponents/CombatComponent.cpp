@@ -205,7 +205,14 @@ bool UCombatComponent::GetCrosshairWorldVector(FVector& CrosshairWorldPosition, 
 
 void UCombatComponent::PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection)
 {
-	const FVector Start = CrossHairWorldPosition;
+	FVector Start = CrossHairWorldPosition;
+
+	if(Character)
+	{
+		const float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+		Start += CrossHairWorldDirection * (DistanceToCharacter + StartTraceBuffer);
+	}
+	
 	const FVector End = Start + CrossHairWorldDirection * TRACE_LENGTH;
 
 	GetWorld()->LineTraceSingleByChannel(
