@@ -75,6 +75,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	bool bLocallyControlled;
 
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
+	bool bRotateRootBone;
+
 	FName LeftHandSocket{TEXT("LeftHandSocket")};
 	FName CharacterBoneToApplyWeapon{TEXT("hand_r")};
 };
