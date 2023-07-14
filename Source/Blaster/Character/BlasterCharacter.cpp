@@ -130,7 +130,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 		EnhancedInputComponent->BindAction(AimInputAsset, ETriggerEvent::Completed, this, &ABlasterCharacter::StopAimAction);
 
 		//Firing Weapon
-		EnhancedInputComponent->BindAction(FireInputAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::FireAction);
+		EnhancedInputComponent->BindAction(FireInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::FireAction);
 		EnhancedInputComponent->BindAction(FireInputAsset, ETriggerEvent::Completed, this, &ABlasterCharacter::StopFireAction);
 	}
 }

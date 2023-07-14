@@ -111,6 +111,16 @@ private:
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpolationSpeed = 20.0f;
 
+
+	/*
+	 * Automatic Fire
+	 */
+	UPROPERTY(EditAnywhere, Category="Combat")
+    float FireDelay = 0.15f;
+
+    UPROPERTY(EditAnywhere, Category="Combat")
+    bool bAutomatic = true;
+
 public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
@@ -118,6 +128,9 @@ public:
 
 	FHUDPackage GetHUDPackage(float CrosshairRangeFactor, FLinearColor CrosshairsColor) const;
 
-	FORCEINLINE float GetZoomedFOV() const{ return ZoomedFOV; }
-	FORCEINLINE float GetZoomInterpolationSpeed() const{ return ZoomInterpolationSpeed; }
+	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+	FORCEINLINE float GetZoomInterpolationSpeed() const { return ZoomInterpolationSpeed; }
+
+	FORCEINLINE float GetFireDelay() const { return FireDelay; }
+	FORCEINLINE bool IsAutomatic() const { return bAutomatic; }
 };

@@ -39,6 +39,7 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+	void Fire();
 
 	void FireButtonPressed(bool bPressed);
 
@@ -59,10 +60,13 @@ private:
 	void AttachWeaponToHandSocket() const;
 
 private:
+	UPROPERTY()
 	ABlasterCharacter* Character;
 
+	UPROPERTY()
 	ABlasterPlayerController* Controller;
 
+	UPROPERTY()
 	ABlasterHUD* HUD;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -88,8 +92,8 @@ private:
 	 * HUD and Crosshairs
 	 */
 	float CrosshairVelocityFactor;
-	float CrossHairInAirFactor;
-	float CrossHairAimFactor;
+	float CrosshairInAirFactor;
+	float CrosshairAimFactor;
 	float CrosshairShootingFactor;
 	float CrosshairOnTargetFactor;
 
@@ -123,7 +127,7 @@ private:
 	FHUDPackage HUDPackage;
 
 	/*
-	 * ZAiming and FOV
+	 * Aiming and FOV
 	 */
 
 	//Field of view when not aiming; set to the camera's base FOV in BeginPlay
@@ -138,4 +142,14 @@ private:
 	float ZoomInterpolationSpeed = 20.0f;
 
 	void InterpolateFOV(float DeltaTime);
+
+	/*
+	 * Automatic Fire
+	 */
+	FTimerHandle FireTimer;
+
+	bool bCanFire = true;
+	
+	void StartFireTimer();
+	void FireTimerFinished();
 };

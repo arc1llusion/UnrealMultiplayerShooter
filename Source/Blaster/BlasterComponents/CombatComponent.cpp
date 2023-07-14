@@ -58,24 +58,89 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
-void UCombatComponent::SetAiming(bool bInAiming)
+void UCombatComponent::FireButtonPressed(bool bPressed)
 {
-	bAiming = bInAiming;
-	ServerSetAiming(bInAiming);
+	bFireButtonPressed = bPressed;
 
-	if(Character)
+	if(bFireButtonPressed && EquippedWeapon)
 	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
+		Fire();
 	}
 }
 
-void UCombatComponent::ServerSetAiming_Implementation(bool bInAiming)
+void UCombatComponent::Fire()
 {
-	bAiming = bInAiming;
-	if(Character)
+	if(bCanFire)
 	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
+		bCanFire = false;
+		ServerFire(HitTarget);
+
+		if(EquippedWeapon)
+		{
+			CrosshairShootingFactor = CrosshairShootScaleFactor;
+		}
+	
+		StartFireTimer();
 	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if(!EquippedWeapon || !Character)
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager = Character->GetWorldTimerManager();
+	TimerManager.SetTimer(FireTimer, this, &UCombatComponent::FireTimerFinished, EquippedWeapon->GetFireDelay());
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if(!EquippedWeapon)
+	{
+		return;
+	}
+	
+	bCanFire = true;
+	if(bFireButtonPressed && EquippedWeapon->IsAutomatic())
+	{
+		Fire();
+	}
+}
+
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	MulticastFire(TraceHitTarget);
+}
+
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{	
+	if(!EquippedWeapon || !Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Servr RPC - No Character or equipped weapon"));
+		return;
+	}
+
+	Character->PlayFireMontage(bAiming);
+	EquippedWeapon->Fire(TraceHitTarget);
+}
+
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if(!Character || !WeaponToEquip)
+	{
+		return;
+	}
+	
+	EquippedWeapon = WeaponToEquip;
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+
+	AttachWeaponToHandSocket();
+
+	EquippedWeapon->SetOwner(Character);
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
@@ -84,23 +149,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	{
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
-	}
-}
-
-void UCombatComponent::FireButtonPressed(bool bPressed)
-{
-	bFireButtonPressed = bPressed;
-
-	if(bFireButtonPressed)
-	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		ServerFire(HitResult.ImpactPoint);
-
-		if(EquippedWeapon)
-		{
-			CrosshairShootingFactor = CrosshairShootScaleFactor;
-		}
 	}
 }
 
@@ -168,6 +216,26 @@ void UCombatComponent::PerformLineTrace(FHitResult& TraceHitResult, const FVecto
 	}
 }
 
+void UCombatComponent::SetAiming(bool bInAiming)
+{
+	bAiming = bInAiming;
+	ServerSetAiming(bInAiming);
+
+	if(Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
+}
+
+void UCombatComponent::ServerSetAiming_Implementation(bool bInAiming)
+{
+	bAiming = bInAiming;
+	if(Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
+}
+
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
 	if(!Character || !Character->Controller)
@@ -200,20 +268,20 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 
 			if(Character->GetCharacterMovement()->IsFalling())
 			{
-				CrossHairInAirFactor = FMath::FInterpTo(CrossHairInAirFactor, CrosshairFallingScaleFactor, DeltaTime, CrosshairFallingScaleFactor);
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, CrosshairFallingScaleFactor, DeltaTime, CrosshairFallingScaleFactor);
 			}
 			else
 			{
-				CrossHairInAirFactor = FMath::FInterpTo(CrossHairInAirFactor, 0.0f, DeltaTime, CrosshairFallingReturnInterpolationSpeed);
+				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.0f, DeltaTime, CrosshairFallingReturnInterpolationSpeed);
 			}
 
 			if(bAiming)
 			{
-				CrossHairAimFactor = FMath::FInterpTo(CrossHairAimFactor, CrosshairAimingScaleFactor, DeltaTime, CrosshairAimingInterpolationSpeed);
+				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairAimingScaleFactor, DeltaTime, CrosshairAimingInterpolationSpeed);
 			}
 			else
 			{
-				CrossHairAimFactor = FMath::FInterpTo(CrossHairAimFactor, 0.0f, DeltaTime, CrosshairAimingReturnInterpolationSpeed);
+				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.0f, DeltaTime, CrosshairAimingReturnInterpolationSpeed);
 			}
 
 			if(bOnTarget)
@@ -231,8 +299,8 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			{
 				const float TotalCrosshairFactor = 0.5f +
 													CrosshairVelocityFactor +
-													CrossHairInAirFactor -
-													CrossHairAimFactor +
+													CrosshairInAirFactor -
+													CrosshairAimFactor +
 													CrosshairShootingFactor -
 													CrosshairOnTargetFactor;
 
@@ -246,40 +314,6 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			}
 		}
 	}
-}
-
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	MulticastFire(TraceHitTarget);
-}
-
-void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{	
-	if(!EquippedWeapon || !Character)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Servr RPC - No Character or equipped weapon"));
-		return;
-	}
-
-	Character->PlayFireMontage(bAiming);
-	EquippedWeapon->Fire(TraceHitTarget);
-}
-
-void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
-{
-	if(!Character || !WeaponToEquip)
-	{
-		return;
-	}
-	
-	EquippedWeapon = WeaponToEquip;
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-
-	AttachWeaponToHandSocket();
-
-	EquippedWeapon->SetOwner(Character);
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
 }
 
 void UCombatComponent::AttachWeaponToHandSocket() const
