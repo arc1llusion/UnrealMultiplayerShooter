@@ -58,76 +58,6 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
-void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
-{
-	if(!Character || !Character->Controller)
-	{
-		return;
-	}
-
-	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
-
-	if(Controller)
-	{
-		HUD = HUD == nullptr ? Cast<ABlasterHUD>(Controller->GetHUD()) : HUD;
-
-		if(HUD)
-		{
-			const float MaxMovementSpeed = Character->GetCharacterMovement()->IsCrouching() ?
-				                               Character->GetCharacterMovement()->MaxWalkSpeedCrouched :
-				                               Character->GetCharacterMovement()->GetMaxSpeed();
-
-			const FVector2D MaxSpeedRange{0.0f, MaxMovementSpeed};
-			const FVector2D VelocityMultiplierRange{0.0f, 1.0f};
-			const FVector Velocity{Character->GetVelocity().X, Character->GetVelocity().Y, 0.0f};
-			
-			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped
-			(
-				MaxSpeedRange,
-				VelocityMultiplierRange,
-				Velocity.Size()
-			);
-
-			if(Character->GetCharacterMovement()->IsFalling())
-			{
-				CrossHairInAirFactor = FMath::FInterpTo(CrossHairInAirFactor, 2.25f, DeltaTime, 2.25f);
-			}
-			else
-			{
-				CrossHairInAirFactor = FMath::FInterpTo(CrossHairInAirFactor, 0.0f, DeltaTime, 30.0f);
-			}
-
-			if(bAiming)
-			{
-				CrossHairAimFactor = FMath::FInterpTo(CrossHairAimFactor, 0.58f, DeltaTime, 30.0f);
-			}
-			else
-			{
-				CrossHairAimFactor = FMath::FInterpTo(CrossHairAimFactor, 0.0f, DeltaTime, 30.0f);
-			}
-
-			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.0f, DeltaTime, 40.0f);
-			
-			if(EquippedWeapon)
-			{
-				const float TotalCrosshairFactor = 0.5f +
-													CrosshairVelocityFactor +
-													CrossHairInAirFactor -
-													CrossHairAimFactor +
-													CrosshairShootingFactor;
-
-				HUDPackage = EquippedWeapon->GetHUDPackage(TotalCrosshairFactor, HUDPackage.CrosshairsColor);
-				HUD->SetHUDPackage(HUDPackage);
-			}
-			else
-			{
-				HUDPackage = FHUDPackage::NullPackage;
-				HUD->SetHUDPackage(HUDPackage);
-			}
-		}
-	}
-}
-
 void UCombatComponent::SetAiming(bool bInAiming)
 {
 	bAiming = bInAiming;
@@ -169,7 +99,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 		if(EquippedWeapon)
 		{
-			CrosshairShootingFactor = 0.75f;
+			CrosshairShootingFactor = CrosshairShootScaleFactor;
 		}
 	}
 }
@@ -228,11 +158,93 @@ void UCombatComponent::PerformLineTrace(FHitResult& TraceHitResult, const FVecto
 
 	if(TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
 	{
+		bOnTarget = true;
 		HUDPackage.CrosshairsColor = FLinearColor::Red;
 	}
 	else
 	{
+		bOnTarget = false;
 		HUDPackage.CrosshairsColor = FLinearColor::White;
+	}
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if(!Character || !Character->Controller)
+	{
+		return;
+	}
+
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+
+	if(Controller)
+	{
+		HUD = HUD == nullptr ? Cast<ABlasterHUD>(Controller->GetHUD()) : HUD;
+
+		if(HUD)
+		{
+			const float MaxMovementSpeed = Character->GetCharacterMovement()->IsCrouching() ?
+											   Character->GetCharacterMovement()->MaxWalkSpeedCrouched :
+											   Character->GetCharacterMovement()->GetMaxSpeed();
+
+			const FVector2D MaxSpeedRange{0.0f, MaxMovementSpeed};
+			const FVector2D VelocityMultiplierRange{0.0f, 1.0f};
+			const FVector Velocity{Character->GetVelocity().X, Character->GetVelocity().Y, 0.0f};
+			
+			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped
+			(
+				MaxSpeedRange,
+				VelocityMultiplierRange,
+				Velocity.Size()
+			);
+
+			if(Character->GetCharacterMovement()->IsFalling())
+			{
+				CrossHairInAirFactor = FMath::FInterpTo(CrossHairInAirFactor, CrosshairFallingScaleFactor, DeltaTime, CrosshairFallingScaleFactor);
+			}
+			else
+			{
+				CrossHairInAirFactor = FMath::FInterpTo(CrossHairInAirFactor, 0.0f, DeltaTime, CrosshairFallingReturnInterpolationSpeed);
+			}
+
+			if(bAiming)
+			{
+				CrossHairAimFactor = FMath::FInterpTo(CrossHairAimFactor, CrosshairAimingScaleFactor, DeltaTime, CrosshairAimingInterpolationSpeed);
+			}
+			else
+			{
+				CrossHairAimFactor = FMath::FInterpTo(CrossHairAimFactor, 0.0f, DeltaTime, CrosshairAimingReturnInterpolationSpeed);
+			}
+
+			if(bOnTarget)
+			{
+				CrosshairOnTargetFactor = FMath::FInterpTo(CrosshairOnTargetFactor, CrosshairOnTargetScaleFactor, DeltaTime, CrosshairOnTargetInterpolationSpeed);
+			}
+			else
+			{
+				CrosshairOnTargetFactor = FMath::FInterpTo(CrosshairOnTargetFactor, 0.0f, DeltaTime, CrosshairOnTargetReturnInterpolationSpeed);
+			}
+
+			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.0f, DeltaTime, CrosshairShootReturnInterpolationSpeed);
+			
+			if(EquippedWeapon)
+			{
+				const float TotalCrosshairFactor = 0.5f +
+													CrosshairVelocityFactor +
+													CrossHairInAirFactor -
+													CrossHairAimFactor +
+													CrosshairShootingFactor -
+													CrosshairOnTargetFactor;
+
+				HUDPackage = EquippedWeapon->GetHUDPackage(TotalCrosshairFactor, HUDPackage.CrosshairsColor);
+				HUD->SetHUDPackage(HUDPackage);
+			}
+			else
+			{
+				HUDPackage = FHUDPackage::NullPackage;
+				HUD->SetHUDPackage(HUDPackage);
+			}
+		}
 	}
 }
 

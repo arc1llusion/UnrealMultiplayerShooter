@@ -91,8 +91,34 @@ private:
 	float CrossHairInAirFactor;
 	float CrossHairAimFactor;
 	float CrosshairShootingFactor;
+	float CrosshairOnTargetFactor;
 
+	bool bOnTarget;
 	FVector HitTarget;
+
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairFallingScaleFactor = 2.25f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairFallingInterpolationSpeed = 2.25f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairFallingReturnInterpolationSpeed = 30.0f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairAimingScaleFactor = 0.38f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairAimingInterpolationSpeed = 30.0f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairAimingReturnInterpolationSpeed = 30.0f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairShootScaleFactor = 0.75f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairShootReturnInterpolationSpeed = 40.0f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairOnTargetScaleFactor = 0.10f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairOnTargetInterpolationSpeed = 30.0f;
+	UPROPERTY(EditAnywhere, Category="Crosshairs")
+	float CrosshairOnTargetReturnInterpolationSpeed = 30.0f;
+	
 
 	FHUDPackage HUDPackage;
 
