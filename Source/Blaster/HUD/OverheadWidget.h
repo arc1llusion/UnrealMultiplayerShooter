@@ -30,6 +30,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ShowPlayerName(APawn* InPawn);
+	
+	UFUNCTION(BlueprintCallable)
+    void ShowActorNameOrLabel(APawn* InPawn);
 
 private:
 	

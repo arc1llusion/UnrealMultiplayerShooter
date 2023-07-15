@@ -5,6 +5,7 @@
 
 #include "Blaster/Blaster.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/GameMode/LobbyGameMode.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -63,23 +64,40 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	if(const auto Character = Cast<ABlasterCharacter>(OtherActor))
 	{
 		Character->MulticastHit();
+		MulticastPlayHitEffect(true);
+	}
+	else
+	{
+		MulticastPlayHitEffect(false);
+	}
+}
+
+void AProjectile::MulticastPlayHitEffect_Implementation(bool bHitEnemy)
+{
+	if(bHitEnemy)
+	{
+		if(CharacterImpactParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), CharacterImpactParticles, GetActorTransform());
+		}
+
+		if(CharacterImpactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, CharacterImpactSound, GetActorLocation());
+		}
+	}
+	else
+	{
+		if(ImpactParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		}
+
+		if(ImpactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+		}
 	}
 	
 	Destroy();
-}
-
-
-void AProjectile::Destroyed()
-{
-	Super::Destroyed();
-	
-	if(ImpactParticles)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-	}
-
-	if(ImpactSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}
 }

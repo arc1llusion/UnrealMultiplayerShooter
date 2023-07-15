@@ -29,3 +29,8 @@ void ALobbyGameMode::GoToMainLevel()
 		World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
 	}
 }
+
+int32 ALobbyGameMode::GetNumberOfPlayers() const
+{
+	return GameState ? GameState->PlayerArray.Num() : -1;
+}

@@ -19,4 +19,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void GoToMainLevel();
+
+	int32 GetNumberOfPlayers() const;
 };

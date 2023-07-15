@@ -48,6 +48,19 @@ void UOverheadWidget::ShowPlayerLocalNetRole(APawn* InPawn)
 	SetDisplayText(Output);
 }
 
+
+
+void UOverheadWidget::ShowActorNameOrLabel(APawn* InPawn)
+{
+	if(!InPawn)
+	{
+		return;
+	}
+	
+	SetDisplayText(InPawn->GetActorNameOrLabel());
+}
+
+
 void UOverheadWidget::ShowPlayerName(APawn* InPawn)
 {
 	if(!InPawn)
