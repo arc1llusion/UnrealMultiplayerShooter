@@ -3,15 +3,37 @@
 
 #include "BlasterHUD.h"
 
+#include "CharacterOverlay.h"
+#include "GameFramework/PlayerController.h"
+#include "Blueprint/UserWidget.h"
+
 const FHUDPackage FHUDPackage::NullPackage{nullptr, nullptr, nullptr, nullptr, nullptr, 0.0f, FLinearColor::White};
+
+void ABlasterHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AddCharacterOverlay();
+}
+
+void ABlasterHUD::AddCharacterOverlay()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+
+	if(PlayerController && CharacterOverlayClass)
+	{
+		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
+		CharacterOverlay->AddToViewport();
+	}
+}
 
 void ABlasterHUD::DrawHUD()
 {
 	Super::DrawHUD();
-	
-	FVector2D ViewportSize;
+
 	if(GEngine)
 	{
+		FVector2D ViewportSize;
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter{ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f};
 

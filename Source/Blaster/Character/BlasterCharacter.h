@@ -9,6 +9,7 @@
 #include "Blaster/Interfaces//InteractWithCrosshairsInterface.h"
 #include "BlasterCharacter.generated.h"
 
+class ABlasterPlayerController;
 class UInputMappingContext;
 class UInputAction;
 class UAnimMontage;
@@ -33,11 +34,8 @@ public:
 
 	void PlayFireMontage(bool bAiming);
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
-
 	virtual void OnRep_ReplicatedMovement() override;
-	
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -63,6 +61,9 @@ protected:
 	virtual void Jump() override;
 
 	void PlayHitReactMontage();
+
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
 
 	/** Input Assets **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -139,7 +140,23 @@ private:
 	float ProxyYaw;
 
 	float TimeSinceLastMovementReplication = 0.0f;
-	
+
+
+	/*
+	 * Player Health
+	 */
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxHealth = 100.0f;
+
+	UPROPERTY(ReplicatedUsing= OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+	float Health = 100.0f;
+
+	UFUNCTION()
+	void OnRep_Health();	
+	void UpdateHUDHealth();
+
+	ABlasterPlayerController* BlasterPlayerController;
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;

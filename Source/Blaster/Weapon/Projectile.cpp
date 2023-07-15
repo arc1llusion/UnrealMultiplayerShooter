@@ -61,9 +61,8 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
                         FVector NormalImpulse, const FHitResult& Hit)
 {
-	if(const auto Character = Cast<ABlasterCharacter>(OtherActor))
+	if(Cast<ABlasterCharacter>(OtherActor))
 	{
-		Character->MulticastHit();
 		MulticastPlayHitEffect(true);
 	}
 	else

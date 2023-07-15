@@ -32,6 +32,8 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayHitEffect(bool bHitEnemy);
 
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.0f;
 private:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;
