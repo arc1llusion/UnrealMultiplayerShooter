@@ -13,6 +13,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Blaster/Blaster.h"
+#include "Blaster/GameMode/BlasterGameMode.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -67,6 +68,10 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	SimProxiesTurn();
 
 	TimeSinceLastMovementReplication = 0;
+}
+
+void ABlasterCharacter::Eliminate()
+{
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -202,6 +207,16 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 
 	UpdateHUDHealth();
 	PlayHitReactMontage();
+
+	if(Health <= 0.0f)
+	{
+		if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>())
+		{
+			BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+			const auto AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
+			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
 }
 
 void ABlasterCharacter::MoveAction(const FInputActionValue& Value)
