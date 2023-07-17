@@ -70,8 +70,11 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementReplication = 0;
 }
 
-void ABlasterCharacter::Eliminate()
+void ABlasterCharacter::Eliminate_Implementation()
 {
+	bEliminated = true;
+	UE_LOG(LogTemp, Warning, TEXT("Eliminated"));
+	PlayEliminationMontage();
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -181,6 +184,17 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+void ABlasterCharacter::PlayEliminationMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if(AnimInstance && EliminationMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Play Elimination Montage"));
+		AnimInstance->Montage_Play(EliminationMontage);
+	}
+}
+
 void ABlasterCharacter::PlayHitReactMontage()
 {
 	if(!Combat || !Combat->EquippedWeapon)
@@ -191,7 +205,7 @@ void ABlasterCharacter::PlayHitReactMontage()
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-	if(AnimInstance && HitReactMontage)
+	if(AnimInstance && HitReactMontage && !AnimInstance->IsAnyMontagePlaying())
 	{
 		AnimInstance->Montage_Play(HitReactMontage);
 		const FName SectionName = FName(TEXT("FromFront"));
@@ -208,6 +222,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	UpdateHUDHealth();
 	PlayHitReactMontage();
 
+	UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
 	if(Health <= 0.0f)
 	{
 		if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>())
@@ -484,7 +499,12 @@ void ABlasterCharacter::HideCharacterIfCameraClose()
 void ABlasterCharacter::OnRep_Health()
 {
 	UpdateHUDHealth();
-	PlayHitReactMontage();
+
+	if(!bEliminated)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Play Hit React Montage"));
+		PlayHitReactMontage();
+	}
 }
 
 void ABlasterCharacter::UpdateHUDHealth()

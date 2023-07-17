@@ -33,9 +33,11 @@ public:
 	virtual void PostInitializeComponents() override;
 
 	void PlayFireMontage(bool bAiming);
+	void PlayEliminationMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
 
+	UFUNCTION(NetMulticast, Reliable)
 	void Eliminate();
 
 protected:
@@ -128,6 +130,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* HitReactMontage;
+	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* EliminationMontage;
 
 	void HideCharacterIfCameraClose();
 
@@ -158,7 +163,10 @@ private:
 	void OnRep_Health();	
 	void UpdateHUDHealth();
 
+	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;
+
+	bool bEliminated = false;
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
@@ -170,6 +178,7 @@ public:
 	FORCEINLINE float GetAimOffsetPitch() const { return AimOffsetPitch; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 
 	FVector GetHitTarget() const;
 

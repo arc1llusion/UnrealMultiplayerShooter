@@ -48,6 +48,7 @@ void UBlasterAnimInstance::SetAnimationVariables()
 	bAiming = BlasterCharacter->IsAiming();
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
+	bEliminated = BlasterCharacter->IsEliminated();
 
 	AimOffsetYaw = BlasterCharacter->GetAimOffsetYaw();
 	AimOffsetPitch = BlasterCharacter->GetAimOffsetPitch();

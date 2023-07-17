@@ -9,4 +9,9 @@
 void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
 	ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
 {
+	if(EliminatedCharacter)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Game Mode Character Eliminated"));
+		EliminatedCharacter->Eliminate();
+	}
 }
