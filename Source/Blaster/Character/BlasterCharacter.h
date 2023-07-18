@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Blaster/Interfaces//InteractWithCrosshairsInterface.h"
+#include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
 class ABlasterPlayerController;
@@ -179,6 +180,30 @@ private:
 
 	UFUNCTION()
 	void EliminateTimerFinished();
+
+	/*
+	 * Dissolve Effect
+	 */
+
+	UPROPERTY(VisibleAnywhere, Category = "Elimination")
+	UTimelineComponent* DissolveTimeline;	
+	FOnTimelineFloat DissolveTrack;
+	
+	UPROPERTY(EditAnywhere, Category = "Elimination")
+	UCurveFloat* DissolveCurve;
+
+	// Dynamic Instance we can change at run time
+	UPROPERTY(VisibleAnywhere, Category = "Elimination")
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	//Material instance set on the blueprint, used with the dynamic material instance
+	UPROPERTY(EditAnywhere, Category = "Elimination")
+	UMaterialInstance* DissolveMaterialInstance;
+
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+	void StartDissolve();
+	
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
@@ -200,4 +225,7 @@ private:
 	void CalculateAimOffsetYaw(float DeltaTime);
 	void CalculateAimOffsetPitch();
 	float CalculateSpeed() const;
+
+	FName DissolveParameterName{TEXT("Dissolve")};
+	FName GlowParameterName{TEXT("Glow")};
 };

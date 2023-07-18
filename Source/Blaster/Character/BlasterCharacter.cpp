@@ -40,6 +40,8 @@ ABlasterCharacter::ABlasterCharacter()
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
 
+	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
+
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 850.0f, 0.0f);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
@@ -81,6 +83,17 @@ void ABlasterCharacter::MulticastEliminate_Implementation()
 {
 	bEliminated = true;
 	PlayEliminationMontage();
+
+	if(DissolveMaterialInstance)
+	{
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
+
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(DissolveParameterName, 0.55f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(GlowParameterName, 200.0f);
+	}
+
+	StartDissolve();
 }
 
 void ABlasterCharacter::EliminateTimerFinished()
@@ -524,6 +537,37 @@ void ABlasterCharacter::UpdateHUDHealth()
 	if(BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
+{
+	if(DynamicDissolveMaterialInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Update Dissolve Here %f on %s"), DissolveValue, *DissolveParameterName.ToString());
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(DissolveParameterName, DissolveValue);
+	}
+}
+
+void ABlasterCharacter::StartDissolve()
+{
+	if(!DissolveCurve)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Start Dissolve - No Dissolve Curve"));
+	}
+
+	if(!DissolveTimeline)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Start Dissolve - No Dissolve Timeline"));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Starting Dissolve"));
+	
+	DissolveTrack.BindDynamic(this, &ABlasterCharacter::UpdateDissolveMaterial);
+	if(DissolveCurve && DissolveTimeline)
+	{
+		DissolveTimeline->AddInterpFloat(DissolveCurve, DissolveTrack);
+		DissolveTimeline->Play();
 	}
 }
 
