@@ -20,4 +20,11 @@ class BLASTER_API ABlasterGameMode : public AGameMode
 
 public:
 	virtual void PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController);
+
+	virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
+
+
+private:
+	AActor* GetRespawnPointWithLargestMinimumDistance() const;
+	float GetMinimumDistance(const AActor* SpawnPoint,  const TArray<AActor*>& Players) const;
 };

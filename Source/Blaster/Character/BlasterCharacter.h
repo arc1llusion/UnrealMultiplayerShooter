@@ -37,8 +37,12 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	UFUNCTION(NetMulticast, Reliable)
+	//Only called on the server
 	void Eliminate();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastEliminate();
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -167,6 +171,14 @@ private:
 	ABlasterPlayerController* BlasterPlayerController;
 
 	bool bEliminated = false;
+
+	FTimerHandle EliminateHandle;
+	
+	UPROPERTY(EditDefaultsOnly)
+	float EliminateDelay = 3.0f;
+
+	UFUNCTION()
+	void EliminateTimerFinished();
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;

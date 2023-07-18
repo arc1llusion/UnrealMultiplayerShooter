@@ -70,11 +70,25 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementReplication = 0;
 }
 
-void ABlasterCharacter::Eliminate_Implementation()
+void ABlasterCharacter::Eliminate()
+{
+	MulticastEliminate();
+
+	GetWorldTimerManager().SetTimer(EliminateHandle, this, &ABlasterCharacter::EliminateTimerFinished, EliminateDelay);
+}
+
+void ABlasterCharacter::MulticastEliminate_Implementation()
 {
 	bEliminated = true;
-	UE_LOG(LogTemp, Warning, TEXT("Eliminated"));
 	PlayEliminationMontage();
+}
+
+void ABlasterCharacter::EliminateTimerFinished()
+{
+	if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>())
+	{
+		BlasterGameMode->RequestRespawn(this, Controller);
+	}
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -190,7 +204,6 @@ void ABlasterCharacter::PlayEliminationMontage()
 
 	if(AnimInstance && EliminationMontage)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Play Elimination Montage"));
 		AnimInstance->Montage_Play(EliminationMontage);
 	}
 }
@@ -222,7 +235,6 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	UpdateHUDHealth();
 	PlayHitReactMontage();
 
-	UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
 	if(Health <= 0.0f)
 	{
 		if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>())
@@ -502,7 +514,6 @@ void ABlasterCharacter::OnRep_Health()
 
 	if(!bEliminated)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Play Hit React Montage"));
 		PlayHitReactMontage();
 	}
 }
