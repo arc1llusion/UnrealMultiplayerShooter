@@ -74,6 +74,11 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 
 void ABlasterCharacter::Eliminate()
 {
+	if(Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->Drop();
+	}
+	
 	MulticastEliminate();
 
 	GetWorldTimerManager().SetTimer(EliminateHandle, this, &ABlasterCharacter::EliminateTimerFinished, EliminateDelay);
@@ -84,16 +89,10 @@ void ABlasterCharacter::MulticastEliminate_Implementation()
 	bEliminated = true;
 	PlayEliminationMontage();
 
-	if(DissolveMaterialInstance)
-	{
-		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
-		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
-
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(DissolveParameterName, 0.55f);
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(GlowParameterName, 200.0f);
-	}
-
 	StartDissolve();
+
+	StopCharacterMovement();
+	DisableCollision();
 }
 
 void ABlasterCharacter::EliminateTimerFinished()
@@ -544,24 +543,20 @@ void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
 {
 	if(DynamicDissolveMaterialInstance)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Update Dissolve Here %f on %s"), DissolveValue, *DissolveParameterName.ToString());
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(DissolveParameterName, DissolveValue);
 	}
 }
 
 void ABlasterCharacter::StartDissolve()
 {
-	if(!DissolveCurve)
+	if(DissolveMaterialInstance)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Start Dissolve - No Dissolve Curve"));
-	}
+		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
+		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
 
-	if(!DissolveTimeline)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Start Dissolve - No Dissolve Timeline"));
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(DissolveParameterName, 0.55f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(GlowParameterName, 200.0f);
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Starting Dissolve"));
 	
 	DissolveTrack.BindDynamic(this, &ABlasterCharacter::UpdateDissolveMaterial);
 	if(DissolveCurve && DissolveTimeline)
@@ -633,4 +628,20 @@ FVector ABlasterCharacter::GetHitTarget() const
 	}
 
 	return Combat->HitTarget;
+}
+
+void ABlasterCharacter::StopCharacterMovement()
+{
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if(BlasterPlayerController)
+	{
+		DisableInput(BlasterPlayerController);
+	}
+}
+
+void ABlasterCharacter::DisableCollision()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

@@ -226,6 +226,9 @@ private:
 	void CalculateAimOffsetPitch();
 	float CalculateSpeed() const;
 
+	void StopCharacterMovement();
+	void DisableCollision();
+
 	FName DissolveParameterName{TEXT("Dissolve")};
 	FName GlowParameterName{TEXT("Glow")};
 };

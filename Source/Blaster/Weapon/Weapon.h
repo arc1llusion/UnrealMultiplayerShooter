@@ -37,6 +37,7 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 
 	virtual void Fire(const FVector& HitTarget);
+	void Drop();
 protected:
 	virtual void BeginPlay() override;
 
