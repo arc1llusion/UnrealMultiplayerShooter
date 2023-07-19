@@ -15,8 +15,12 @@
 #include "Blaster/Blaster.h"
 #include "Blaster/GameMode/BlasterGameMode.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystemComponent.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -93,6 +97,8 @@ void ABlasterCharacter::MulticastEliminate_Implementation()
 
 	StopCharacterMovement();
 	DisableCollision();
+
+	SpawnEliminationBot();
 }
 
 void ABlasterCharacter::EliminateTimerFinished()
@@ -100,6 +106,50 @@ void ABlasterCharacter::EliminateTimerFinished()
 	if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>())
 	{
 		BlasterGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+void ABlasterCharacter::StopCharacterMovement()
+{
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if(BlasterPlayerController)
+	{
+		DisableInput(BlasterPlayerController);
+	}
+}
+
+void ABlasterCharacter::DisableCollision()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ABlasterCharacter::SpawnEliminationBot()
+{
+	const FVector EliminationBotSpawnPoint{GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.0f};
+	EliminationBotComponent = UGameplayStatics::SpawnEmitterAtLocation(
+		this,
+		EliminationBotEffect,
+		EliminationBotSpawnPoint,
+		GetActorRotation());
+
+	if(EliminationBotSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(
+			this,
+			EliminationBotSound,
+			EliminationBotSpawnPoint);
+	}
+}
+
+void ABlasterCharacter::Destroyed()
+{
+	Super::Destroyed();
+	
+	if(EliminationBotComponent)
+	{
+		EliminationBotComponent->DestroyComponent();
 	}
 }
 
@@ -628,20 +678,4 @@ FVector ABlasterCharacter::GetHitTarget() const
 	}
 
 	return Combat->HitTarget;
-}
-
-void ABlasterCharacter::StopCharacterMovement()
-{
-	GetCharacterMovement()->DisableMovement();
-	GetCharacterMovement()->StopMovementImmediately();
-	if(BlasterPlayerController)
-	{
-		DisableInput(BlasterPlayerController);
-	}
-}
-
-void ABlasterCharacter::DisableCollision()
-{
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

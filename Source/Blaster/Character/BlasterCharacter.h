@@ -10,6 +10,7 @@
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
+class USoundCue;
 class ABlasterPlayerController;
 class UInputMappingContext;
 class UInputAction;
@@ -44,7 +45,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
 
-
+	virtual void Destroyed() override;
 protected:
 	virtual void BeginPlay() override;
 	
@@ -203,7 +204,20 @@ private:
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);
 	void StartDissolve();
-	
+
+	/*
+	 * Elimination Bot
+	 */
+
+	UPROPERTY(EditAnywhere, Category = "Elimination")
+	UParticleSystem* EliminationBotEffect;
+
+	UPROPERTY(VisibleAnywhere, Category = "Elimination")
+	UParticleSystemComponent* EliminationBotComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Elimination")
+	USoundCue* EliminationBotSound;
+
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
@@ -231,4 +245,6 @@ private:
 
 	FName DissolveParameterName{TEXT("Dissolve")};
 	FName GlowParameterName{TEXT("Glow")};
+
+	void SpawnEliminationBot();
 };
