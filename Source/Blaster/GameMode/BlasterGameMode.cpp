@@ -4,6 +4,7 @@
 #include "BlasterGameMode.h"
 
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "GameFramework/GameStateBase.h"
@@ -106,12 +107,9 @@ void ABlasterGameMode::BroadcastDefeat(const ABlasterPlayerState* Attacker, cons
 
 	if(GameState)
 	{
-		for(const auto Player : GameState->PlayerArray)
+		if(const auto BlasterGameState = Cast<ABlasterGameState>(GameState))
 		{
-			if(const auto BlasterPlayerState = Cast<ABlasterPlayerState>(Player))
-			{
-				BlasterPlayerState->AddToDefeatsLog(Victim->GetPlayerName(), Attacker->GetPlayerName());
-			}
+			BlasterGameState->AddToDefeatsLog(Victim->GetPlayerName(), Attacker->GetPlayerName());
 		}
 	}
 }
