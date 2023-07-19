@@ -8,6 +8,7 @@
 
 class ABlasterPlayerController;
 class ABlasterCharacter;
+
 /**
  * 
  */
@@ -21,6 +22,7 @@ public:
 	
 	void AddToScore(float ScoreAmount);
 	void AddToDefeats(int32 DefeatsAmount);
+	void AddToDefeatsLog(const FString& Defeated, const FString& DefeatedBy);
 
 	/*
 	 * Replication Notifies
@@ -29,6 +31,9 @@ public:
 
 	UFUNCTION()
 	virtual void OnRep_Defeats();
+
+	UFUNCTION()
+	virtual void OnRep_DefeatsLog();
 
 private:
 	UPROPERTY()
@@ -39,5 +44,11 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats)
 	int32 Defeats;
 
-	
+	UPROPERTY(ReplicatedUsing = OnRep_DefeatsLog)
+	TArray<FString> DefeatsLog;
+
+	UFUNCTION()
+	void PruneDefeatsLog();
+
+	TArray<FTimerHandle> Timers;
 };

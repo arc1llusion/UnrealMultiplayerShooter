@@ -16,15 +16,15 @@ struct FHUDPackage
 
 public:
 	UPROPERTY()
-	UTexture2D* CrosshairsCenter;
+	UTexture2D* CrosshairsCenter = nullptr;
 	UPROPERTY()
-	UTexture2D* CrosshairsLeft;
+	UTexture2D* CrosshairsLeft = nullptr;
 	UPROPERTY()
-	UTexture2D* CrosshairsRight;
+	UTexture2D* CrosshairsRight = nullptr;
 	UPROPERTY()
-	UTexture2D* CrosshairsTop;
+	UTexture2D* CrosshairsTop = nullptr;
 	UPROPERTY()
-	UTexture2D* CrosshairsBottom;
+	UTexture2D* CrosshairsBottom = nullptr;
 
 	float CrosshairSpread;
 

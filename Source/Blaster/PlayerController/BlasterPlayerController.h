@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
 
+class ABlasterPlayerState;
 class ABlasterHUD;
 /**
  * 
@@ -19,6 +20,7 @@ public:
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDScore(float Score);
 	void SetHUDDefeats(int32 InDefeats);
+	void SetHUDDefeatsLog(const TArray<FString>& Logs);
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	

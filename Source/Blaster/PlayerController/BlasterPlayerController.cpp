@@ -6,8 +6,10 @@
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/HUD/CharacterOverlay.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Kismet/KismetStringLibrary.h"
 
 
 void ABlasterPlayerController::BeginPlay()
@@ -74,5 +76,20 @@ void ABlasterPlayerController::SetHUDDefeats(int32 InDefeats)
 	{
 		const FString DefeatsText = FString::Printf(TEXT("%d"), InDefeats);
 		BlasterHUD->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDDefeatsLog(const TArray<FString>& Logs)
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->DefeatsRelay;
+
+	if(bHudValid)
+	{		
+		const FString Output = UKismetStringLibrary::JoinStringArray(Logs, TEXT("\n"));
+		BlasterHUD->CharacterOverlay->DefeatsRelay->SetText(FText::FromString(Output));
 	}
 }

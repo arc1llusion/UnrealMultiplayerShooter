@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "GameFramework/GameMode.h"
 #include "BlasterGameMode.generated.h"
 
 
+class ABlasterPlayerState;
 class ABlasterCharacter;
 class ABlasterPlayerController;
 /**
@@ -27,4 +29,6 @@ public:
 private:
 	AActor* GetRespawnPointWithLargestMinimumDistance() const;
 	float GetMinimumDistance(const AActor* SpawnPoint,  const TArray<AActor*>& Players) const;
+
+	void BroadcastDefeat(const ABlasterPlayerState* Attacker, const ABlasterPlayerState* Victim) const;
 };

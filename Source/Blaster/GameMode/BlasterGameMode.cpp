@@ -6,6 +6,7 @@
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
+#include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -24,6 +25,8 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
 	{
 		VictimPlayerState->AddToDefeats(1);
 	}
+
+	BroadcastDefeat(AttackerPlayerState, VictimPlayerState);
 	
 	if(EliminatedCharacter)
 	{
@@ -92,4 +95,23 @@ float ABlasterGameMode::GetMinimumDistance(const AActor* SpawnPoint, const TArra
 	}
 
 	return FMath::Sqrt(Minimum);
+}
+
+void ABlasterGameMode::BroadcastDefeat(const ABlasterPlayerState* Attacker, const ABlasterPlayerState* Victim) const
+{
+	if(!Attacker || !Victim)
+	{
+		return;
+	}
+
+	if(GameState)
+	{
+		for(const auto Player : GameState->PlayerArray)
+		{
+			if(const auto BlasterPlayerState = Cast<ABlasterPlayerState>(Player))
+			{
+				BlasterPlayerState->AddToDefeatsLog(Victim->GetPlayerName(), Attacker->GetPlayerName());
+			}
+		}
+	}
 }
