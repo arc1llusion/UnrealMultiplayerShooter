@@ -15,12 +15,12 @@
 #include "Blaster/Blaster.h"
 #include "Blaster/GameMode/BlasterGameMode.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
-#include "Particles/ParticleSystemComponent.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -193,6 +193,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	}
 	
 	HideCharacterIfCameraClose();
+	PollInit();
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -304,6 +305,20 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 			BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
 			const auto AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
 			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
+}
+
+void ABlasterCharacter::PollInit()
+{
+	if(!BlasterPlayerState)
+	{
+		BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+
+		if(BlasterPlayerState)
+		{
+			BlasterPlayerState->AddToScore(0.0f);
+			BlasterPlayerState->AddToDefeats(0);
 		}
 	}
 }

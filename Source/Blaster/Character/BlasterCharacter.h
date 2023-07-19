@@ -10,6 +10,7 @@
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
+class ABlasterPlayerState;
 class USoundCue;
 class ABlasterPlayerController;
 class UInputMappingContext;
@@ -74,6 +75,9 @@ protected:
 
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+
+	//Poll for any relevant classes and initialize our HUD
+	void PollInit();
 
 	/** Input Assets **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -218,6 +222,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Elimination")
 	USoundCue* EliminationBotSound;
 
+	UPROPERTY()
+	ABlasterPlayerState* BlasterPlayerState;
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
@@ -234,6 +240,9 @@ public:
 	FVector GetHitTarget() const;
 
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	
 private:
 	void CalculateAimOffsetYaw(float DeltaTime);
