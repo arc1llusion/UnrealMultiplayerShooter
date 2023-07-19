@@ -41,10 +41,11 @@ void UBlasterGameInstance::CreateMenuWidget()
 }
 
 void UBlasterGameInstance::OnGameInstancePreClientTravel(const FString& PendingURL, ETravelType TravelType,
-	bool bIsSeamlessTravel) const
+	bool bIsSeamlessTravel)
 {	
 	if(OpeningWidget)
 	{		
 		OpeningWidget->MenuTearDown();
+		OpeningWidget = nullptr;
 	}
 }

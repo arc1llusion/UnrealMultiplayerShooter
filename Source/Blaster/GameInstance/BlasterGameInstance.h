@@ -22,6 +22,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CreateMenuWidget();
 private:
+	UPROPERTY()
 	UMenu* OpeningWidget;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Multiplayer Menu")
@@ -36,5 +37,5 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Multiplayer Menu")
 	FString PathToLobby{FString(TEXT("/Game/Maps/Lobby"))};
 
-	void OnGameInstancePreClientTravel(const FString& PendingURL, ETravelType TravelType, bool bIsSeamlessTravel) const;
+	void OnGameInstancePreClientTravel(const FString& PendingURL, ETravelType TravelType, bool bIsSeamlessTravel);
 };
