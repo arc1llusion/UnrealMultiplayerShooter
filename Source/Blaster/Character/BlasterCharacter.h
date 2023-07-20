@@ -10,6 +10,8 @@
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
+class USphereComponent;
+class UOverheadWidget;
 class ABlasterPlayerState;
 class USoundCue;
 class ABlasterPlayerController;
@@ -47,7 +49,7 @@ public:
 	void MulticastEliminate();
 
 	virtual void Destroyed() override;
-protected:
+protected:	
 	virtual void BeginPlay() override;
 	
 	/** Input **/
@@ -110,6 +112,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, Category = "Overhead Collision")
+	USphereComponent* OverheadCollisionSphere;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* OverheadWidget;
@@ -224,6 +229,7 @@ private:
 
 	UPROPERTY()
 	ABlasterPlayerState* BlasterPlayerState;
+	
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped() const;
@@ -242,7 +248,18 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	FORCEINLINE float GetHealth() const { return Health; }
-	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }	
+	
+	UFUNCTION()
+	void OnOverheadOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+								const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverheadOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	void SetupOverheadOverlapEvents();
+	
+	void SetDisplayOverheadWidget(bool bInDisplay) const;
 	
 private:
 	void CalculateAimOffsetYaw(float DeltaTime);

@@ -23,6 +23,8 @@ public:
 	void SetHUDDefeatsLog(const TArray<FString>& Logs);
 	
 	virtual void OnPossess(APawn* InPawn) override;
+
+	virtual void AcknowledgePossession(APawn* P) override;
 	
 protected:
 	virtual void BeginPlay() override;

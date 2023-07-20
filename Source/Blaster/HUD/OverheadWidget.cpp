@@ -3,6 +3,7 @@
 
 #include "OverheadWidget.h"
 
+#include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
 
@@ -120,4 +121,13 @@ void UOverheadWidget::NativeDestruct()
 {
 	RemoveFromParent();
 	Super::NativeDestruct();
+}
+
+void UOverheadWidget::UpdateOverlayHealth(float Health, float MaxHealth)
+{
+	if(DisplayHealth)
+	{
+		const float Percent = Health / MaxHealth;
+		DisplayHealth->SetPercent(Percent);
+	}
 }

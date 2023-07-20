@@ -21,6 +21,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "Blaster/HUD/OverheadWidget.h"
+#include "Components/SphereComponent.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -37,6 +39,15 @@ ABlasterCharacter::ABlasterCharacter()
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	OverheadCollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverheadCollision"));
+	OverheadCollisionSphere->SetupAttachment(RootComponent);
+	OverheadCollisionSphere->SetCollisionObjectType(ECC_Pawn);
+	OverheadCollisionSphere->SetGenerateOverlapEvents(true);
+	FCollisionResponseContainer SphereCollisionResponses;
+	SphereCollisionResponses.SetAllChannels(ECollisionResponse::ECR_Ignore);
+	SphereCollisionResponses.SetResponse(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	OverheadCollisionSphere->SetCollisionResponseToChannels(SphereCollisionResponses);
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
@@ -156,6 +167,8 @@ void ABlasterCharacter::Destroyed()
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Warning, TEXT("Begin Play for %s"), *GetActorNameOrLabel());
 	
 	if (const APlayerController *PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -602,6 +615,14 @@ void ABlasterCharacter::UpdateHUDHealth()
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
 	}
+
+	if(OverheadWidget)
+	{
+		if(const auto Widget = Cast<UOverheadWidget>(OverheadWidget->GetWidget()))
+		{
+			Widget->UpdateOverlayHealth(Health, MaxHealth);
+		}
+	}
 }
 
 void ABlasterCharacter::UpdateDissolveMaterial(float DissolveValue)
@@ -693,4 +714,67 @@ FVector ABlasterCharacter::GetHitTarget() const
 	}
 
 	return Combat->HitTarget;
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void ABlasterCharacter::OnOverheadOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(const auto BlasterActor = Cast<ABlasterCharacter>(OtherActor))
+	{
+		const auto ThisSphereComponent = Cast<USphereComponent>(OverlappedComponent);
+		const auto OtherSphereComponent = Cast<USphereComponent>(OtherComp);
+		if(ThisSphereComponent && OtherSphereComponent)
+		{
+			BlasterActor->SetDisplayOverheadWidget(true);
+		}
+	}
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void ABlasterCharacter::OnOverheadOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s End Overlap against %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
+	
+	if(const auto BlasterActor = Cast<ABlasterCharacter>(OtherActor))
+	{
+		const auto ThisSphereComponent = Cast<USphereComponent>(OverlappedComponent);
+		const auto OtherSphereComponent = Cast<USphereComponent>(OtherComp);
+		if(ThisSphereComponent && OtherSphereComponent)
+		{
+			BlasterActor->SetDisplayOverheadWidget(false);
+		}
+	}
+}
+
+void ABlasterCharacter::SetupOverheadOverlapEvents()
+{
+	if(IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s Setup Overlap Events"), *GetActorNameOrLabel());
+		OverheadCollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ABlasterCharacter::OnOverheadOverlapBegin);
+		OverheadCollisionSphere->OnComponentEndOverlap.AddDynamic(this, &ABlasterCharacter::OnOverheadOverlapEnd);
+		if(OverheadWidget)
+		{
+			OverheadWidget->SetVisibility(true);
+		}
+	}
+	else
+	{
+		if(OverheadWidget)
+		{
+			OverheadWidget->SetVisibility(false);
+		}
+	}
+}
+
+void ABlasterCharacter::SetDisplayOverheadWidget(bool bInDisplay) const
+{
+	if(!OverheadWidget)
+	{
+		return;
+	}
+
+	OverheadWidget->SetVisibility(IsLocallyControlled() ? true : bInDisplay);
 }

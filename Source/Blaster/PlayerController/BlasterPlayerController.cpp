@@ -29,6 +29,18 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	}
 }
 
+void ABlasterPlayerController::AcknowledgePossession(APawn* P)
+{
+	Super::AcknowledgePossession(P);
+
+	UE_LOG(LogTemp, Warning, TEXT("%s AcknowledgePossession"), *P->GetActorNameOrLabel());
+
+	if(const auto BlasterCharacter = Cast<ABlasterCharacter>(P))
+	{
+		BlasterCharacter->SetupOverheadOverlapEvents();
+	}
+}
+
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;

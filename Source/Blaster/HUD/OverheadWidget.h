@@ -7,6 +7,10 @@
 #include "TimerManager.h"
 #include "OverheadWidget.generated.h"
 
+
+class UTextBlock;
+class UProgressBar;
+
 /**
  * 
  */
@@ -17,7 +21,10 @@ class BLASTER_API UOverheadWidget : public UUserWidget
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* DisplayText;
+	UTextBlock* DisplayText;
+
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* DisplayHealth;
 
 	void SetDisplayText(const FString& TextToDisplay) const;
 	
@@ -33,6 +40,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
     void ShowActorNameOrLabel(APawn* InPawn);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateOverlayHealth(float Health, float MaxHealth);
 
 private:
 	
