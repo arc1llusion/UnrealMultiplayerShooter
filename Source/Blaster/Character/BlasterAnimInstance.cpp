@@ -79,12 +79,12 @@ void UBlasterAnimInstance::ApplyToWeaponSocket(float DeltaSeconds)
 {
 	if(bIsWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
 	{
-		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName(LeftHandSocket), ERelativeTransformSpace::RTS_World);
+		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(LeftHandSocket, ERelativeTransformSpace::RTS_World);
 
 		FVector OutPosition;
 		FRotator OutRotation;
 		BlasterCharacter->GetMesh()->TransformToBoneSpace(
-			FName(CharacterBoneToApplyWeapon),
+			CharacterBoneToApplyWeapon,
 			LeftHandTransform.GetLocation(),
 			FRotator::ZeroRotator,
 			OutPosition,
@@ -96,19 +96,27 @@ void UBlasterAnimInstance::ApplyToWeaponSocket(float DeltaSeconds)
 		if(BlasterCharacter->IsLocallyControlled())
 		{
 			bLocallyControlled = true;
-			const FTransform RightHandTransform = BlasterCharacter->GetMesh()->GetSocketTransform(FName(CharacterBoneToApplyWeapon), ERelativeTransformSpace::RTS_World);
+			const FTransform RightHandTransform = BlasterCharacter->GetMesh()->GetSocketTransform(CharacterBoneToApplyWeapon, ERelativeTransformSpace::RTS_World);
+			
 			const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation
 			(
 				RightHandTransform.GetLocation(),
 				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())
 			);
 
+			const FVector Start = RightHandTransform.GetLocation();
+			const FVector Target = RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget());
+			UE_LOG(LogTemp, Warning, TEXT("Start: %s"), *Start.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("Target: %s"), *Target.ToString());
+
+			UE_LOG(LogTemp, Warning, TEXT("Look At Rotation: %s"), *LookAtRotation.ToString());
+
 			RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 15.0f);
 		}
 		
-		// const FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName(TEXT("MuzzleFlash"), ERelativeTransformSpace::RTS_World));
-		// const FVector MuzzleX{FRotationMatrix{MuzzleTipTransform.GetRotation().Rotator()}.GetUnitAxis(EAxis::X)};
-		// DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), MuzzleTipTransform.GetLocation() + MuzzleX * 1000.0f, FColor::Red);
-		// DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), BlasterCharacter->GetHitTarget(), FColor::Orange);
+		const FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName(TEXT("MuzzleFlash"), ERelativeTransformSpace::RTS_World));
+		const FVector MuzzleX{FRotationMatrix{MuzzleTipTransform.GetRotation().Rotator()}.GetUnitAxis(EAxis::X)};
+		DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), MuzzleTipTransform.GetLocation() + MuzzleX * 1000.0f, FColor::Red);
+		DrawDebugLine(GetWorld(), MuzzleTipTransform.GetLocation(), BlasterCharacter->GetHitTarget(), FColor::Orange);
 	}
 }

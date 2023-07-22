@@ -82,6 +82,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	bool bEliminated;
 
+	UPROPERTY(EditAnywhere)
 	FName LeftHandSocket{TEXT("LeftHandSocket")};
+	UPROPERTY(EditAnywhere)
 	FName CharacterBoneToApplyWeapon{TEXT("hand_r")};
 };
