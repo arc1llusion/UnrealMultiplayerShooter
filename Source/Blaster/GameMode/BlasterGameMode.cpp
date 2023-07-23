@@ -4,6 +4,7 @@
 #include "BlasterGameMode.h"
 
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/GameInstance/BlasterGameInstance.h"
 #include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
@@ -54,6 +55,30 @@ void ABlasterGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AControll
 			UE_LOG(LogTemp, Error, TEXT("No player spawn point found."));
 		}
 	}
+}
+
+UClass* ABlasterGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
+{
+	if(InController)
+	{
+		if(const auto BlasterGameInstance = Cast<UBlasterGameInstance>(GetGameInstance()))
+		{
+			if(InController->PlayerState)
+			{
+				const auto NetId = InController->PlayerState->GetUniqueId();
+				if(NetId.IsValid())
+				{
+					int32 SelectedPawnType = BlasterGameInstance->GetSelectedCharacter(NetId->GetHexEncodedString());
+					if(PawnTypes.Contains(SelectedPawnType))
+					{
+						return PawnTypes[SelectedPawnType];
+					}
+				}
+			}
+		}
+	}
+
+	return Super::GetDefaultPawnClassForController_Implementation(InController);
 }
 
 AActor* ABlasterGameMode::GetRespawnPointWithLargestMinimumDistance() const

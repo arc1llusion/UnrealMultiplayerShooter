@@ -25,10 +25,14 @@ public:
 
 	virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
 
+	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-private:
+private:	
 	AActor* GetRespawnPointWithLargestMinimumDistance() const;
 	float GetMinimumDistance(const AActor* SpawnPoint,  const TArray<AActor*>& Players) const;
 
 	void BroadcastDefeat(const ABlasterPlayerState* Attacker, const ABlasterPlayerState* Victim) const;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character Select")
+	TMap<int32, UClass*> PawnTypes;
 };

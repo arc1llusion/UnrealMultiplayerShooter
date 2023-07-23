@@ -2,6 +2,7 @@
 
 
 #include "BlasterGameInstance.h"
+
 #include "Engine/GameInstance.h"
 #include "MultiplayerSessions/Public/Menu.h"
 
@@ -40,8 +41,35 @@ void UBlasterGameInstance::CreateMenuWidget()
 	}
 }
 
+void UBlasterGameInstance::SelectCharacter(const FString& PlayerId, int32 InDesiredPawn)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Selecting Character %s %d"), *PlayerId, InDesiredPawn);
+	
+	if(PlayerCharacterSelections.Contains(PlayerId))
+	{
+		PlayerCharacterSelections[PlayerId] = InDesiredPawn;
+	}
+	else
+	{
+		PlayerCharacterSelections.Add(PlayerId, InDesiredPawn);
+	}
+}
+
+int32 UBlasterGameInstance::GetSelectedCharacter(const FString& PlayerId) const
+{
+	UE_LOG(LogTemp, Warning, TEXT("Checking Player Character Selection %s"), *PlayerId);
+	if(PlayerCharacterSelections.Contains(PlayerId))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found: %d"), PlayerCharacterSelections[PlayerId]);
+		return PlayerCharacterSelections[PlayerId];
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Not Found"));
+	return DefaultCharacterPawnType;
+}
+
 void UBlasterGameInstance::OnGameInstancePreClientTravel(const FString& PendingURL, ETravelType TravelType,
-	bool bIsSeamlessTravel)
+                                                         bool bIsSeamlessTravel)
 {	
 	if(OpeningWidget)
 	{		

@@ -168,8 +168,6 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("Begin Play for %s"), *GetActorNameOrLabel());
-	
 	if (const APlayerController *PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem *Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -239,6 +237,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 		//Firing Weapon
 		EnhancedInputComponent->BindAction(FireInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::FireAction);
 		EnhancedInputComponent->BindAction(FireInputAsset, ETriggerEvent::Completed, this, &ABlasterCharacter::StopFireAction);
+
+		//Change Character in Lobby
+		EnhancedInputComponent->BindAction(ChangeCharacterAsset, ETriggerEvent::Started, this, &ABlasterCharacter::ChangeCharacterAction);
 	}
 }
 
@@ -419,6 +420,27 @@ void ABlasterCharacter::StopFireAction(const FInputActionValue& Value)
 	if(Combat)
 	{
 		Combat->FireButtonPressed(false);
+	}
+}
+
+void ABlasterCharacter::ChangeCharacterAction(const FInputActionValue& Value)
+{
+	const float Axis = Value.Get<float>();
+	if(Axis > 0)
+	{
+		BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController; 
+		if(BlasterPlayerController)
+		{
+			BlasterPlayerController->ForwardDesiredPawn();
+		}
+	}
+	else if(Axis < 0)
+	{
+		BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController; 
+		if(BlasterPlayerController)
+		{
+			BlasterPlayerController->BackDesiredPawn();
+		}
 	}
 }
 
@@ -735,8 +757,6 @@ void ABlasterCharacter::OnOverheadOverlapBegin(UPrimitiveComponent* OverlappedCo
 void ABlasterCharacter::OnOverheadOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                              UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s End Overlap against %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
-	
 	if(const auto BlasterActor = Cast<ABlasterCharacter>(OtherActor))
 	{
 		const auto ThisSphereComponent = Cast<USphereComponent>(OverlappedComponent);
@@ -752,7 +772,6 @@ void ABlasterCharacter::SetupOverheadOverlapEvents()
 {
 	if(IsLocallyControlled())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s Setup Overlap Events"), *GetActorNameOrLabel());
 		OverheadCollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ABlasterCharacter::OnOverheadOverlapBegin);
 		OverheadCollisionSphere->OnComponentEndOverlap.AddDynamic(this, &ABlasterCharacter::OnOverheadOverlapEnd);
 		if(OverheadWidget)

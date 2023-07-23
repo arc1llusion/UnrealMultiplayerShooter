@@ -6,6 +6,7 @@
 #include "GameFramework/GameMode.h"
 #include "LobbyGameMode.generated.h"
 
+class ABlasterCharacter;
 /**
  * 
  */
@@ -20,5 +21,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GoToMainLevel();
 
-	int32 GetNumberOfPlayers() const;
+	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
+
+	virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
+
+	FORCEINLINE int32 GetNumberOfPossibleCharacters() const { return PawnTypes.Num(); }
+private:
+	AActor* GetRespawnPointWithLargestMinimumDistance() const;
+	float GetMinimumDistance(const AActor* SpawnPoint,  const TArray<AActor*>& Players) const;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character Select")
+	TMap<int32, UClass*> PawnTypes;
 };

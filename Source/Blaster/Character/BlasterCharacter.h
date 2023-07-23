@@ -67,6 +67,8 @@ protected:
 	void FireAction(const FInputActionValue &Value);
 	void StopFireAction(const FInputActionValue &Value);
 
+	void ChangeCharacterAction(const FInputActionValue &Value);
+
 	void AimOffset(float DeltaTime);
 	
 	void SimProxiesTurn();
@@ -105,6 +107,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
     UInputAction *FireInputAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction *ChangeCharacterAsset;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

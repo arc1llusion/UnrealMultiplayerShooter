@@ -21,9 +21,17 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void CreateMenuWidget();
+
+	void SelectCharacter(const FString& PlayerId, int32 InDesiredPawn);
+	int32 GetSelectedCharacter(const FString& PlayerId) const;
 private:
 	UPROPERTY()
 	UMenu* OpeningWidget;
+
+	UPROPERTY(VisibleAnywhere, Category = "Character Select")
+	TMap<FString, int32> PlayerCharacterSelections;
+
+	int32 DefaultCharacterPawnType = 0;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Multiplayer Menu")
 	TSubclassOf<UMenu> OpeningWidgetClass;

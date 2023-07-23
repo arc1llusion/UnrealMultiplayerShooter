@@ -4,19 +4,33 @@
 #include "BlasterPlayerController.h"
 
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/GameInstance/BlasterGameInstance.h"
+#include "Blaster/GameMode/LobbyGameMode.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/HUD/CharacterOverlay.h"
-#include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "GameFramework/PlayerState.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "Net/UnrealNetwork.h"
 
+void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABlasterPlayerController, DesiredPawn)
+}
 
 void ABlasterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	BlasterHUD = Cast<ABlasterHUD>(GetHUD());
+
+	if(GetPawn())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Begin Play"), *GetPawn()->GetActorNameOrLabel());
+	}
 }
 
 void ABlasterPlayerController::OnPossess(APawn* InPawn)
@@ -33,12 +47,86 @@ void ABlasterPlayerController::AcknowledgePossession(APawn* P)
 {
 	Super::AcknowledgePossession(P);
 
-	UE_LOG(LogTemp, Warning, TEXT("%s AcknowledgePossession"), *P->GetActorNameOrLabel());
-
 	if(const auto BlasterCharacter = Cast<ABlasterCharacter>(P))
 	{
 		BlasterCharacter->SetupOverheadOverlapEvents();
 	}
+}
+
+void ABlasterPlayerController::SetDesiredPawn(const int32 InDesiredPawn)
+{
+	DesiredPawn = InDesiredPawn;	
+	ServerSetPawn(DesiredPawn, true);
+}
+
+void ABlasterPlayerController::ServerSetPawn_Implementation(int32 InDesiredPawn, bool RequestRespawn)
+{	
+	if(const auto LobbyGameMode = Cast<ALobbyGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		DesiredPawn = InDesiredPawn;
+
+		if(DesiredPawn >= LobbyGameMode->GetNumberOfPossibleCharacters())
+		{
+			DesiredPawn = 0;
+		}
+		else if(DesiredPawn < 0)
+		{
+			DesiredPawn = LobbyGameMode->GetNumberOfPossibleCharacters() - 1;
+		}	
+
+		SelectCharacter();
+
+		if(RequestRespawn)
+		{
+			LobbyGameMode->RequestRespawn(Cast<ACharacter>(GetPawn()), this);
+		}
+	}
+}
+
+void ABlasterPlayerController::SelectCharacter()
+{
+	if(const auto BlasterGameInstance = Cast<UBlasterGameInstance>(GetGameInstance()))
+	{
+		if(PlayerState)
+		{
+			const auto NetId = PlayerState->GetUniqueId();
+			if(NetId.IsValid())
+			{
+				BlasterGameInstance->SelectCharacter(NetId->GetHexEncodedString(), DesiredPawn);
+			}
+			else
+			{
+				if(GetPawn())
+				{
+					UE_LOG(LogTemp, Warning, TEXT("%s: No Unique Id"), *GetPawn()->GetActorNameOrLabel());
+				}
+			}
+		}
+		else
+		{
+			if(GetPawn())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%s: No Player State"), *GetPawn()->GetActorNameOrLabel());
+			}
+		}
+	}
+	else
+	{
+		if(GetPawn())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s: No Game Instance"), *GetPawn()->GetActorNameOrLabel());
+		}
+	}
+}
+
+void ABlasterPlayerController::ForwardDesiredPawn()
+{
+	ServerSetPawn(DesiredPawn + 1, true);
+}
+
+void ABlasterPlayerController::BackDesiredPawn()
+{
+	ServerSetPawn(DesiredPawn - 1, true);
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
