@@ -78,7 +78,7 @@ void ABlasterPlayerController::ServerSetPawn_Implementation(int32 InDesiredPawn,
 
 		if(RequestRespawn)
 		{
-			LobbyGameMode->RequestRespawn(Cast<ACharacter>(GetPawn()), this);
+			LobbyGameMode->RequestRespawn(Cast<ACharacter>(GetPawn()), this, true, GetPawn()->GetTransform());
 		}
 	}
 }

@@ -3,15 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
+#include "BlasterGameModeBase.h"
 #include "LobbyGameMode.generated.h"
 
-class ABlasterCharacter;
 /**
  * 
  */
 UCLASS()
-class BLASTER_API ALobbyGameMode : public AGameMode
+class BLASTER_API ALobbyGameMode : public ABlasterGameModeBase
 {
 	GENERATED_BODY()
 
@@ -22,14 +21,4 @@ public:
 	void GoToMainLevel();
 
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
-
-	virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
-
-	FORCEINLINE int32 GetNumberOfPossibleCharacters() const { return PawnTypes.Num(); }
-private:
-	AActor* GetRespawnPointWithLargestMinimumDistance() const;
-	float GetMinimumDistance(const AActor* SpawnPoint,  const TArray<AActor*>& Players) const;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Character Select")
-	TMap<int32, UClass*> PawnTypes;
 };
