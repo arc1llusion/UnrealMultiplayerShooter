@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
+class ABlasterPlayerController;
+class ABlasterCharacter;
 class ACasing;
 class USphereComponent;
 class USkeletalMeshComponent;
@@ -33,6 +35,9 @@ public:
 	AWeapon();
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnRep_Owner() override;
+	
+	void SetHUDWeaponAmmo();
 
 	void ShowPickupWidget(bool bShowWidget);
 
@@ -121,6 +126,22 @@ private:
 
     UPROPERTY(EditAnywhere, Category="Combat")
     bool bAutomatic = true;
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	int32 Ammo = 0;
+
+	UFUNCTION()
+	void OnRep_Ammo();
+
+	void SpendRound();
+
+	UPROPERTY(EditAnywhere)
+	int32 AmmoCapacity = 0;
+
+	UPROPERTY()
+	ABlasterCharacter* BlasterOwnerCharacter;
+	UPROPERTY()
+	ABlasterPlayerController* BlasterOwnerController;
 
 public:
 	void SetWeaponState(EWeaponState State);

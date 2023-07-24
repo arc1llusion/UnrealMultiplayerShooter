@@ -193,3 +193,18 @@ void ABlasterPlayerController::SetHUDDefeatsLog(const TArray<FString>& Logs)
 		BlasterHUD->CharacterOverlay->DefeatsRelay->SetText(FText::FromString(Output));
 	}
 }
+
+void ABlasterPlayerController::SetHUDWeaponAmmo(int32 InAmmo)
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->WeaponAmmoAmount;
+
+	if(bHudValid)
+	{
+		const FString DefeatsText = FString::Printf(TEXT("%d"), InAmmo);
+		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(DefeatsText));
+	}
+}

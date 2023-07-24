@@ -24,6 +24,8 @@ public:
 	void SetHUDScore(float Score);
 	void SetHUDDefeats(int32 InDefeats);
 	void SetHUDDefeatsLog(const TArray<FString>& Logs);
+	void SetHUDWeaponAmmo(int32 InAmmo);
+	
 	
 	virtual void OnPossess(APawn* InPawn) override;
 
