@@ -155,4 +155,6 @@ public:
 
 	FORCEINLINE float GetFireDelay() const { return FireDelay; }
 	FORCEINLINE bool IsAutomatic() const { return bAutomatic; }
+
+	bool IsEmpty() const;
 };

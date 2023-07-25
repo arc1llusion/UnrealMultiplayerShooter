@@ -70,7 +70,7 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::Fire()
 {
-	if(bCanFire)
+	if(CanFire())
 	{
 		bCanFire = false;
 		ServerFire(HitTarget);
@@ -356,3 +356,7 @@ void UCombatComponent::InterpolateFOV(float DeltaTime)
 	}
 }
 
+bool UCombatComponent::CanFire()
+{
+	return EquippedWeapon && !EquippedWeapon->IsEmpty() && bCanFire;
+}
