@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WeaponTypes.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
@@ -127,6 +128,9 @@ private:
     UPROPERTY(EditAnywhere, Category="Combat")
     bool bAutomatic = true;
 
+	/*
+	 * Ammo
+	 */
 	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
 	int32 Ammo = 0;
 
@@ -138,6 +142,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 AmmoCapacity = 0;
 
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponType;
+
+	/*
+	 * Stored properties
+	 */
 	UPROPERTY()
 	ABlasterCharacter* BlasterOwnerCharacter;
 	UPROPERTY()
@@ -155,6 +165,8 @@ public:
 
 	FORCEINLINE float GetFireDelay() const { return FireDelay; }
 	FORCEINLINE bool IsAutomatic() const { return bAutomatic; }
+
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 
 	bool IsEmpty() const;
 };
