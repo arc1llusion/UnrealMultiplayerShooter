@@ -38,6 +38,7 @@ public:
 	virtual void PostInitializeComponents() override;
 
 	void PlayFireMontage(bool bAiming);
+	void PlayReloadMontage();
 	void PlayEliminationMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
@@ -68,6 +69,8 @@ protected:
 	void StopFireAction(const FInputActionValue &Value);
 
 	void ChangeCharacterAction(const FInputActionValue &Value);
+	
+	void ReloadAction(const FInputActionValue &Value);
 
 	void AimOffset(float DeltaTime);
 	
@@ -111,6 +114,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction *ChangeCharacterAsset;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction *ReloadInputAsset;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
@@ -147,6 +153,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* FireWeaponMontage;
+	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* ReloadMontage;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* HitReactMontage;

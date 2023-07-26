@@ -30,6 +30,8 @@ public:
 
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
+	void Reload();
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -53,6 +55,9 @@ protected:
 	void TraceUnderCrosshairs(FHitResult &TraceHitResult);
 
 	void SetHUDCrosshairs(float DeltaTime);
+
+	UFUNCTION(Server, Reliable)
+	void ServerReload();
 
 private:
 	bool GetCrosshairWorldVector(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection) const;

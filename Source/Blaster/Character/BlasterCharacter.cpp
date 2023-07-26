@@ -245,6 +245,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 
 		//Change Character in Lobby
 		EnhancedInputComponent->BindAction(ChangeCharacterAsset, ETriggerEvent::Started, this, &ABlasterCharacter::ChangeCharacterAction);
+
+		//Reload
+		EnhancedInputComponent->BindAction(ReloadInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::ReloadAction);
 	}
 }
 
@@ -277,6 +280,42 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Anim instance or fire weapon montage"));
+	}
+}
+
+void ABlasterCharacter::PlayReloadMontage()
+{
+	if(!Combat || !Combat->EquippedWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Combat or Equipped Weapon"));
+		return;
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if(AnimInstance && ReloadMontage)
+	{
+		AnimInstance->Montage_Play(ReloadMontage);
+		FName SectionName = FName(TEXT("Rifle"));
+
+		switch(Combat->EquippedWeapon->GetWeaponType())
+		{
+			case EWeaponType::EWT_AssaultRifle:
+				SectionName = FName(TEXT("Rifle"));
+				break;
+			case EWeaponType::EWT_Pistol:
+				SectionName = FName(TEXT("Pistol"));
+				break;
+			default:
+				SectionName = FName(TEXT("Rifle"));
+				break;
+		}
+
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Anim instance or reload weapon montage"));
 	}
 }
 
@@ -446,6 +485,14 @@ void ABlasterCharacter::ChangeCharacterAction(const FInputActionValue& Value)
 		{
 			BlasterPlayerController->BackDesiredPawn();
 		}
+	}
+}
+
+void ABlasterCharacter::ReloadAction(const FInputActionValue& Value)
+{
+	if(Combat)
+	{
+		Combat->Reload();
 	}
 }
 
