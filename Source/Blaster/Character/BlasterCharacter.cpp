@@ -296,7 +296,7 @@ void ABlasterCharacter::PlayReloadMontage()
 	if(AnimInstance && ReloadMontage)
 	{
 		AnimInstance->Montage_Play(ReloadMontage);
-		FName SectionName = FName(TEXT("Rifle"));
+		FName SectionName;
 
 		switch(Combat->EquippedWeapon->GetWeaponType())
 		{
