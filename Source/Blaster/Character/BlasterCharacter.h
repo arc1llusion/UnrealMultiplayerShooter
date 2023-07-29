@@ -289,5 +289,8 @@ private:
 	FName DissolveParameterName{TEXT("Dissolve")};
 	FName GlowParameterName{TEXT("Glow")};
 
-	void SpawnEliminationBot();
+	void SpawnEliminationBot();	
+
+	UFUNCTION()
+	void OnReloadMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted);
 };

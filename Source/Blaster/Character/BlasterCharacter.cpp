@@ -296,8 +296,8 @@ void ABlasterCharacter::PlayReloadMontage()
 	if(AnimInstance && ReloadMontage)
 	{
 		AnimInstance->Montage_Play(ReloadMontage);
+		
 		FName SectionName;
-
 		switch(Combat->EquippedWeapon->GetWeaponType())
 		{
 			case EWeaponType::EWT_AssaultRifle:
@@ -311,11 +311,33 @@ void ABlasterCharacter::PlayReloadMontage()
 				break;
 		}
 
-		AnimInstance->Montage_JumpToSection(SectionName);
+		AnimInstance->Montage_JumpToSection(SectionName);		
+
+		FOnMontageEnded ReloadMontageEndDelegate;
+		ReloadMontageEndDelegate.BindUObject(this, &ABlasterCharacter::OnReloadMontageEnd);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Anim instance or reload weapon montage"));
+	}
+}
+
+void ABlasterCharacter::OnReloadMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted)
+{
+	if(!Combat)
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Reload Montage End"));
+	
+	if(bInterrupted)
+	{
+		Combat->CombatState = ECombatState::ECS_Unoccupied;
+	}
+	else
+	{
+		Combat->FinishReloading();
 	}
 }
 

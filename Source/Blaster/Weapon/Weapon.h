@@ -44,6 +44,8 @@ public:
 
 	virtual void Fire(const FVector& HitTarget);
 	void Drop();
+
+	void AddAmmo(int32 AmmoToAdd);
 protected:
 	virtual void BeginPlay() override;
 
@@ -167,6 +169,9 @@ public:
 	FORCEINLINE bool IsAutomatic() const { return bAutomatic; }
 
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
+	FORCEINLINE int32 GetAmmoCapacity() const { return AmmoCapacity; }
 
 	bool IsEmpty() const;
 };

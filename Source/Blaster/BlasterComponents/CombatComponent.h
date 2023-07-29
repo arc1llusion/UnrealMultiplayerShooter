@@ -32,7 +32,8 @@ public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
 	void Reload();
-	
+	void SetHUDCarriedAmmo();
+
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 
@@ -66,11 +67,15 @@ protected:
 	//Happens on both server and clients
 	void HandleReload();
 
+	int32 AmountToReload();
+
 private:
 	bool GetCrosshairWorldVector(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection) const;
 	void PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection);
 	
 	void AttachWeaponToHandSocket() const;
+
+	void UpdateAmmoValues();
 
 private:
 	UPROPERTY()
