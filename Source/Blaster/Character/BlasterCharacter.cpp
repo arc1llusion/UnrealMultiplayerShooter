@@ -790,6 +790,16 @@ FVector ABlasterCharacter::GetHitTarget() const
 	return Combat->HitTarget;
 }
 
+ECombatState ABlasterCharacter::GetCombatState() const
+{
+	if(!Combat)
+	{
+		return ECombatState::ECS_MAX;
+	}
+
+	return Combat->CombatState;
+}
+
 // ReSharper disable once CppMemberFunctionMayBeConst
 void ABlasterCharacter::OnOverheadOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                                UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

@@ -6,6 +6,7 @@
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/Weapon/WeaponTypes.h"
 #include "Components/ActorComponent.h"
+#include "Blaster/BlasterTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.0f
@@ -31,6 +32,9 @@ public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
 	void Reload();
+	
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
 
 protected:
 	virtual void BeginPlay() override;
@@ -58,6 +62,9 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
+
+	//Happens on both server and clients
+	void HandleReload();
 
 private:
 	bool GetCrosshairWorldVector(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection) const;
@@ -174,4 +181,10 @@ private:
 	TMap<EWeaponType, int32> StartingAmmoMap;
 	
 	void InitializeCarriedAmmo();
+
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
+
+	UFUNCTION()
+	void OnRep_CombatState();
 };

@@ -82,6 +82,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	bool bEliminated;
 
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
+	bool bUseFabrik;
+
 	UPROPERTY(EditAnywhere)
 	FName LeftHandSocket{TEXT("LeftHandSocket")};
 	UPROPERTY(EditAnywhere)

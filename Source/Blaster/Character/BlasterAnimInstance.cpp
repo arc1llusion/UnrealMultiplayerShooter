@@ -49,6 +49,7 @@ void UBlasterAnimInstance::SetAnimationVariables()
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
 	bEliminated = BlasterCharacter->IsEliminated();
+	bUseFabrik = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 
 	AimOffsetYaw = BlasterCharacter->GetAimOffsetYaw();
 	AimOffsetPitch = BlasterCharacter->GetAimOffsetPitch();
