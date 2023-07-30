@@ -37,4 +37,7 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* DefeatsRelay;
+	
+	UPROPERTY(meta = (BindWidget))
+    UTextBlock* MatchCountdownText;
 };
