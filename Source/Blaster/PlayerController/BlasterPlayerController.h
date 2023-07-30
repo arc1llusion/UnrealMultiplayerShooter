@@ -34,6 +34,8 @@ public:
 	virtual float GetServerTime() const;
 	//Sync with server clock as soon as possible
 	virtual void ReceivedPlayer() override;
+
+	void OnMatchStateSet(FName InMatchState);
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void AcknowledgePossession(APawn* P) override;
@@ -87,4 +89,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Replicated)
 	int32 DesiredPawn = 0;
+
+	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+	FName MatchState;
+
+	UFUNCTION()
+	void OnRep_MatchState();
 };

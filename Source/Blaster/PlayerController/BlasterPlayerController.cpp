@@ -20,6 +20,7 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABlasterPlayerController, DesiredPawn)
+	DOREPLIFETIME(ABlasterPlayerController, MatchState);
 }
 
 void ABlasterPlayerController::BeginPlay()
@@ -309,5 +310,30 @@ void ABlasterPlayerController::ReceivedPlayer()
 	if(IsLocalController())
 	{
 		ServerRequestServerTime(GetWorld()->GetTimeSeconds());
+	}
+}
+
+void ABlasterPlayerController::OnMatchStateSet(FName InMatchState)
+{
+	MatchState = InMatchState;
+	if(MatchState == MatchState::InProgress)
+	{		
+		BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+		if(BlasterHUD)
+		{
+			BlasterHUD->AddCharacterOverlay();
+		}
+	}
+}
+
+void ABlasterPlayerController::OnRep_MatchState()
+{
+	if(MatchState == MatchState::InProgress)
+	{		
+		BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+		if(BlasterHUD)
+		{
+			BlasterHUD->AddCharacterOverlay();
+		}
 	}
 }

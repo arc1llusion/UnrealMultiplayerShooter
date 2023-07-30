@@ -33,6 +33,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void OnMatchStateSet() override;
 	
 private:	
 	void BroadcastDefeat(const ABlasterPlayerState* Attacker, const ABlasterPlayerState* Victim) const;
