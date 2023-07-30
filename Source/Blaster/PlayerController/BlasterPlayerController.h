@@ -28,10 +28,13 @@ public:
 	void SetHUDWeaponAmmo(int32 InAmmo);
 	void SetHUDCarriedAmmo(int32 InAmmo);
 	void SetHUDMatchCountdown(float CountdownTime);
-	
+
+	//Synced with server world clock
+	virtual float GetServerTime() const;
+	//Sync with server clock as soon as possible
+	virtual void ReceivedPlayer() override;
 	
 	virtual void OnPossess(APawn* InPawn) override;
-
 	virtual void AcknowledgePossession(APawn* P) override;
 
 	void ForwardDesiredPawn();
@@ -44,9 +47,31 @@ protected:
 
 	void SetHUDTime();
 
+	/*
+	 * Sync time between client and server
+	 */
+
+	// Requests current server time, passing in the clients time when the request was sent
+	UFUNCTION(Server, Reliable)
+	void ServerRequestServerTime(float TimeOfClientRequest);
+
+	// Reports the current server time to the client in response to ServerRequestServerTime
+	UFUNCTION(Client, Reliable)
+	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
+
+	//Difference between client and server time
+	float ClientServerDelta = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Server Time Synchronization")
+	float TimeSyncFrequency = 5.0f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Server Time Synchronization")
+	float TimeSyncRunningTime = 0.0f;
+
+	void CheckTimeSync(float DeltaSeconds);
+
 	UFUNCTION(Reliable, Server)
 	virtual void ServerSetPawn(int32 InDesiredPawn, bool RequestRespawn);
-
 	virtual void SelectCharacter();	
 	
 private:
