@@ -8,6 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
+class USoundCue;
 class ABlasterPlayerController;
 class ABlasterCharacter;
 class ACasing;
@@ -148,6 +149,12 @@ private:
 	EWeaponType WeaponType;
 
 	/*
+	 * Sounds
+	 */
+	UPROPERTY(EditAnywhere)
+	USoundCue* EquipSound;
+
+	/*
 	 * Stored properties
 	 */
 	UPROPERTY()
@@ -174,4 +181,6 @@ public:
 	FORCEINLINE int32 GetAmmoCapacity() const { return AmmoCapacity; }
 
 	bool IsEmpty() const;
+
+	FORCEINLINE USoundCue* GetEquippedSound() const { return EquipSound; }
 };

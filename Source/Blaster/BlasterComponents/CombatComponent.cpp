@@ -12,6 +12,7 @@
 #include "DrawDebugHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -162,9 +163,24 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 
 	SetHUDCarriedAmmo();
+
+	PlayEquippedWeaponSound();
 	
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::PlayEquippedWeaponSound() const
+{
+	if(!EquippedWeapon || !EquippedWeapon->GetEquippedSound() || !Character)
+	{
+		return;
+	}
+
+	UGameplayStatics::PlaySoundAtLocation(
+			this,
+			EquippedWeapon->GetEquippedSound(),
+			Character->GetActorLocation());
 }
 
 void UCombatComponent::Reload()
@@ -253,6 +269,9 @@ void UCombatComponent::OnRep_CombatState()
 		case ECombatState::ECS_Reloading:
 			HandleReload();
 			break;
+
+		default:
+			break;
 	}
 }
 
@@ -289,6 +308,8 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
+
+		PlayEquippedWeaponSound();
 	}
 }
 

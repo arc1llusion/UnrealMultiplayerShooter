@@ -76,6 +76,7 @@ private:
 	void AttachWeaponToHandSocket() const;
 
 	void UpdateAmmoValues();
+	void PlayEquippedWeaponSound() const;
 
 private:
 	UPROPERTY()
