@@ -115,6 +115,8 @@ void UCombatComponent::FireTimerFinished()
 	{
 		Fire();
 	}
+
+	ReloadIfEmpty();
 }
 
 void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
@@ -163,8 +165,8 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 
 	SetHUDCarriedAmmo();
-
 	PlayEquippedWeaponSound();
+	ReloadIfEmpty();
 	
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
@@ -188,6 +190,14 @@ void UCombatComponent::Reload()
 	if(CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
 	{
 		ServerReload();	
+	}
+}
+
+void UCombatComponent::ReloadIfEmpty()
+{
+	if(EquippedWeapon->IsEmpty())
+	{
+		Reload();
 	}
 }
 

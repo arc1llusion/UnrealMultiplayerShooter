@@ -77,6 +77,7 @@ private:
 
 	void UpdateAmmoValues();
 	void PlayEquippedWeaponSound() const;
+	void ReloadIfEmpty();
 
 private:
 	UPROPERTY()
