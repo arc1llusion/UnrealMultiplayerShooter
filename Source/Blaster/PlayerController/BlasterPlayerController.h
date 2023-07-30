@@ -9,6 +9,7 @@
 class ABlasterPlayerState;
 class ABlasterHUD;
 class AGameMode;
+class UInputMappingContext;
 /**
  * 
  */
@@ -69,6 +70,9 @@ protected:
 	float TimeSyncRunningTime = 0.0f;
 
 	void CheckTimeSync(float DeltaSeconds);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputMappingContext *DefaultMappingContext;
 
 	UFUNCTION(Reliable, Server)
 	virtual void ServerSetPawn(int32 InDesiredPawn, bool RequestRespawn);

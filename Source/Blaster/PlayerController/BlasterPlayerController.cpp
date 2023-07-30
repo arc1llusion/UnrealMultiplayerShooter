@@ -3,6 +3,7 @@
 
 #include "BlasterPlayerController.h"
 
+#include "EnhancedInputSubsystems.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/GameInstance/BlasterGameInstance.h"
 #include "Blaster/GameMode/LobbyGameMode.h"
@@ -26,10 +27,13 @@ void ABlasterPlayerController::BeginPlay()
 	Super::BeginPlay();
 	
 	BlasterHUD = Cast<ABlasterHUD>(GetHUD());
-
-	if(GetPawn())
+ 
+	if (const ULocalPlayer* LocalBlasterPlayer = (GEngine && GetWorld()) ? GEngine->GetFirstGamePlayer(GetWorld()) : nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: Begin Play"), *GetPawn()->GetActorNameOrLabel());
+		if (UEnhancedInputLocalPlayerSubsystem *Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalBlasterPlayer))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
 	}
 }
 

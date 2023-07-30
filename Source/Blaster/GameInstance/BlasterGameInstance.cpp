@@ -57,14 +57,14 @@ void UBlasterGameInstance::SelectCharacter(const FString& PlayerId, int32 InDesi
 
 int32 UBlasterGameInstance::GetSelectedCharacter(const FString& PlayerId) const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Checking Player Character Selection %s"), *PlayerId);
+	//UE_LOG(LogTemp, Warning, TEXT("Checking Player Character Selection %s"), *PlayerId);
 	if(PlayerCharacterSelections.Contains(PlayerId))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Found: %d"), PlayerCharacterSelections[PlayerId]);
 		return PlayerCharacterSelections[PlayerId];
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Not Found"));
+	//UE_LOG(LogTemp, Warning, TEXT("Not Found"));
 	return DefaultCharacterPawnType;
 }
 

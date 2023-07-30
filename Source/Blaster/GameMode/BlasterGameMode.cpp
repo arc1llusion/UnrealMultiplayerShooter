@@ -10,6 +10,32 @@
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "GameFramework/GameStateBase.h"
 
+ABlasterGameMode::ABlasterGameMode()
+{
+	bDelayedStart = true;
+}
+
+void ABlasterGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+}
+
+void ABlasterGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	
+	if(MatchState == MatchState::WaitingToStart)
+	{
+		CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if(CountdownTime <= 0.0f)
+		{
+			StartMatch();
+		}
+	}
+}
+
 void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
                                         ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
 {
@@ -45,7 +71,7 @@ UClass* ABlasterGameMode::GetDefaultPawnClassForController_Implementation(AContr
 				const auto NetId = InController->PlayerState->GetUniqueId();
 				if(NetId.IsValid())
 				{
-					int32 SelectedPawnType = BlasterGameInstance->GetSelectedCharacter(NetId->GetHexEncodedString());
+					const int32 SelectedPawnType = BlasterGameInstance->GetSelectedCharacter(NetId->GetHexEncodedString());
 					if(PawnTypes.Contains(SelectedPawnType))
 					{
 						return PawnTypes[SelectedPawnType];
