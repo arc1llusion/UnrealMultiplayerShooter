@@ -73,6 +73,8 @@ protected:
 
 	void CheckTimeSync(float DeltaSeconds);
 
+	void HandleMatchHasStarted();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;
 
