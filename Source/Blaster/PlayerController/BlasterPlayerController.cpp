@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/GameInstance/BlasterGameInstance.h"
+#include "Blaster/GameMode/BlasterGameMode.h"
 #include "Blaster/GameMode/LobbyGameMode.h"
 #include "Blaster/HUD/AnnouncementWidget.h"
 #include "Blaster/HUD/BlasterHUD.h"
@@ -13,6 +14,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Net/UnrealNetwork.h"
 
@@ -27,13 +29,10 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 void ABlasterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	BlasterHUD = Cast<ABlasterHUD>(GetHUD());
 
-	if(BlasterHUD)
-	{
-		BlasterHUD->AddAnnouncementOverlay();
-	}
+	ServerCheckMatchState();	
  
 	if (const ULocalPlayer* LocalBlasterPlayer = (GEngine && GetWorld()) ? GEngine->GetFirstGamePlayer(GetWorld()) : nullptr)
 	{
@@ -51,6 +50,36 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 	SetHUDTime();
 
 	CheckTimeSync(DeltaSeconds);
+}
+
+void ABlasterPlayerController::ServerCheckMatchState_Implementation()
+{
+	if(auto GameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
+		WarmupTime = GameMode->GetWarmupTime();
+		MatchTime = GameMode->GetMatchTime();
+		LevelStartingTime = GameMode->GetLevelStartingTime();
+		MatchState = GameMode->GetMatchState();
+		ClientJoinMidGame(MatchState, WarmupTime, MatchTime, LevelStartingTime);		
+
+		if(BlasterHUD && MatchState == MatchState::WaitingToStart)
+		{
+			BlasterHUD->AddAnnouncementOverlay();
+		}
+	}
+}
+
+void ABlasterPlayerController::ClientJoinMidGame_Implementation(FName InMatchState, float InWarmupTime, float InMatchTime, float InStartingTime)
+{
+	WarmupTime = InWarmupTime;
+	MatchTime = InMatchTime;
+	LevelStartingTime = InStartingTime;
+	MatchState = InMatchState;
+	OnMatchStateSet(MatchState);
+	if(BlasterHUD && MatchState == MatchState::WaitingToStart)
+	{
+		BlasterHUD->AddAnnouncementOverlay();
+	}
 }
 
 void ABlasterPlayerController::OnPossess(APawn* InPawn)
@@ -272,16 +301,65 @@ void ABlasterPlayerController::SetHUDMatchCountdown(float CountdownTime)
 	}
 }
 
+void ABlasterPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->AnnouncementOverlay &&
+		BlasterHUD->AnnouncementOverlay->WarmupTime;
+
+	if(bHudValid)
+	{
+		const int32 Minutes = FMath::FloorToInt(CountdownTime / 60);
+		const int32 Seconds = CountdownTime - (Minutes * 60);
+		
+		const FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		BlasterHUD->AnnouncementOverlay->WarmupTime->SetText(FText::FromString(CountdownText));
+	}
+}
+
 void ABlasterPlayerController::SetHUDTime()
 {
-	const uint32 SecondsLeft = FMath::CeilToInt(MatchTime - GetServerTime());
+	if (HasAuthority())
+	{
+		if (const ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this)))
+		{
+			LevelStartingTime = BlasterGameMode->GetLevelStartingTime();
+		}
+	}
+	
+	const float TimeLeft = GetTimeLeft();
+	const uint32 SecondsLeft = FMath::CeilToInt(TimeLeft);
 
 	if(Countdown != SecondsLeft)
 	{
-		SetHUDMatchCountdown(MatchTime - GetServerTime());
+		if(MatchState == MatchState::WaitingToStart)
+		{
+			SetHUDAnnouncementCountdown(TimeLeft);
+		}
+		else if(MatchState == MatchState::InProgress)
+		{
+			SetHUDMatchCountdown(TimeLeft);
+		}		
 	}
 	
 	Countdown = SecondsLeft;	
+}
+
+float ABlasterPlayerController::GetTimeLeft() const
+{
+	float TimeLeft = 0.0f;
+	if(MatchState == MatchState::WaitingToStart)
+	{
+		TimeLeft = WarmupTime - GetServerTime() + LevelStartingTime;
+	}
+	else if(MatchState == MatchState::InProgress)
+	{
+		TimeLeft = WarmupTime + MatchTime - GetServerTime() + LevelStartingTime;
+	}
+
+	return TimeLeft;
 }
 
 void ABlasterPlayerController::ServerRequestServerTime_Implementation(float TimeOfClientRequest)

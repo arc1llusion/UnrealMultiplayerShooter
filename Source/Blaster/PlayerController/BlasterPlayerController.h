@@ -29,6 +29,7 @@ public:
 	void SetHUDWeaponAmmo(int32 InAmmo);
 	void SetHUDCarriedAmmo(int32 InAmmo);
 	void SetHUDMatchCountdown(float CountdownTime);
+	void SetHUDAnnouncementCountdown(float CountdownTime);
 
 	//Synced with server world clock
 	virtual float GetServerTime() const;
@@ -75,6 +76,12 @@ protected:
 
 	void HandleMatchHasStarted();
 
+	UFUNCTION(Server, Reliable)
+	void ServerCheckMatchState();
+
+	UFUNCTION(Client, Reliable)
+	void ClientJoinMidGame(FName InMatchState, float InWarmupTime, float InMatchTime, float InStartingTime);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;
 
@@ -86,7 +93,9 @@ private:
 	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
 
-	float MatchTime = 120.0f;
+	float MatchTime = 0.0f;
+	float WarmupTime = 0.0f;
+	float LevelStartingTime = 0.0f;
 	uint32 Countdown = 0;
 
 	UPROPERTY(VisibleAnywhere, Replicated)
@@ -97,4 +106,7 @@ private:
 
 	UFUNCTION()
 	void OnRep_MatchState();
+
+	float GetTimeLeft() const;
+
 };

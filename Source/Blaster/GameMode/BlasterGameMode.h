@@ -30,6 +30,8 @@ public:
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
 	FORCEINLINE float GetWarmupTime() const { return WarmupTime; }
+	FORCEINLINE float GetMatchTime() const { return MatchTime; }
+	FORCEINLINE float GetLevelStartingTime() const { return LevelStartingTime; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -41,6 +43,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float WarmupTime = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MatchTime = 120.0f;
 
 	float LevelStartingTime = 0.0f;
 
