@@ -75,6 +75,7 @@ protected:
 	void CheckTimeSync(float DeltaSeconds);
 
 	void HandleMatchHasStarted();
+	void HandleCooldown();
 
 	UFUNCTION(Server, Reliable)
 	void ServerCheckMatchState();
