@@ -33,8 +33,10 @@ public:
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
 	FORCEINLINE float GetWarmupTime() const { return WarmupTime; }
+	FORCEINLINE float GetCooldownTime() const { return CooldownTime; }
 	FORCEINLINE float GetMatchTime() const { return MatchTime; }
 	FORCEINLINE float GetLevelStartingTime() const { return LevelStartingTime; }
+	FORCEINLINE float GetCountdownTime() const { return CountdownTime; }
 
 protected:
 	virtual void BeginPlay() override;

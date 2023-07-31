@@ -8,8 +8,8 @@
 
 class ABlasterPlayerState;
 class ABlasterHUD;
-class AGameMode;
 class UInputMappingContext;
+class ABlasterGameMode;
 /**
  * 
  */
@@ -81,7 +81,7 @@ protected:
 	void ServerCheckMatchState();
 
 	UFUNCTION(Client, Reliable)
-	void ClientJoinMidGame(FName InMatchState, float InWarmupTime, float InMatchTime, float InStartingTime);
+	void ClientJoinMidGame(FName InMatchState, float InWarmupTime, float InCooldownTime, float InMatchTime, float InStartingTime);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;
@@ -94,8 +94,12 @@ private:
 	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
 
+	UPROPERTY()
+	ABlasterGameMode* BlasterGameMode;
+
 	float MatchTime = 0.0f;
 	float WarmupTime = 0.0f;
+	float CooldownTime = 0.0f;
 	float LevelStartingTime = 0.0f;
 	uint32 Countdown = 0;
 
