@@ -44,7 +44,9 @@ public:
 	void ForwardDesiredPawn();
 	void BackDesiredPawn();
 	FORCEINLINE int32 GetDesiredPawn() const { return DesiredPawn; }
-	void SetDesiredPawn(const int32 InDesiredPawn);	
+	void SetDesiredPawn(const int32 InDesiredPawn);
+
+	FORCEINLINE bool IsGameplayDisabled() const { return bDisableGameplay; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -85,6 +87,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputMappingContext *LookOnlyMappingContext;
+
+	UPROPERTY(Replicated)
+	bool bDisableGameplay;
 
 	UFUNCTION(Reliable, Server)
 	virtual void ServerSetPawn(int32 InDesiredPawn, bool RequestRespawn);

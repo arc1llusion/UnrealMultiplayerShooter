@@ -53,7 +53,7 @@ public:
 	virtual void Destroyed() override;
 protected:	
 	virtual void BeginPlay() override;
-	
+
 	/** Input **/
 	void MoveAction(const FInputActionValue &Value);
 
@@ -86,6 +86,7 @@ protected:
 
 	//Poll for any relevant classes and initialize our HUD
 	void PollInit();
+	void RotateInPlace(float DeltaTime);
 
 	/** Input Assets **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -177,7 +178,6 @@ private:
 	float ProxyYaw;
 
 	float TimeSinceLastMovementReplication = 0.0f;
-
 
 	/*
 	 * Player Health
@@ -277,6 +277,11 @@ public:
 	void SetupOverheadOverlapEvents();
 	
 	void SetDisplayOverheadWidget(bool bInDisplay) const;
+	
+	/*
+	 * Player Controller Functions
+	 */
+	bool GetDisableGameplayFromController();
 	
 private:
 	void CalculateAimOffsetYaw(float DeltaTime);

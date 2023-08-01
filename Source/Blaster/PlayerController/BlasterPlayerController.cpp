@@ -63,7 +63,7 @@ void ABlasterPlayerController::ServerCheckMatchState_Implementation()
 		MatchState = GameMode->GetMatchState();
 		ClientJoinMidGame(MatchState, WarmupTime, CooldownTime, MatchTime, LevelStartingTime);		
 
-		if(BlasterHUD && MatchState == MatchState::WaitingToStart)
+		if(BlasterHUD && (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown))
 		{
 			BlasterHUD->AddAnnouncementOverlay();
 		}
@@ -78,7 +78,7 @@ void ABlasterPlayerController::ClientJoinMidGame_Implementation(FName InMatchSta
 	LevelStartingTime = InStartingTime;
 	MatchState = InMatchState;
 	OnMatchStateSet(MatchState);
-	if(BlasterHUD && MatchState == MatchState::WaitingToStart)
+	if(BlasterHUD && (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown))
 	{
 		BlasterHUD->AddAnnouncementOverlay();
 	}
@@ -352,7 +352,7 @@ void ABlasterPlayerController::SetHUDTime()
 		BlasterGameMode = !BlasterGameMode ? Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this)) : BlasterGameMode;
 		if(BlasterGameMode)
 		{
-			SecondsLeft = FMath::CeilToInt(BlasterGameMode->GetCountdownTime() + LevelStartingTime);
+			SecondsLeft = FMath::CeilToInt(BlasterGameMode->GetCountdownTime());
 		}
 	}
 
@@ -469,7 +469,11 @@ void ABlasterPlayerController::HandleCooldown()
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 	if(BlasterHUD)
 	{
-		BlasterHUD->CharacterOverlay->RemoveFromParent();
+		if(BlasterHUD->CharacterOverlay)
+		{
+			BlasterHUD->CharacterOverlay->RemoveFromParent();
+		}
+		
 		if( BlasterHUD->AnnouncementOverlay &&
 			BlasterHUD->AnnouncementOverlay->AnnouncementText &&
 			BlasterHUD->AnnouncementOverlay->InfoText)
@@ -481,5 +485,16 @@ void ABlasterPlayerController::HandleCooldown()
 
 			BlasterHUD->AnnouncementOverlay->InfoText->SetText(FText());
 		}
+		else
+		{
+			BlasterHUD->AddAnnouncementOverlay();
+		}
+	}
+
+	bDisableGameplay = true;
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =	ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{		
+		Subsystem->ClearAllMappings();		
+		Subsystem->AddMappingContext(LookOnlyMappingContext, 0);		
 	}
 }
