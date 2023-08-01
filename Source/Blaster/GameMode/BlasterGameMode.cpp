@@ -75,12 +75,24 @@ void ABlasterGameMode::OnMatchStateSet()
 void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
                                         ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
 {
+	if(!AttackerController || !AttackerController->PlayerState)
+	{
+		return;
+	}
+
+	if(!VictimController || !VictimController->PlayerState)
+	{
+		return;
+	}
+	
 	ABlasterPlayerState* AttackerPlayerState = AttackerController ? Cast<ABlasterPlayerState>(AttackerController->PlayerState) : nullptr;
 	ABlasterPlayerState* VictimPlayerState = VictimController ? Cast<ABlasterPlayerState>(VictimController->PlayerState) : nullptr;
+	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();
 
-	if(AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+	if(AttackerPlayerState && AttackerPlayerState != VictimPlayerState && BlasterGameState)
 	{
 		AttackerPlayerState->AddToScore(1.0f);
+		BlasterGameState->UpdateTopScore(AttackerPlayerState);
 	}
 
 	if(VictimPlayerState)

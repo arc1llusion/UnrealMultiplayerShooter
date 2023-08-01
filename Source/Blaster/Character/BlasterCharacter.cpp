@@ -168,8 +168,10 @@ void ABlasterCharacter::Destroyed()
 		EliminationBotComponent->DestroyComponent();
 	}
 
-	//TODO: Possibly remove
-	if(Combat && Combat->EquippedWeapon)
+	const ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	const bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
+	
+	if(Combat && Combat->EquippedWeapon && bMatchNotInProgress)
 	{
 		Combat->EquippedWeapon->Destroy();
 	}

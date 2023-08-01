@@ -12,6 +12,26 @@ void ABlasterGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABlasterGameState, DefeatsLog);
+	DOREPLIFETIME(ABlasterGameState, TopScoringPlayers);
+}
+
+void ABlasterGameState::UpdateTopScore(ABlasterPlayerState* ScoringPlayer)
+{
+	if(TopScoringPlayers.Num() == 0)
+	{
+		TopScoringPlayers.Add(ScoringPlayer);
+		TopScore = ScoringPlayer->GetScore();
+	}
+	else if(ScoringPlayer->GetScore() == TopScore)
+	{
+		TopScoringPlayers.AddUnique(ScoringPlayer);
+	}
+	else if (ScoringPlayer->GetScore() > TopScore)
+	{
+		TopScoringPlayers.Empty();
+		TopScoringPlayers.AddUnique(ScoringPlayer);
+		TopScore = ScoringPlayer->GetScore();
+	}
 }
 
 void ABlasterGameState::AddToDefeatsLog(const FString& Defeated, const FString& DefeatedBy)
@@ -31,6 +51,16 @@ void ABlasterGameState::AddToDefeatsLog(const FString& Defeated, const FString& 
 void ABlasterGameState::OnRep_DefeatsLog()
 {
 	BroadcastDefeatsLog();
+}
+
+void ABlasterGameState::GetTopScoringPlayers(TArray<ABlasterPlayerState*>& OutTopScoringPlayers)
+{
+	OutTopScoringPlayers.Empty();
+
+	for(auto State : TopScoringPlayers)
+	{
+		OutTopScoringPlayers.AddUnique(State);
+	}
 }
 
 void ABlasterGameState::PruneDefeatsLog()
