@@ -71,6 +71,11 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	}
 }
 
+void AProjectile::Destroyed()
+{
+	Super::Destroyed();
+}
+
 void AProjectile::MulticastPlayHitEffect_Implementation(bool bHitEnemy)
 {
 	if(bHitEnemy)

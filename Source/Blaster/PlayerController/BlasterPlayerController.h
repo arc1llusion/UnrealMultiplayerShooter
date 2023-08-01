@@ -122,4 +122,6 @@ private:
 
 	float GetTimeLeft() const;
 
+	void SetWinnerText();
+
 };
