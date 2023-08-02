@@ -6,6 +6,10 @@
 #include "Projectile.h"
 #include "ProjectileRocket.generated.h"
 
+
+class UNiagaraComponent;
+class UNiagaraSystem;
+
 /**
  * 
  */
@@ -19,7 +23,27 @@ public:
 
 protected:
 	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) override;
+	virtual void BeginPlay() override;
 
+	void ApplyRadialDamage();
+	void DisableFxOnHit();
+
+	void DestroyTimerFinished();
+	
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* TrailSystem;	
+
+	UPROPERTY()
+	UNiagaraComponent* TrailSystemComponent;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* ProjectileLoop;
+
+	UPROPERTY()
+	UAudioComponent* ProjectileLoopComponent;
+
+	UPROPERTY(EditAnywhere)
+	USoundAttenuation* LoopingSoundAttenuation;
 private:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* RocketMesh;
@@ -29,4 +53,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
 	float OuterDamageRadius = 500.0f;
+
+	FTimerHandle DestroyTimer;
+
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.0;
 };

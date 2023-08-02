@@ -29,6 +29,10 @@ void ABlasterHUD::AddCharacterOverlay()
 	{
 		CharacterOverlay->AddToViewport();
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Character Overlay Found"));
+	}
 }
 
 void ABlasterHUD::AddAnnouncementOverlay()

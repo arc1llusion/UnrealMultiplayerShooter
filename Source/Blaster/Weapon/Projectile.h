@@ -34,22 +34,13 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayHitEffect(bool bHitEnemy);
 
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.0f;
-private:
+	void PlayImpactEffects(AActor* OtherActorHit);
+	
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;
 
-	UPROPERTY(VisibleAnywhere)
-	UProjectileMovementComponent* ProjectileMovementComponent;
-
 	UPROPERTY(EditAnywhere)
-	UParticleSystem* Tracer;
-
-	UPROPERTY()
-	UParticleSystemComponent* TracerComponent;
-
-	int32 NumberOfConfirmedImpactEffects = 0;
+	float Damage = 20.0f;	
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactParticles;
@@ -62,4 +53,15 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* CharacterImpactSound;
+private:
+	UPROPERTY(VisibleAnywhere)
+	UProjectileMovementComponent* ProjectileMovementComponent;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* Tracer;
+
+	UPROPERTY()
+	UParticleSystemComponent* TracerComponent;
+
+	int32 NumberOfConfirmedImpactEffects = 0;
 };

@@ -61,7 +61,12 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
                         FVector NormalImpulse, const FHitResult& Hit)
 {
-	if(Cast<ABlasterCharacter>(OtherActor))
+	PlayImpactEffects(OtherActor);
+}
+
+void AProjectile::PlayImpactEffects(AActor* OtherActorHit)
+{
+	if(Cast<ABlasterCharacter>(OtherActorHit))
 	{
 		MulticastPlayHitEffect(true);
 	}
