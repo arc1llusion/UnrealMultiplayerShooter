@@ -42,7 +42,6 @@ void ABlasterGameMode::Tick(float DeltaSeconds)
 	else if(MatchState == MatchState::InProgress)
 	{
 		CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
-		UE_LOG(LogTemp, Warning, TEXT("Countdown time: %f"), CountdownTime);
 		
 		if(CountdownTime <= 0.0f)
 		{

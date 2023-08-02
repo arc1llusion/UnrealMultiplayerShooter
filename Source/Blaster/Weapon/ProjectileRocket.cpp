@@ -7,6 +7,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Components/BoxComponent.h"
 #include "NiagaraComponent.h"
+#include "RocketMovementComponent.h"
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
 
@@ -15,6 +16,10 @@ AProjectileRocket::AProjectileRocket()
 	RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RocketMesh"));
 	RocketMesh->SetupAttachment(RootComponent);
 	RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	RocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
+	RocketMovementComponent->bRotationFollowsVelocity = true;
+	RocketMovementComponent->SetIsReplicated(true);
 }
 
 void AProjectileRocket::BeginPlay()
@@ -60,6 +65,12 @@ void AProjectileRocket::BeginPlay()
 void AProjectileRocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                               UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if(OtherActor == GetOwner())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit Self"));
+		return;
+	}
+	
 	ApplyRadialDamage();	
 	GetWorldTimerManager().SetTimer(DestroyTimer, this, &AProjectileRocket::DestroyTimerFinished, DestroyTime);
 	PlayImpactEffects(OtherActor);
@@ -91,6 +102,8 @@ void AProjectileRocket::ApplyRadialDamage()
 
 void AProjectileRocket::DisableFxOnHit()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Disable FX On Hit"));
+	
 	if(RocketMesh)
 	{
 		RocketMesh->SetVisibility(false);
@@ -106,6 +119,10 @@ void AProjectileRocket::DisableFxOnHit()
 	if(ProjectileLoopComponent && ProjectileLoopComponent->IsPlaying())
 	{
 		ProjectileLoopComponent->Stop();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not stopping projectile loop sound"));
 	}
 }
 

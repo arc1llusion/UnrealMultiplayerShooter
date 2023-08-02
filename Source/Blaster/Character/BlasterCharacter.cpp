@@ -63,6 +63,7 @@ ABlasterCharacter::ABlasterCharacter()
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	
@@ -312,6 +313,9 @@ void ABlasterCharacter::PlayReloadMontage()
 		switch(Combat->EquippedWeapon->GetWeaponType())
 		{
 			case EWeaponType::EWT_AssaultRifle:
+				SectionName = FName(TEXT("Rifle"));
+				break;
+			case EWeaponType::EWT_RocketLauncher:
 				SectionName = FName(TEXT("Rifle"));
 				break;
 			case EWeaponType::EWT_Pistol:
