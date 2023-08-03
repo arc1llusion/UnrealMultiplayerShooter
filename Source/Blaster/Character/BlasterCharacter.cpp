@@ -319,7 +319,7 @@ void ABlasterCharacter::PlayReloadMontage()
 				SectionName = FName(TEXT("Rifle"));
 				break;
 			case EWeaponType::EWT_Pistol:
-				SectionName = FName(TEXT("Pistol"));
+				SectionName = FName(TEXT("Rifle"));
 				break;
 			default:
 				SectionName = FName(TEXT("Rifle"));
