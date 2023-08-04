@@ -32,10 +32,25 @@ void AHitScanWeapon::PerformLineTrace(const FVector& HitTarget, FHitResult& Fire
 				Start,
 				End,
 				ECollisionChannel::ECC_Visibility
-			);
-		}
+			);			
 
-		PerformHit(GetWorld(), FireHit, SocketTransform);
+			PerformFireEffects(World, SocketTransform);
+			
+			PerformHit(World, FireHit, SocketTransform);
+		}
+	}
+}
+
+void AHitScanWeapon::PerformFireEffects(UWorld* World, const FTransform& SocketTransform) const
+{
+	if(MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(World, MuzzleFlash, SocketTransform);
+	}
+
+	if(FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 }
 

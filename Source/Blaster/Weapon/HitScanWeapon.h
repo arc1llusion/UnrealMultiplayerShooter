@@ -17,7 +17,6 @@ class BLASTER_API AHitScanWeapon : public AWeapon
 public:
 	virtual void Fire(const FVector& HitTarget) override;
 
-
 private:
 	UPROPERTY(EditAnywhere)
 	FName MuzzleSocketFlashName{"MuzzleFlash"};
@@ -43,8 +42,15 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UParticleSystemComponent* BeamParticlesComponent;
 
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* MuzzleFlash;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* FireSound;
+
 	void PerformLineTrace(const FVector& HitTarget, FHitResult& FireHit);
 	void ApplyDamage(ABlasterCharacter* BlasterCharacter);
+	void PerformFireEffects(UWorld* World, const FTransform& SocketTransform) const;
 	void PerformHit(UWorld* World, const FHitResult& FireHit, const FTransform& SocketTransform);
 	void PerformHitEffects(bool bIsCharacterTarget, const UWorld* World, const FHitResult& FireHit) const;
 };
