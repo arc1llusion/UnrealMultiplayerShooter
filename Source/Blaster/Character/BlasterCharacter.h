@@ -51,7 +51,8 @@ public:
 	void MulticastEliminate();
 
 	virtual void Destroyed() override;
-protected:	
+protected:
+
 	virtual void BeginPlay() override;
 
 	/** Input **/
@@ -83,6 +84,9 @@ protected:
 
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+
+	UFUNCTION()
+	void KillZOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	//Poll for any relevant classes and initialize our HUD
 	void PollInit();

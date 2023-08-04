@@ -21,6 +21,7 @@ public:
 	void UpdateTopScore(ABlasterPlayerState* ScoringPlayer);
 
 	virtual void AddToDefeatsLog(const FString& Defeated, const FString& DefeatedBy);
+	virtual void AddToDefeatsLogFell(const FString& Fell);
 
 	UFUNCTION()
 	virtual void OnRep_DefeatsLog();

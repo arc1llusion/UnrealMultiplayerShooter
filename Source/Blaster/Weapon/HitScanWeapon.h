@@ -37,7 +37,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	USoundCue* CharacterImpactSound;
 
-	void PerformLineTrace(const FVector& HitTarget, FHitResult& FireHit, const AController* InstigatorController) const;
-	void PerformHit(const UWorld* World, const FHitResult& FireHit, AController* InstigatorController);
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* BeamParticles;
+
+	UPROPERTY(VisibleAnywhere)
+	UParticleSystemComponent* BeamParticlesComponent;
+
+	void PerformLineTrace(const FVector& HitTarget, FHitResult& FireHit);
+	void ApplyDamage(ABlasterCharacter* BlasterCharacter);
+	void PerformHit(UWorld* World, const FHitResult& FireHit, const FTransform& SocketTransform);
 	void PerformHitEffects(bool bIsCharacterTarget, const UWorld* World, const FHitResult& FireHit) const;
 };

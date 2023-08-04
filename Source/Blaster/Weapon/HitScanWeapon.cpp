@@ -6,34 +6,25 @@
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
 	Super::Fire(HitTarget);
-
-	const auto OwnerPawn = Cast<APawn>(GetOwner());
-	if(!OwnerPawn)
-	{
-		return;
-	}
-
-	const auto InstigatorController = Cast<AController>(OwnerPawn->Controller);
 	
 	FHitResult FireHit;
-	PerformLineTrace(HitTarget, FireHit, InstigatorController);
-	PerformHit(GetWorld(), FireHit, InstigatorController);
+	PerformLineTrace(HitTarget, FireHit);
 }
 
-void AHitScanWeapon::PerformLineTrace(const FVector& HitTarget, FHitResult& FireHit, const AController* InstigatorController) const
+void AHitScanWeapon::PerformLineTrace(const FVector& HitTarget, FHitResult& FireHit)
 {
-	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(MuzzleSocketFlashName);
-	if(MuzzleFlashSocket && InstigatorController)
+	if(const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(MuzzleSocketFlashName))
 	{
 		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
 		const FVector Start = SocketTransform.GetLocation();
 		const FVector End = Start + (HitTarget - Start) * 1.25f;
-
+		
 		if(const auto World = GetWorld())
 		{
 			World->LineTraceSingleByChannel(
@@ -42,27 +33,27 @@ void AHitScanWeapon::PerformLineTrace(const FVector& HitTarget, FHitResult& Fire
 				End,
 				ECollisionChannel::ECC_Visibility
 			);
-		}		
+		}
+
+		PerformHit(GetWorld(), FireHit, SocketTransform);
 	}
 }
 
-void AHitScanWeapon::PerformHit(const UWorld* World, const FHitResult& FireHit, AController* InstigatorController)
+void AHitScanWeapon::PerformHit(UWorld* World, const FHitResult& FireHit, const FTransform& SocketTransform)
 {
+	if(!World)
+	{
+		return;
+	}
+
+	FVector BeamEnd = FireHit.TraceEnd;
 	if(FireHit.bBlockingHit)
 	{
+		BeamEnd = FireHit.ImpactPoint;
+
 		if(const auto BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor()))
 		{
-			if(HasAuthority())
-			{
-				UGameplayStatics::ApplyDamage(
-					BlasterCharacter,
-					Damage,
-					InstigatorController,
-					this,
-					UDamageType::StaticClass()
-				);						
-			}
-					
+			ApplyDamage(BlasterCharacter);					
 			PerformHitEffects(true, World, FireHit);
 		}
 		else
@@ -70,10 +61,48 @@ void AHitScanWeapon::PerformHit(const UWorld* World, const FHitResult& FireHit, 
 			PerformHitEffects(false, World, FireHit);
 		}
 	}
+
+	if(BeamParticles)
+	{
+		BeamParticlesComponent = UGameplayStatics::SpawnEmitterAtLocation(
+			World,
+			BeamParticles,
+			SocketTransform
+		);
+
+		if(BeamParticlesComponent)
+		{
+			BeamParticlesComponent->SetVectorParameter(FName("Target"), BeamEnd);
+		}
+	}
+}
+
+void AHitScanWeapon::ApplyDamage(ABlasterCharacter* const BlasterCharacter)
+{
+	if(const auto OwnerPawn = Cast<APawn>(GetOwner()))
+	{
+		const auto InstigatorController = Cast<AController>(OwnerPawn->Controller);
+			
+		if(HasAuthority() && InstigatorController)
+		{
+			UGameplayStatics::ApplyDamage(
+				BlasterCharacter,
+				Damage,
+				InstigatorController,
+				this,
+				UDamageType::StaticClass()
+			);						
+		}
+	}
 }
 
 void AHitScanWeapon::PerformHitEffects(bool bIsCharacterTarget, const UWorld* World, const FHitResult& FireHit) const
 {
+	if(!World)
+	{
+		return;
+	}
+	
 	if(bIsCharacterTarget)
 	{
 		if(CharacterImpactParticles)

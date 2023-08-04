@@ -107,6 +107,35 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
 	}
 }
 
+void ABlasterGameMode::PlayerFell(ABlasterCharacter* CharacterThatFell,
+	ABlasterPlayerController* CharacterThatFellController)
+{
+	if(!CharacterThatFellController || !CharacterThatFellController->PlayerState)
+	{
+		return;
+	}
+
+	ABlasterPlayerState* CharacterThatFellPlayerState = CharacterThatFellController ? Cast<ABlasterPlayerState>(CharacterThatFellController->PlayerState) : nullptr;
+
+	if(CharacterThatFellPlayerState)
+	{
+		CharacterThatFellPlayerState->AddToDefeats(1);
+	}
+
+	if(GameState)
+	{
+		if(const auto BlasterGameState = Cast<ABlasterGameState>(GameState))
+		{
+			BlasterGameState->AddToDefeatsLogFell(CharacterThatFellPlayerState->GetPlayerName());
+		}
+	}
+
+	if(CharacterThatFell)
+	{
+		CharacterThatFell->Eliminate();
+	}
+}
+
 UClass* ABlasterGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
 	if(InController)

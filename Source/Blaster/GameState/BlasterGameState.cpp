@@ -48,6 +48,20 @@ void ABlasterGameState::AddToDefeatsLog(const FString& Defeated, const FString& 
 	}
 }
 
+void ABlasterGameState::AddToDefeatsLogFell(const FString& Fell)
+{
+	DefeatsLog.Add(FString::Printf(TEXT("%s fell!"), *Fell));
+	BroadcastDefeatsLog();
+
+	if(HasAuthority())
+	{		
+		FTimerHandle NewTimer;
+		GetWorldTimerManager().SetTimer(NewTimer, this, &ABlasterGameState::PruneDefeatsLog, 5.0f);
+
+		Timers.Add(NewTimer);
+	}
+}
+
 void ABlasterGameState::OnRep_DefeatsLog()
 {
 	BroadcastDefeatsLog();

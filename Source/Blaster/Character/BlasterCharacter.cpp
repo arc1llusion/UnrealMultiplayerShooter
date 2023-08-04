@@ -23,6 +23,7 @@
 #include "Sound/SoundCue.h"
 #include "Blaster/HUD/OverheadWidget.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/KillZVolume.h"
 
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -187,6 +188,8 @@ void ABlasterCharacter::BeginPlay()
 	if(HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
+
+		OnActorBeginOverlap.AddDynamic(this, &ABlasterCharacter::KillZOverlap);
 	}
 }
 
@@ -400,6 +403,18 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 			BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
 			const auto AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
 			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
+}
+
+void ABlasterCharacter::KillZOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	if(Cast<AKillZVolume>(OtherActor))
+	{
+		if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>())
+		{
+			BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+			BlasterGameMode->PlayerFell(this, BlasterPlayerController);
 		}
 	}
 }

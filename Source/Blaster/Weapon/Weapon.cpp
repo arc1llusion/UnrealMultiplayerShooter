@@ -249,3 +249,8 @@ bool AWeapon::IsEmpty() const
 	return Ammo <= 0;
 }
 
+bool AWeapon::IsFull() const
+{
+	return Ammo == AmmoCapacity;
+}
+

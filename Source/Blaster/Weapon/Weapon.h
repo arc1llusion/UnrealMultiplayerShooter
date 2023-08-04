@@ -181,6 +181,7 @@ public:
 	FORCEINLINE int32 GetAmmoCapacity() const { return AmmoCapacity; }
 
 	bool IsEmpty() const;
+	bool IsFull() const;
 
 	FORCEINLINE USoundCue* GetEquippedSound() const { return EquipSound; }
 };

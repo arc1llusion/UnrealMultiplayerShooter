@@ -30,6 +30,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	
 	virtual void PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController);
+	virtual void PlayerFell(ABlasterCharacter* CharacterThatFell, ABlasterPlayerController* CharacterThatFellController);
+	
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
 	FORCEINLINE float GetWarmupTime() const { return WarmupTime; }
