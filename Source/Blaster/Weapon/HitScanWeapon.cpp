@@ -6,42 +6,58 @@
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
-	Super::Fire(HitTarget);
+	Super::Fire(HitTarget);	
+
+	FTransform SocketTransform;
+	FVector Start;
+	GetSocketInformation(SocketTransform, Start);
 	
-	FHitResult FireHit;
-	PerformLineTrace(HitTarget, FireHit);
-}
-
-void AHitScanWeapon::PerformLineTrace(const FVector& HitTarget, FHitResult& FireHit)
-{
-	if(const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(MuzzleSocketFlashName))
+	const FVector End = bUseScatter ? TraceEndWithScatter(Start, HitTarget) : (Start + (HitTarget - Start) * 1.25f);
+	
+	if(const auto World = GetWorld())
 	{
-		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		const FVector Start = SocketTransform.GetLocation();
-		const FVector End = Start + (HitTarget - Start) * 1.25f;
-		
-		if(const auto World = GetWorld())
+		FHitResult FireHit;
+		PerformLineTrace(World, Start, End, FireHit);			
+		PerformFireEffects(World, FireHit, SocketTransform);			
+		if(PerformHit(World, FireHit))
 		{
-			World->LineTraceSingleByChannel(
-				FireHit,
-				Start,
-				End,
-				ECollisionChannel::ECC_Visibility
-			);			
-
-			PerformFireEffects(World, SocketTransform);
-			
-			PerformHit(World, FireHit, SocketTransform);
+			ApplyDamage(FireHit.GetActor(), Damage);
 		}
 	}
 }
 
-void AHitScanWeapon::PerformFireEffects(UWorld* World, const FTransform& SocketTransform) const
+void AHitScanWeapon::GetSocketInformation(FTransform& OutSocketTransform, FVector& OutStart) const
+{
+	OutSocketTransform = FTransform::Identity;
+	OutStart = FVector::ZeroVector;
+	
+	if(const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(MuzzleSocketFlashName))
+	{
+		OutSocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+		OutStart = OutSocketTransform.GetLocation();		
+	}
+}
+
+void AHitScanWeapon::PerformLineTrace(const UWorld* World, const FVector& Start, const FVector& End, FHitResult& FireHit)
+{
+	if(World)
+	{
+		World->LineTraceSingleByChannel(
+			FireHit,
+			Start,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
+	}
+}
+
+void AHitScanWeapon::PerformFireEffects(UWorld* World, const FHitResult& FireHit, const FTransform& SocketTransform) const
 {
 	if(MuzzleFlash)
 	{
@@ -52,23 +68,39 @@ void AHitScanWeapon::PerformFireEffects(UWorld* World, const FTransform& SocketT
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
-}
-
-void AHitScanWeapon::PerformHit(UWorld* World, const FHitResult& FireHit, const FTransform& SocketTransform)
-{
-	if(!World)
-	{
-		return;
-	}
 
 	FVector BeamEnd = FireHit.TraceEnd;
 	if(FireHit.bBlockingHit)
 	{
 		BeamEnd = FireHit.ImpactPoint;
+	}
 
-		if(const auto BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor()))
+	if(BeamParticles)
+	{
+		if(const auto BeamParticlesComponent = UGameplayStatics::SpawnEmitterAtLocation(
+			World,
+			BeamParticles,
+			SocketTransform
+		))
 		{
-			ApplyDamage(BlasterCharacter);					
+			BeamParticlesComponent->SetVectorParameter(FName("Target"), BeamEnd);
+		}
+	}
+}
+
+bool AHitScanWeapon::PerformHit(const UWorld* World, const FHitResult& FireHit) const
+{
+	if(!World)
+	{
+		return false;
+	}
+
+	bool bHitBlasterCharacter = false;
+	if(FireHit.bBlockingHit)
+	{
+		if(Cast<ABlasterCharacter>(FireHit.GetActor()))
+		{
+			bHitBlasterCharacter = true;				
 			PerformHitEffects(true, World, FireHit);
 		}
 		else
@@ -77,22 +109,10 @@ void AHitScanWeapon::PerformHit(UWorld* World, const FHitResult& FireHit, const 
 		}
 	}
 
-	if(BeamParticles)
-	{
-		BeamParticlesComponent = UGameplayStatics::SpawnEmitterAtLocation(
-			World,
-			BeamParticles,
-			SocketTransform
-		);
-
-		if(BeamParticlesComponent)
-		{
-			BeamParticlesComponent->SetVectorParameter(FName("Target"), BeamEnd);
-		}
-	}
+	return bHitBlasterCharacter;
 }
 
-void AHitScanWeapon::ApplyDamage(ABlasterCharacter* const BlasterCharacter)
+void AHitScanWeapon::ApplyDamage(AActor* HitActor, float InDamage)
 {
 	if(const auto OwnerPawn = Cast<APawn>(GetOwner()))
 	{
@@ -101,8 +121,8 @@ void AHitScanWeapon::ApplyDamage(ABlasterCharacter* const BlasterCharacter)
 		if(HasAuthority() && InstigatorController)
 		{
 			UGameplayStatics::ApplyDamage(
-				BlasterCharacter,
-				Damage,
+				HitActor,
+				InDamage,
 				InstigatorController,
 				this,
 				UDamageType::StaticClass()
@@ -111,7 +131,7 @@ void AHitScanWeapon::ApplyDamage(ABlasterCharacter* const BlasterCharacter)
 	}
 }
 
-void AHitScanWeapon::PerformHitEffects(bool bIsCharacterTarget, const UWorld* World, const FHitResult& FireHit) const
+void AHitScanWeapon::PerformHitEffects(const bool bIsCharacterTarget, const UWorld* World, const FHitResult& FireHit) const
 {
 	if(!World)
 	{
@@ -152,4 +172,23 @@ void AHitScanWeapon::PerformHitEffects(bool bIsCharacterTarget, const UWorld* Wo
 			UGameplayStatics::PlaySoundAtLocation(World, ImpactSound, GetActorLocation());
 		}
 	}
+}
+
+FVector AHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget) const
+{
+	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+
+	const FVector RandomVector = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.0f, SphereRadius);
+	const FVector EndLocation = SphereCenter + RandomVector;
+	const FVector ToEndLocation = EndLocation - TraceStart;
+
+	if(bShowDebugSpheres)
+	{
+		DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Red, true);
+		DrawDebugSphere(GetWorld(), EndLocation, 4.0f, 12, FColor::Orange, true);
+		DrawDebugLine(GetWorld(), TraceStart, FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size()), FColor::Cyan, true);
+	}
+	
+	return FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size());
 }

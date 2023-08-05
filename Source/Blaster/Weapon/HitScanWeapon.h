@@ -16,14 +16,9 @@ class BLASTER_API AHitScanWeapon : public AWeapon
 
 public:
 	virtual void Fire(const FVector& HitTarget) override;
+	
 
 private:
-	UPROPERTY(EditAnywhere)
-	FName MuzzleSocketFlashName{"MuzzleFlash"};
-
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.0f;
-
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactParticles;
 
@@ -39,18 +34,40 @@ private:
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* BeamParticles;
 
-	UPROPERTY(VisibleAnywhere)
-	UParticleSystemComponent* BeamParticlesComponent;
-
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* MuzzleFlash;
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* FireSound;
 
-	void PerformLineTrace(const FVector& HitTarget, FHitResult& FireHit);
-	void ApplyDamage(ABlasterCharacter* BlasterCharacter);
-	void PerformFireEffects(UWorld* World, const FTransform& SocketTransform) const;
-	void PerformHit(UWorld* World, const FHitResult& FireHit, const FTransform& SocketTransform);
+	/*
+	 * Trace End With Scatter
+	 */
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bShowDebugSpheres = false;
+
+protected:
+	UPROPERTY(EditAnywhere)
+	FName MuzzleSocketFlashName{"MuzzleFlash"};
+	
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.0f;
+	
+	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget) const;
+
+	void GetSocketInformation(FTransform& OutSocketTransform, FVector& OutStart) const;
+	void PerformLineTrace(const UWorld* World, const FVector& Start, const FVector& End, FHitResult& FireHit);
+	void ApplyDamage(AActor* HitActor, float InDamage);
+	void PerformFireEffects(UWorld* World, const FHitResult& FireHit, const FTransform& SocketTransform) const;
+	bool PerformHit(const UWorld* World, const FHitResult& FireHit) const;
 	void PerformHitEffects(bool bIsCharacterTarget, const UWorld* World, const FHitResult& FireHit) const;
 };

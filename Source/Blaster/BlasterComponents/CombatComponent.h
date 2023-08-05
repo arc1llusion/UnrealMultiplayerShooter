@@ -9,8 +9,6 @@
 #include "Blaster/BlasterTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
-#define TRACE_LENGTH 80000.0f
-
 class ABlasterHUD;
 class ABlasterPlayerController;
 class ABlasterCharacter;
