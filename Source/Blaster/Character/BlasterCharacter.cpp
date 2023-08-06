@@ -343,6 +343,9 @@ void ABlasterCharacter::PlayReloadMontage()
 			case EWeaponType::EWT_SniperRifle:
 				SectionName = FName(TEXT("Rifle"));
 				break;
+			case EWeaponType::EWT_GrenadeLauncher:
+				SectionName = FName(TEXT("Rifle"));
+				break;
 			default:
 				SectionName = FName(TEXT("Rifle"));
 				break;

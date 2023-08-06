@@ -4,7 +4,6 @@
 #include "ProjectileRocket.h"
 
 #include "Kismet/GameplayStatics.h"
-#include "NiagaraFunctionLibrary.h"
 #include "Components/BoxComponent.h"
 #include "NiagaraComponent.h"
 #include "RocketMovementComponent.h"
@@ -13,9 +12,9 @@
 
 AProjectileRocket::AProjectileRocket()
 {
-	RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RocketMesh"));
-	RocketMesh->SetupAttachment(RootComponent);
-	RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RocketMesh"));
+	ProjectileMesh->SetupAttachment(RootComponent);
+	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	RocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
 	RocketMovementComponent->bRotationFollowsVelocity = true;
@@ -29,19 +28,8 @@ void AProjectileRocket::BeginPlay()
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectileRocket::OnHit);
 	}
-	
-	if(TrailSystem)
-	{
-		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			TrailSystem,
-			GetRootComponent(),
-			FName(),
-			GetActorLocation(),
-			GetActorRotation(),
-			EAttachLocation::KeepWorldPosition,
-			false
-		);
-	}
+
+	SpawnTrailSystem();
 
 	if(ProjectileLoop && LoopingSoundAttenuation)
 	{
@@ -71,42 +59,19 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 		return;
 	}
 	
-	ApplyRadialDamage();	
-	GetWorldTimerManager().SetTimer(DestroyTimer, this, &AProjectileRocket::DestroyTimerFinished, DestroyTime);
+	ApplyRadialDamage();
+	StartDestroyTimer();
 	PlayImpactEffects(OtherActor);
 	DisableFxOnHit();
-}
-
-void AProjectileRocket::ApplyRadialDamage()
-{
-	if(const APawn* FiringPawn = GetInstigator(); FiringPawn && HasAuthority())
-	{
-		if(AController* FiringController = FiringPawn->GetController())
-		{
-			UGameplayStatics::ApplyRadialDamageWithFalloff(
-				this,//World Context Object
-				Damage, //Base Damage
-				Damage * 0.5f,// Minimum Damage
-				GetActorLocation(), //Origin
-				InnerDamageRadius,
-				OuterDamageRadius,
-				1.0f, //Falloff Damage Curve
-				UDamageType::StaticClass(),
-				TArray<AActor*>(),
-				this, //Damage Causer
-				FiringController // Instigator Controller
-			);
-		}
-	}
 }
 
 void AProjectileRocket::DisableFxOnHit()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Disable FX On Hit"));
 	
-	if(RocketMesh)
+	if(ProjectileMesh)
 	{
-		RocketMesh->SetVisibility(false);
+		ProjectileMesh->SetVisibility(false);
 	}
 	if(CollisionBox)
 	{
@@ -124,9 +89,4 @@ void AProjectileRocket::DisableFxOnHit()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Not stopping projectile loop sound"));
 	}
-}
-
-void AProjectileRocket::DestroyTimerFinished()
-{
-	Destroy();
 }

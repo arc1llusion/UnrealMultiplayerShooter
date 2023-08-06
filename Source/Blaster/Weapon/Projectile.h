@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
+class UNiagaraComponent;
+class UNiagaraSystem;
 class UBoxComponent;
 class UProjectileMovementComponent;
 class UParticleSystem;
@@ -28,6 +30,11 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void StartDestroyTimer();
+	void SpawnTrailSystem();
+	void DestroyTimerFinished();
+	void ApplyRadialDamage();
+	
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 	
@@ -35,6 +42,7 @@ protected:
 	void MulticastPlayHitEffect(bool bHitEnemy);
 
 	void PlayImpactEffects(AActor* OtherActorHit);
+
 	
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;
@@ -54,6 +62,15 @@ protected:
 	UPROPERTY(EditAnywhere)
 	USoundCue* CharacterImpactSound;
 	
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* TrailSystem;	
+
+	UPROPERTY()
+	UNiagaraComponent* TrailSystemComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ProjectileMesh;
+	
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComponent;
 private:
@@ -64,4 +81,18 @@ private:
 	UParticleSystemComponent* TracerComponent;
 
 	int32 NumberOfConfirmedImpactEffects = 0;
+	
+	FTimerHandle DestroyTimer;
+
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.0;
+	
+	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	float InnerDamageRadius = 200.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	float OuterDamageRadius = 500.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	float MinimumDamage = 10.0f;
 };

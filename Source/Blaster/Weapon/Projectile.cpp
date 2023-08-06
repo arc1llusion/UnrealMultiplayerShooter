@@ -3,6 +3,7 @@
 
 #include "Projectile.h"
 
+#include "NiagaraFunctionLibrary.h"
 #include "Blaster/Blaster.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Components/BoxComponent.h"
@@ -48,6 +49,11 @@ void AProjectile::BeginPlay()
 	}
 }
 
+void AProjectile::StartDestroyTimer()
+{
+	GetWorldTimerManager().SetTimer(DestroyTimer, this, &AProjectile::DestroyTimerFinished, DestroyTime);
+}
+
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -57,6 +63,29 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
                         FVector NormalImpulse, const FHitResult& Hit)
 {
 	PlayImpactEffects(OtherActor);
+}
+
+void AProjectile::ApplyRadialDamage()
+{
+	if(const APawn* FiringPawn = GetInstigator(); FiringPawn && HasAuthority())
+	{
+		if(AController* FiringController = FiringPawn->GetController())
+		{
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				this,//World Context Object
+				Damage, //Base Damage
+				MinimumDamage, // Minimum Damage
+				GetActorLocation(), //Origin
+				InnerDamageRadius,
+				OuterDamageRadius,
+				1.0f, //Falloff Damage Curve
+				UDamageType::StaticClass(),
+				TArray<AActor*>(),
+				this, //Damage Causer
+				FiringController // Instigator Controller
+			);
+		}
+	}
 }
 
 void AProjectile::PlayImpactEffects(AActor* OtherActorHit)
@@ -69,6 +98,27 @@ void AProjectile::PlayImpactEffects(AActor* OtherActorHit)
 	{
 		MulticastPlayHitEffect(false);
 	}
+}
+
+void AProjectile::SpawnTrailSystem()
+{	
+	if(TrailSystem)
+	{
+		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			TrailSystem,
+			GetRootComponent(),
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			false
+		);
+	}
+}
+
+void AProjectile::DestroyTimerFinished()
+{
+	Destroy();
 }
 
 void AProjectile::Destroyed()

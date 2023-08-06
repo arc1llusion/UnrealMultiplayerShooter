@@ -8,8 +8,6 @@
 
 
 class URocketMovementComponent;
-class UNiagaraComponent;
-class UNiagaraSystem;
 
 /**
  * 
@@ -26,16 +24,8 @@ protected:
 	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void BeginPlay() override;
 
-	void ApplyRadialDamage();
-	void DisableFxOnHit();
-
-	void DestroyTimerFinished();
 	
-	UPROPERTY(EditAnywhere)
-	UNiagaraSystem* TrailSystem;	
-
-	UPROPERTY()
-	UNiagaraComponent* TrailSystemComponent;
+	void DisableFxOnHit();
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* ProjectileLoop;
@@ -49,17 +39,5 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	URocketMovementComponent* RocketMovementComponent;
 private:
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* RocketMesh;
 	
-	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
-	float InnerDamageRadius = 200.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
-	float OuterDamageRadius = 500.0f;
-
-	FTimerHandle DestroyTimer;
-
-	UPROPERTY(EditAnywhere)
-	float DestroyTime = 3.0;
 };
