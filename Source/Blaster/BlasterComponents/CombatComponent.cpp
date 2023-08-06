@@ -389,12 +389,40 @@ void UCombatComponent::PerformLineTrace(FHitResult& TraceHitResult, const FVecto
 
 void UCombatComponent::SetAiming(bool bInAiming)
 {
+	if(!Character || !EquippedWeapon)
+	{
+		return;
+	}
+	
 	bAiming = bInAiming;
 	ServerSetAiming(bInAiming);
-
-	if(Character)
+	
+	Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
+	if (Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
 	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
+		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDSniperScope(bAiming);
+		}
+	}
+
+	if(Character->IsLocallyControlled())
+	{		
+		if (bAiming)
+		{
+			if(EquippedWeapon->GetZoomInSound())
+			{
+				UGameplayStatics::PlaySound2D(this, EquippedWeapon->GetZoomInSound());
+			}
+		}
+		else
+		{
+			if(EquippedWeapon->GetZoomOutSound())
+			{
+				UGameplayStatics::PlaySound2D(this, EquippedWeapon->GetZoomOutSound());
+			}
+		}
 	}
 }
 

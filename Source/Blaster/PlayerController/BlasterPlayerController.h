@@ -28,6 +28,7 @@ public:
 	void SetHUDDefeatsLog(const TArray<FString>& Logs);
 	void SetHUDWeaponAmmo(int32 InAmmo);
 	void SetHUDCarriedAmmo(int32 InAmmo);
+	void SetHUDSniperScope(bool bIsAiming);
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);
 

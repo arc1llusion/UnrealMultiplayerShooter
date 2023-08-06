@@ -154,6 +154,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	USoundCue* EquipSound;
 
+	UPROPERTY(EditAnywhere)
+	USoundCue* ZoomInSound;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* ZoomOutSound;	
+
 	/*
 	 * Stored properties
 	 */
@@ -166,6 +172,9 @@ public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+
+	FORCEINLINE USoundCue* GetZoomInSound() const { return ZoomInSound; }
+	FORCEINLINE USoundCue* GetZoomOutSound() const { return ZoomOutSound; }
 
 	FHUDPackage GetHUDPackage(float CrosshairRangeFactor, FLinearColor CrosshairsColor) const;
 

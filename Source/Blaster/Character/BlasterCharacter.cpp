@@ -101,6 +101,14 @@ void ABlasterCharacter::Eliminate()
 	GetWorldTimerManager().SetTimer(EliminateHandle, this, &ABlasterCharacter::EliminateTimerFinished, EliminateDelay);
 }
 
+void ABlasterCharacter::HideAimingScope()
+{
+	if(IsLocallyControlled() && Combat)
+	{
+		Combat->SetAiming(false);
+	}
+}
+
 void ABlasterCharacter::MulticastEliminate_Implementation()
 {
 	if(BlasterPlayerController)
@@ -117,6 +125,8 @@ void ABlasterCharacter::MulticastEliminate_Implementation()
 	DisableCollision();
 
 	SpawnEliminationBot();
+
+	HideAimingScope();
 }
 
 void ABlasterCharacter::EliminateTimerFinished()
@@ -226,7 +236,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 		EnhancedInputComponent->BindAction(CrouchInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::CrouchAction);
 
 		// Aiming
-		EnhancedInputComponent->BindAction(AimInputAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::AimAction);
+		EnhancedInputComponent->BindAction(AimInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::AimAction);
 		EnhancedInputComponent->BindAction(AimInputAsset, ETriggerEvent::Completed, this, &ABlasterCharacter::StopAimAction);
 
 		//Firing Weapon
@@ -328,6 +338,9 @@ void ABlasterCharacter::PlayReloadMontage()
 				SectionName = FName(TEXT("Rifle"));
 				break;
 			case EWeaponType::EWT_Shotgun:
+				SectionName = FName(TEXT("Rifle"));
+				break;
+			case EWeaponType::EWT_SniperRifle:
 				SectionName = FName(TEXT("Rifle"));
 				break;
 			default:

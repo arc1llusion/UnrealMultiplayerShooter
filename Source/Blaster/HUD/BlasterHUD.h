@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "BlasterHUD.generated.h"
 
+class USniperScope;
 class UAnnouncementWidget;
 class UTexture2D;
 class UCharacterOverlay;
@@ -46,6 +47,7 @@ public:
 	virtual void DrawHUD() override;
 	void AddCharacterOverlay();
 	void AddAnnouncementOverlay();
+	void AddSniperScope();
 
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	TSubclassOf<UUserWidget> CharacterOverlayClass;
@@ -58,6 +60,12 @@ public:
 
 	UPROPERTY()
 	UAnnouncementWidget* AnnouncementOverlay;
+
+	UPROPERTY(EditAnywhere, Category = "Sniper Scope")
+	TSubclassOf<UUserWidget> SniperScopeClass;
+
+	UPROPERTY()
+	USniperScope* SniperScope;
 
 protected:
 	virtual void BeginPlay() override;;
