@@ -35,6 +35,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 
+	UFUNCTION(BlueprintCallable)
+	void ShotgunShellReload();
+
+	void JumpToShotgunEnd();
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -74,6 +79,8 @@ private:
 	void AttachWeaponToHandSocket() const;
 
 	void UpdateAmmoValues();
+	void UpdateShotgunAmmoValues();
+	
 	void PlayEquippedWeaponSound() const;
 	void ReloadIfEmpty();
 

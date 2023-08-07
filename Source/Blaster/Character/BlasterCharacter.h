@@ -39,7 +39,10 @@ public:
 	virtual void PostInitializeComponents() override;
 
 	void PlayFireMontage(bool bAiming);
+	
 	void PlayReloadMontage();
+	void JumpToReloadMontageSection(const FName& SectionName) const;
+	
 	void PlayEliminationMontage();
 
 	virtual void OnRep_ReplicatedMovement() override;
@@ -261,6 +264,7 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 
 	FVector GetHitTarget() const;
 

@@ -13,6 +13,7 @@
 #include "Camera/CameraComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
+#include "Blaster/Character/BlasterAnimInstance.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -132,6 +133,14 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 		return;
 	}
 
+	if(Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
+		CombatState = ECombatState::ECS_Unoccupied;
+		return;
+	}
+	
 	if(CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
@@ -245,6 +254,13 @@ void UCombatComponent::FinishReloading()
 	}
 }
 
+void UCombatComponent::ShotgunShellReload()
+{
+	if(Character && Character->HasAuthority())
+	{
+		UpdateShotgunAmmoValues();	
+	}
+}
 
 
 void UCombatComponent::UpdateAmmoValues()
@@ -263,6 +279,40 @@ void UCombatComponent::UpdateAmmoValues()
 
 	SetHUDCarriedAmmo();
 	EquippedWeapon->AddAmmo(ReloadAmount);
+}
+
+void UCombatComponent::UpdateShotgunAmmoValues()
+{
+	if(!EquippedWeapon || !Character)
+	{
+		return;
+	}
+	
+	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= 1;
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+
+	SetHUDCarriedAmmo();
+	EquippedWeapon->AddAmmo(1);
+	bCanFire = true;
+
+	if(EquippedWeapon->IsFull() || CarriedAmmo == 0)
+	{
+		//Jump to ShotgunEnd section
+		Character->JumpToReloadMontageSection(FName(TEXT("ShotgunEnd")));
+	}
+}
+
+void UCombatComponent::JumpToShotgunEnd()
+{
+	if(!Character)
+	{
+		return;
+	}
+	
+	Character->JumpToReloadMontageSection(FName(TEXT("ShotgunEnd")));
 }
 
 void UCombatComponent::OnRep_CombatState()
@@ -547,7 +597,12 @@ void UCombatComponent::InterpolateFOV(float DeltaTime)
 
 bool UCombatComponent::CanFire() const
 {
-	return EquippedWeapon && !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
+	return EquippedWeapon &&
+		   !EquippedWeapon->IsEmpty() &&
+		   (
+		   	 (bCanFire && CombatState == ECombatState::ECS_Unoccupied) ||
+		   	 (bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+		   );
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()
@@ -556,6 +611,16 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	if(Controller)
 	{		
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
+	}
+
+	bool bJumpToShotgunEnd = CombatState == ECombatState::ECS_Reloading &&
+											EquippedWeapon &&
+											EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
+											CarriedAmmo == 0;
+
+	if(bJumpToShotgunEnd)
+	{
+		JumpToShotgunEnd();
 	}
 }
 

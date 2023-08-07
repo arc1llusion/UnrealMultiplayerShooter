@@ -10,6 +10,9 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Components/WidgetComponent.h"
 #include "Animation/AnimationAsset.h"
+#include "Blaster/BlasterComponents/CombatComponent.h"
+#include "Blaster/HUD/OverheadWidget.h"
+#include "Blaster/HUD/PickupWidget.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Net/UnrealNetwork.h"
 
@@ -124,6 +127,11 @@ void AWeapon::SpendRound()
 
 void AWeapon::OnRep_Ammo()
 {
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if(BlasterOwnerCharacter && BlasterOwnerCharacter->GetCombat() && IsFull())
+	{
+		BlasterOwnerCharacter->GetCombat()->JumpToShotgunEnd();
+	}
 	SetHUDWeaponAmmo();
 }
 
@@ -215,6 +223,10 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 	if(PickupWidget)
 	{
 		PickupWidget->SetVisibility(bShowWidget);
+		if(const auto Widget = Cast<UPickupWidget>(PickupWidget->GetWidget()))
+		{
+			Widget->SetWeaponText(WeaponType);
+		}
 	}
 }
 

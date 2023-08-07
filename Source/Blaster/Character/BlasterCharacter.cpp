@@ -329,22 +329,22 @@ void ABlasterCharacter::PlayReloadMontage()
 				SectionName = FName(TEXT("Rifle"));
 				break;
 			case EWeaponType::EWT_RocketLauncher:
-				SectionName = FName(TEXT("Rifle"));
+				SectionName = FName(TEXT("RocketLauncher"));
 				break;
 			case EWeaponType::EWT_Pistol:
-				SectionName = FName(TEXT("Rifle"));
+				SectionName = FName(TEXT("Pistol"));
 				break;
 			case EWeaponType::EWT_SubMachineGun:
-				SectionName = FName(TEXT("Rifle"));
+				SectionName = FName(TEXT("Pistol"));
 				break;
 			case EWeaponType::EWT_Shotgun:
-				SectionName = FName(TEXT("Rifle"));
+				SectionName = FName(TEXT("Shotgun"));
 				break;
 			case EWeaponType::EWT_SniperRifle:
-				SectionName = FName(TEXT("Rifle"));
+				SectionName = FName(TEXT("SniperRifle"));
 				break;
 			case EWeaponType::EWT_GrenadeLauncher:
-				SectionName = FName(TEXT("Rifle"));
+				SectionName = FName(TEXT("GrenadeLauncher"));
 				break;
 			default:
 				SectionName = FName(TEXT("Rifle"));
@@ -359,6 +359,16 @@ void ABlasterCharacter::PlayReloadMontage()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Anim instance or reload weapon montage"));
+	}
+}
+
+void ABlasterCharacter::JumpToReloadMontageSection(const FName& SectionName) const
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if(AnimInstance && ReloadMontage)
+	{
+		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
 
