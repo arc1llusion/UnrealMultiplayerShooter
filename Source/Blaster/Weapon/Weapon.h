@@ -47,6 +47,9 @@ public:
 	void Drop();
 
 	void AddAmmo(int32 AmmoToAdd);
+
+	void EnableCustomDepth(bool bInEnable);
+	
 protected:
 	virtual void BeginPlay() override;
 
