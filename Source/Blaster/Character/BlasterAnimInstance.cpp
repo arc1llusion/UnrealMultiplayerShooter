@@ -49,9 +49,9 @@ void UBlasterAnimInstance::SetAnimationVariables()
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
 	bEliminated = BlasterCharacter->IsEliminated();
-	bUseFabrik = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
-	bUseAimOffsets = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading && !BlasterCharacter->GetDisableGameplayFromController();
-	bTransformRightHand = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading && !BlasterCharacter->GetDisableGameplayFromController();
+	bUseFabrik = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
+	bUseAimOffsets = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplayFromController();
+	bTransformRightHand = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplayFromController();
 
 	AimOffsetYaw = BlasterCharacter->GetAimOffsetYaw();
 	AimOffsetPitch = BlasterCharacter->GetAimOffsetPitch();

@@ -150,7 +150,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
-	if(!Character || !WeaponToEquip)
+	if(!Character || !WeaponToEquip || CombatState != ECombatState::ECS_Unoccupied)
 	{
 		return;
 	}
@@ -196,7 +196,7 @@ void UCombatComponent::PlayEquippedWeaponSound() const
 
 void UCombatComponent::Reload()
 {
-	if(CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading && EquippedWeapon && !EquippedWeapon->IsFull())
+	if(CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull())
 	{
 		ServerReload();	
 	}
@@ -315,6 +315,11 @@ void UCombatComponent::JumpToShotgunEnd()
 	Character->JumpToReloadMontageSection(FName(TEXT("ShotgunEnd")));
 }
 
+void UCombatComponent::ThrowGrenadeFinished()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
+}
+
 void UCombatComponent::OnRep_CombatState()
 {
 	switch(CombatState)
@@ -328,6 +333,13 @@ void UCombatComponent::OnRep_CombatState()
 			
 		case ECombatState::ECS_Reloading:
 			HandleReload();
+			break;
+
+		case ECombatState::ECS_ThrowingGrenade:
+			if(Character && !Character->IsLocallyControlled())
+			{
+				Character->PlayThrowGrenadeMontage();
+			}
 			break;
 
 		default:
@@ -357,6 +369,35 @@ int32 UCombatComponent::AmountToReload()
 	const int32 Least = FMath::Min(RoomInWeapon, AmountCarried);
 
 	return FMath::Clamp(RoomInWeapon, 0, Least);
+}
+
+void UCombatComponent::ThrowGrenade()
+{
+	if(CombatState != ECombatState::ECS_Unoccupied)
+	{
+		return;
+	}
+	
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+
+	if(Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+	}
+
+	if(Character && !Character->HasAuthority())
+	{
+		ServerThrowGrenade();	
+	}	
+}
+
+void UCombatComponent::ServerThrowGrenade_Implementation()
+{
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+	if(Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+	}
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()

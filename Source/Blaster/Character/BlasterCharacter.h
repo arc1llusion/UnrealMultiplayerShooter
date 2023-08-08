@@ -45,6 +45,8 @@ public:
 	
 	void PlayEliminationMontage();
 
+	void PlayThrowGrenadeMontage();
+
 	virtual void OnRep_ReplicatedMovement() override;
 
 	//Only called on the server
@@ -76,6 +78,8 @@ protected:
 	void ChangeCharacterAction(const FInputActionValue &Value);
 	
 	void ReloadAction(const FInputActionValue &Value);
+
+	void ThrowGrenadeAction(const FInputActionValue &Value);
 
 	void AimOffset(float DeltaTime);
 	
@@ -126,6 +130,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction *ReloadInputAsset;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction *ThrowGrenadeInputAsset;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
@@ -171,6 +178,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* EliminationMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* ThrowGrenadeMontage;
 
 	void HideCharacterIfCameraClose();
 
@@ -307,5 +317,8 @@ private:
 	void HideAimingScope();
 
 	UFUNCTION()
-	void OnReloadMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted);
+	void OnReloadMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted) const;
+
+	UFUNCTION()
+	void OnThrowGrenadeMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted) const;
 };

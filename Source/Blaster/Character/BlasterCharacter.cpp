@@ -248,6 +248,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 
 		//Reload
 		EnhancedInputComponent->BindAction(ReloadInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::ReloadAction);
+
+		//Throw Grenade
+		EnhancedInputComponent->BindAction(ThrowGrenadeInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::ThrowGrenadeAction);
 	}
 }
 
@@ -355,6 +358,8 @@ void ABlasterCharacter::PlayReloadMontage()
 
 		FOnMontageEnded ReloadMontageEndDelegate;
 		ReloadMontageEndDelegate.BindUObject(this, &ABlasterCharacter::OnReloadMontageEnd);
+
+		AnimInstance->Montage_SetEndDelegate(ReloadMontageEndDelegate, ReloadMontage);
 	}
 	else
 	{
@@ -372,7 +377,7 @@ void ABlasterCharacter::JumpToReloadMontageSection(const FName& SectionName) con
 	}
 }
 
-void ABlasterCharacter::OnReloadMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted)
+void ABlasterCharacter::OnReloadMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted) const
 {
 	if(!Combat)
 	{
@@ -398,6 +403,41 @@ void ABlasterCharacter::PlayEliminationMontage()
 	if(AnimInstance && EliminationMontage)
 	{
 		AnimInstance->Montage_Play(EliminationMontage);
+	}
+}
+
+void ABlasterCharacter::PlayThrowGrenadeMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if(AnimInstance && ThrowGrenadeMontage)
+	{
+		AnimInstance->Montage_Play(ThrowGrenadeMontage);
+
+		FOnMontageEnded ThrowGrenadeMontageEndDelegate;
+		ThrowGrenadeMontageEndDelegate.BindUObject(this, &ABlasterCharacter::OnThrowGrenadeMontageEnd);
+
+		AnimInstance->Montage_SetEndDelegate(ThrowGrenadeMontageEndDelegate, ThrowGrenadeMontage);
+	}
+}
+
+void ABlasterCharacter::OnThrowGrenadeMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted) const
+{
+	if(!Combat)
+	{
+		return;
+	}
+
+	const FString Interrupted = bInterrupted ? TEXT("True") : TEXT("False");
+	UE_LOG(LogTemp, Warning, TEXT("Throw Grenade Montage End %s"), *Interrupted);
+	
+	if(bInterrupted)
+	{
+		Combat->CombatState = ECombatState::ECS_Unoccupied;
+	}
+	else
+	{
+		Combat->ThrowGrenadeFinished();
 	}
 }
 
@@ -577,6 +617,14 @@ void ABlasterCharacter::ReloadAction(const FInputActionValue& Value)
 	if(Combat)
 	{
 		Combat->Reload();
+	}
+}
+
+void ABlasterCharacter::ThrowGrenadeAction(const FInputActionValue& Value)
+{
+	if(Combat)
+	{
+		Combat->ThrowGrenade();
 	}
 }
 
