@@ -259,6 +259,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Elimination")
 	USoundCue* EliminationBotSound;
 
+	/*
+	 * Grenade
+	 */
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* AttachedGrenade;
+
 	UPROPERTY()
 	ABlasterPlayerState* BlasterPlayerState;
 	
@@ -311,6 +318,7 @@ private:
 
 	FName DissolveParameterName{TEXT("Dissolve")};
 	FName GlowParameterName{TEXT("Glow")};
+	FName GrenadeSocketName{TEXT("GrenadeSocket")};
 
 	void SpawnEliminationBot();
 	
