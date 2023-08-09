@@ -43,6 +43,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ThrowGrenadeFinished();
 
+	UFUNCTION(BlueprintCallable)
+	void LaunchGrenade();
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -93,7 +96,9 @@ private:
 	void UpdateShotgunAmmoValues();
 	
 	void PlayEquippedWeaponSound() const;
-	void ReloadIfEmpty();
+	void ReloadIfEmpty();	
+
+	void ShowAttachedGrenade(bool bShowGrenade);
 
 private:
 	UPROPERTY()

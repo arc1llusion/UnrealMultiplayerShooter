@@ -326,6 +326,11 @@ void UCombatComponent::ThrowGrenadeFinished()
 	AttachActorToRightHandSocket(EquippedWeapon);
 }
 
+void UCombatComponent::LaunchGrenade()
+{
+	ShowAttachedGrenade(false);
+}
+
 void UCombatComponent::OnRep_CombatState()
 {
 	switch(CombatState)
@@ -346,6 +351,7 @@ void UCombatComponent::OnRep_CombatState()
 			{
 				Character->PlayThrowGrenadeMontage();
 				AttachActorToLeftHandSocket(EquippedWeapon);
+				ShowAttachedGrenade(true);
 			}
 			break;
 
@@ -391,6 +397,7 @@ void UCombatComponent::ThrowGrenade()
 	{
 		Character->PlayThrowGrenadeMontage();
 		AttachActorToLeftHandSocket(EquippedWeapon);
+		ShowAttachedGrenade(true);
 	}
 
 	if(Character && !Character->HasAuthority())
@@ -406,7 +413,18 @@ void UCombatComponent::ServerThrowGrenade_Implementation()
 	{
 		Character->PlayThrowGrenadeMontage();
 		AttachActorToLeftHandSocket(EquippedWeapon);
+		ShowAttachedGrenade(true);
 	}
+}
+
+void UCombatComponent::ShowAttachedGrenade(bool bShowGrenade)
+{
+	if(!Character || !Character->GetAttachedGrenade())
+	{
+		return;
+	}
+	
+	Character->GetAttachedGrenade()->SetVisibility(bShowGrenade);
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
