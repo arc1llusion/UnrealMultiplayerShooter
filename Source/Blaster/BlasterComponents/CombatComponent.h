@@ -30,7 +30,7 @@ public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
 	void Reload();
-	void SetHUDCarriedAmmo();
+	void UpdateCarriedAmmo();
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
@@ -50,6 +50,8 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(bool bInAiming);
+
+	void DropEquippedWeapon() const;
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
@@ -84,7 +86,8 @@ private:
 	bool GetCrosshairWorldVector(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection) const;
 	void PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection);
 	
-	void AttachWeaponToHandSocket() const;
+	void AttachActorToRightHandSocket(AActor* ActorToAttach) const;
+	void AttachActorToLeftHandSocket(AActor* ActorToAttach) const;
 
 	void UpdateAmmoValues();
 	void UpdateShotgunAmmoValues();
@@ -106,6 +109,8 @@ private:
 	AWeapon* EquippedWeapon;
 
 	FName RightHandSocketName{TEXT("RightHandSocket")};
+	FName LeftHandSocketName{TEXT("LeftHandSocket")};
+	FName PistolSocketName{TEXT("PistolSocket")};
 
 	UPROPERTY(Replicated)
 	bool bAiming;

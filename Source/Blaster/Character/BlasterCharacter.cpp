@@ -433,7 +433,7 @@ void ABlasterCharacter::OnThrowGrenadeMontageEnd(UAnimMontage* AnimMontage, bool
 	
 	if(bInterrupted)
 	{
-		Combat->CombatState = ECombatState::ECS_Unoccupied;
+		Combat->ThrowGrenadeFinished();
 	}
 	else
 	{
