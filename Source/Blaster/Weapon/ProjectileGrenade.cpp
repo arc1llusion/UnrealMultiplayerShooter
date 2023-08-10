@@ -21,6 +21,7 @@ AProjectileGrenade::AProjectileGrenade()
 
 void AProjectileGrenade::BeginPlay()
 {
+	//Skipping AProjectile BeginPlay here.
 	AActor::BeginPlay();
 
 	SpawnTrailSystem();
