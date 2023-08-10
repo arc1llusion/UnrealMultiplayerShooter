@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/BlasterTypes/CombatState.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Blaster/Interfaces//InteractWithCrosshairsInterface.h"
@@ -290,7 +291,7 @@ public:
 
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
-
+	
 	ECombatState GetCombatState() const;
 	
 	UFUNCTION()

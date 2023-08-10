@@ -9,6 +9,7 @@
 #include "Blaster/BlasterTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
+class USoundCue;
 class AProjectile;
 class ABlasterHUD;
 class ABlasterPlayerController;
@@ -50,6 +51,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerLaunchGrenade(const FVector_NetQuantize Target);
 
+	FORCEINLINE int32 GetGrenades() const { return Grenades; }
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -86,6 +89,9 @@ protected:
 
 	void ThrowGrenade();
 
+	UPROPERTY(EditAnywhere)
+	USoundCue* ThrowGrenadeSound;
+
 	UFUNCTION(Server, Reliable)
 	void ServerThrowGrenade();
 
@@ -105,7 +111,7 @@ private:
 	void PlayEquippedWeaponSound() const;
 	void ReloadIfEmpty();	
 
-	void ShowAttachedGrenade(bool bShowGrenade);
+	void ShowAttachedGrenade(bool bShowGrenade) const;
 
 private:
 	UPROPERTY()
@@ -224,4 +230,15 @@ private:
 
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	UPROPERTY(ReplicatedUsing = OnRep_Grenades)
+	int32 Grenades = 4;
+
+	UFUNCTION()
+	void OnRep_Grenades();
+
+	UPROPERTY(EditAnywhere)
+	int32 GrenadeCapacity = 4;
+
+	void UpdateHUDGrenades();
 };

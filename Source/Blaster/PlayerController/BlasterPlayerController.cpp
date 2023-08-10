@@ -94,7 +94,16 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 
 	if(const auto BlasterCharacter = Cast<ABlasterCharacter>(InPawn))
 	{
-		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
+		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());		
+
+		if(BlasterCharacter->GetCombat())
+		{
+			SetHUDGrenades(BlasterCharacter->GetCombat()->GetGrenades());	
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No combat component on character for grenades yet"));
+		}	
 	}
 }
 
@@ -212,6 +221,10 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		const FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		BlasterHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Health overlay not valid"));
+	}
 }
 
 void ABlasterPlayerController::SetHUDScore(float Score)
@@ -286,6 +299,25 @@ void ABlasterPlayerController::SetHUDCarriedAmmo(int32 InAmmo)
 	{
 		const FString AmmoText = FString::Printf(TEXT("%d"), InAmmo);
 		BlasterHUD->CharacterOverlay->CarriedAmmoAmount->SetText(FText::FromString(AmmoText));
+	}
+}
+
+void ABlasterPlayerController::SetHUDGrenades(int32 InGrenades)
+{
+	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+
+	bool bHudValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->GrenadesText;
+
+	if(bHudValid)
+	{
+		const FString GrenadesText = FString::Printf(TEXT("%d"), InGrenades);
+		BlasterHUD->CharacterOverlay->GrenadesText->SetText(FText::FromString(GrenadesText));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Grenade overlay not valid"));
 	}
 }
 
