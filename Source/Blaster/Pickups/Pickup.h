@@ -33,6 +33,9 @@ protected:
 		const FHitResult& SweepResult
 	);
 
+	UPROPERTY(EditAnywhere)
+	float BaseTurnRate = 45.0f;
+
 private:
 	UPROPERTY(EditAnywhere)
 	USphereComponent* OverlapSphere;

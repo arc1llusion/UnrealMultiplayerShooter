@@ -324,6 +324,24 @@ void UCombatComponent::JumpToShotgunEnd()
 	Character->JumpToReloadMontageSection(FName(TEXT("ShotgunEnd")));
 }
 
+void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 InAmmoAmount)
+{
+	if(CarriedAmmoMap.Contains(WeaponType))
+	{
+		CarriedAmmoMap[WeaponType] = FMath::Clamp(CarriedAmmoMap[WeaponType] + InAmmoAmount, 0, MaxCarriedAmmo);
+		UpdateCarriedAmmo();
+	}
+	else
+	{
+		CarriedAmmoMap.Emplace(WeaponType, InAmmoAmount);
+	}	
+
+	if(EquippedWeapon && EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == WeaponType)
+	{
+		Reload();
+	}
+}
+
 void UCombatComponent::OnRep_CombatState()
 {
 	switch(CombatState)
