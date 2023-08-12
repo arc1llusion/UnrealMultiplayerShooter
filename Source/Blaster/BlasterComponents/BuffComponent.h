@@ -15,6 +15,9 @@ public:
 	friend class ABlasterCharacter;
 
 	void Heal(float HealAmount, float HealingTime);
+	
+	void BuffSpeed(float BuffBaseSPeed, float BuffCrouchSpeed, float BuffDuration);
+	void SetInitialSpeeds(float InBaseSpeed, float InCrouchSpeed);
 
 protected:
 	virtual void BeginPlay() override;
@@ -28,8 +31,23 @@ private:
 	UPROPERTY()
 	ABlasterCharacter* Character;
 
+	/*
+	 * Health Buff
+	 */
 	bool bHealing = false;
-
 	float HealingRate = 0.0f;
 	float AmountToHeal = 0.0f;
+
+	/*
+	 * Speed Buff
+	 */
+
+	FTimerHandle SpeedBuffTimer;
+	void ResetSpeeds();
+
+	float InitialBaseSpeed;
+	float InitialCrouchSpeed;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSpeedBuff(float BaseSpeed, float CrouchSpeed);
 };
