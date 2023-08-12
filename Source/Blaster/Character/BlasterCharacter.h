@@ -40,6 +40,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 
+	void UpdateHUDHealth();
+
 	void PlayFireMontage(bool bAiming);
 	
 	void PlayReloadMontage();
@@ -212,8 +214,7 @@ private:
 	float Health = 100.0f;
 
 	UFUNCTION()
-	void OnRep_Health();	
-	void UpdateHUDHealth();
+	void OnRep_Health(float LastHealth);	
 
 	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;
@@ -287,6 +288,7 @@ public:
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
+	FORCEINLINE UBuffComponent* GetBuffComponent() const { return Buff; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 
 	FVector GetHitTarget() const;
@@ -294,6 +296,7 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(const float Amount) { Health = FMath::Clamp(Amount, 0.0f, MaxHealth); }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	
 	ECombatState GetCombatState() const;

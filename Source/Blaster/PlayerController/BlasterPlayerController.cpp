@@ -221,10 +221,6 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 		const FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		BlasterHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Health overlay not valid"));
-	}
 }
 
 void ABlasterPlayerController::SetHUDScore(float Score)
@@ -315,10 +311,6 @@ void ABlasterPlayerController::SetHUDGrenades(int32 InGrenades)
 		const FString GrenadesText = FString::Printf(TEXT("%d"), InGrenades);
 		BlasterHUD->CharacterOverlay->GrenadesText->SetText(FText::FromString(GrenadesText));
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Grenade overlay not valid"));
-	}
 }
 
 void ABlasterPlayerController::SetHUDSniperScope(bool bIsAiming)
@@ -338,7 +330,6 @@ void ABlasterPlayerController::SetHUDSniperScope(bool bIsAiming)
 	{
 		if (bIsAiming)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Playing Sniper Zoom In Animation"));
 			BlasterHUD->SniperScope->PlayAnimation(BlasterHUD->SniperScope->ScopeZoomIn);
 		}
 		else
