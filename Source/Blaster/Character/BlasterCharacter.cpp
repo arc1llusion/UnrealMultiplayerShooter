@@ -256,10 +256,10 @@ void ABlasterCharacter::PostInitializeComponents()
 		Combat->Character = this;
 	}
 
-	if(Buff)
+	if(Buff && Combat)
 	{
 		Buff->Character = this;
-		Buff->SetInitialSpeeds(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
+		Buff->SetInitialSpeeds(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched, Combat->AimWalkSpeed);
 	}
 }
 

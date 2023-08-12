@@ -16,8 +16,8 @@ public:
 
 	void Heal(float HealAmount, float HealingTime);
 	
-	void BuffSpeed(float BuffBaseSPeed, float BuffCrouchSpeed, float BuffDuration);
-	void SetInitialSpeeds(float InBaseSpeed, float InCrouchSpeed);
+	void BuffSpeed(float BuffBaseSPeed, float BuffCrouchSpeed, float BuffAimSpeed, float BuffDuration);
+	void SetInitialSpeeds(float InBaseSpeed, float InCrouchSpeed, float InAimWalkSpeed);
 
 protected:
 	virtual void BeginPlay() override;
@@ -47,7 +47,8 @@ private:
 
 	float InitialBaseSpeed;
 	float InitialCrouchSpeed;
+	float InitialAimSpeed;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastSpeedBuff(float BaseSpeed, float CrouchSpeed);
+	void MulticastSpeedBuff(float BaseSpeed, float CrouchSpeed, float AimSpeed);
 };

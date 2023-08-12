@@ -34,5 +34,8 @@ private:
 	float CrouchSpeedBuff = 850.0f;
 
 	UPROPERTY(EditAnywhere)
+	float AimSpeedBuff = 800.0f;
+
+	UPROPERTY(EditAnywhere)
 	float Duration = 30.0f;
 };

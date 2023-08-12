@@ -54,6 +54,8 @@ public:
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
 
 	void PickupAmmo(EWeaponType WeaponType, int32 InAmmoAmount);
+	
+	void SetMovementSpeed(float InBaseSpeed, float InAimSpeed);
 
 protected:
 	virtual void BeginPlay() override;

@@ -41,13 +41,14 @@ void UBuffComponent::HealRampUp(float DeltaTime)
 	}
 }
 
-void UBuffComponent::SetInitialSpeeds(float InBaseSpeed, float InCrouchSpeed)
+void UBuffComponent::SetInitialSpeeds(float InBaseSpeed, float InCrouchSpeed, float InAimWalkSpeed)
 {
 	InitialBaseSpeed = InBaseSpeed;
 	InitialCrouchSpeed = InCrouchSpeed;
+	InitialAimSpeed = InAimWalkSpeed;
 }
 
-void UBuffComponent::BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffDuration)
+void UBuffComponent::BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffAimSpeed, float BuffDuration)
 {
 	if(!Character)
 	{
@@ -62,7 +63,7 @@ void UBuffComponent::BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float
 		Character->GetCharacterMovement()->MaxWalkSpeedCrouched = BuffCrouchSpeed;
 	}
 
-	MulticastSpeedBuff(BuffBaseSpeed, BuffCrouchSpeed);
+	MulticastSpeedBuff(BuffBaseSpeed, BuffCrouchSpeed, BuffAimSpeed);
 }
 
 void UBuffComponent::ResetSpeeds()
@@ -75,10 +76,10 @@ void UBuffComponent::ResetSpeeds()
 	Character->GetCharacterMovement()->MaxWalkSpeed = InitialBaseSpeed;
 	Character->GetCharacterMovement()->MaxWalkSpeedCrouched = InitialCrouchSpeed;
 
-	MulticastSpeedBuff(InitialBaseSpeed, InitialCrouchSpeed);
+	MulticastSpeedBuff(InitialBaseSpeed, InitialCrouchSpeed, InitialAimSpeed);
 }
 
-void UBuffComponent::MulticastSpeedBuff_Implementation(float BaseSpeed, float CrouchSpeed)
+void UBuffComponent::MulticastSpeedBuff_Implementation(float BaseSpeed, float CrouchSpeed, float AimSpeed)
 {
 	if(!Character || !Character->GetCharacterMovement())
 	{
@@ -87,6 +88,11 @@ void UBuffComponent::MulticastSpeedBuff_Implementation(float BaseSpeed, float Cr
 	
 	Character->GetCharacterMovement()->MaxWalkSpeed = BaseSpeed;
 	Character->GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
+
+	if(Character->GetCombat())
+	{
+		Character->GetCombat()->SetMovementSpeed(BaseSpeed, AimSpeed);
+	}
 }
 
 void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

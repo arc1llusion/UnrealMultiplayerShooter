@@ -342,6 +342,12 @@ void UCombatComponent::PickupAmmo(EWeaponType WeaponType, int32 InAmmoAmount)
 	}
 }
 
+void UCombatComponent::SetMovementSpeed(float InBaseSpeed, float InAimSpeed)
+{
+	BaseWalkSpeed = InBaseSpeed;
+	AimWalkSpeed = InAimSpeed;
+}
+
 void UCombatComponent::OnRep_CombatState()
 {
 	switch(CombatState)
@@ -589,7 +595,7 @@ void UCombatComponent::SetAiming(bool bInAiming)
 	
 	bAiming = bInAiming;
 	ServerSetAiming(bInAiming);
-	
+
 	Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
 	if (Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
 	{

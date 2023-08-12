@@ -15,7 +15,7 @@ void APickupSpeed::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	{
 		if(const auto Buff = BlasterCharacter->GetBuffComponent())
 		{
-			Buff->BuffSpeed(BaseSpeedBuff, CrouchSpeedBuff, Duration);
+			Buff->BuffSpeed(BaseSpeedBuff, CrouchSpeedBuff, AimSpeedBuff, Duration);
 		}
 	}
 	
