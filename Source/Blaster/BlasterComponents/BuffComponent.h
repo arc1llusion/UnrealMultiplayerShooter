@@ -15,6 +15,8 @@ public:
 	friend class ABlasterCharacter;
 
 	void Heal(float HealAmount, float HealingTime);
+
+	void ReplenishShield(float ShieldAmount, float ReplenishTime);
 	
 	void BuffSpeed(float BuffBaseSPeed, float BuffCrouchSpeed, float BuffAimSpeed, float BuffDuration);
 	void SetInitialSpeeds(float InBaseSpeed, float InCrouchSpeed, float InAimWalkSpeed);
@@ -26,6 +28,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 	void HealRampUp(float DeltaTime);
+	void ShieldRampUp(float DeltaTime);	
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -40,6 +43,13 @@ private:
 	bool bHealing = false;
 	float HealingRate = 0.0f;
 	float AmountToHeal = 0.0f;
+
+	/*
+	 * Shield Buff
+	 */
+	bool bShieldReplenishing = false;
+	float ShieldReplenishRate = 0.0f;
+	float ShieldReplenishAmount = 0.0f;
 
 	/*
 	 * Speed Buff

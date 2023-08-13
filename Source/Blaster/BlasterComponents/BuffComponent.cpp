@@ -41,6 +41,34 @@ void UBuffComponent::HealRampUp(float DeltaTime)
 	}
 }
 
+void UBuffComponent::ShieldRampUp(float DeltaTime)
+{
+	if(!bShieldReplenishing || !Character || Character->IsEliminated())
+	{
+		return;
+	}
+
+	const float ReplenishThisFrame = ShieldReplenishRate * DeltaTime;
+	Character->SetShield(Character->GetShield() + ReplenishThisFrame); //Clamp is taken care of on Character->SetShield
+	Character->UpdateHUDShield();
+	
+	ShieldReplenishAmount -= ReplenishThisFrame;
+
+	if(ShieldReplenishAmount <= 0.0f || Character->GetShield() >= Character->GetMaxShield())
+	{
+		bShieldReplenishing = false;
+		ShieldReplenishAmount = 0.0f;
+	}
+}
+
+void UBuffComponent::ReplenishShield(float ShieldAmount, float ReplenishTime)
+{
+	bShieldReplenishing = true;
+
+	ShieldReplenishRate = ShieldAmount / ReplenishTime;
+	ShieldReplenishAmount += ShieldAmount;
+}
+
 void UBuffComponent::SetInitialSpeeds(float InBaseSpeed, float InCrouchSpeed, float InAimWalkSpeed)
 {
 	InitialBaseSpeed = InBaseSpeed;
@@ -121,5 +149,6 @@ void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	HealRampUp(DeltaTime);
+	ShieldRampUp(DeltaTime);
 }
 
