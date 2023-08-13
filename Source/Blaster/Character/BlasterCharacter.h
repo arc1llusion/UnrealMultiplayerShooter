@@ -41,6 +41,7 @@ public:
 	virtual void PostInitializeComponents() override;
 
 	void UpdateHUDHealth();
+	void UpdateHUDShield();
 
 	void PlayFireMontage(bool bAiming);
 	
@@ -214,7 +215,20 @@ private:
 	float Health = 100.0f;
 
 	UFUNCTION()
-	void OnRep_Health(float LastHealth);	
+	void OnRep_Health(float LastHealth);
+
+	/*
+	 * Player Shields
+	 */
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxShield = 100.0f;
+
+	UPROPERTY(ReplicatedUsing= OnRep_Shield, VisibleAnywhere, Category = "Player Stats")
+	float Shield = 100.0f;
+
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);	
 
 	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;
@@ -298,6 +312,10 @@ public:
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE void SetHealth(const float Amount) { Health = FMath::Clamp(Amount, 0.0f, MaxHealth); }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+
+	FORCEINLINE float GetShield() const { return Shield; }
+	FORCEINLINE void SetShield(const float Amount) { Shield = FMath::Clamp(Amount, 0.0f, MaxShield); }
+	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	
 	ECombatState GetCombatState() const;
 	

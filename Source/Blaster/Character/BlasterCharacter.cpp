@@ -86,6 +86,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterCharacter, Health);
+	DOREPLIFETIME(ABlasterCharacter, Shield);
 }
 
 void ABlasterCharacter::OnRep_ReplicatedMovement()
@@ -184,6 +185,7 @@ void ABlasterCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	UpdateHUDHealth();
+	UpdateHUDShield();
 
 	if(HasAuthority())
 	{
@@ -486,10 +488,28 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	{
 		return;
 	}
+
+	float DamageToHealth = Damage;
+
+	if(Shield > 0.0f)
+	{
+		if(Shield >= Damage)
+		{
+			Shield = FMath::Clamp(Shield - Damage, 0.0f, MaxShield);
+			DamageToHealth = 0.0f;
+		}
+		else
+		{
+			DamageToHealth = FMath::Clamp(DamageToHealth - Shield, 0.0f, Damage);
+			Shield = 0.0f;			
+		}
+	}
 	
-	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
+	Health = FMath::Clamp(Health - DamageToHealth, 0.0f, MaxHealth);
 
 	UpdateHUDHealth();
+	UpdateHUDShield();
+	
 	PlayHitReactMontage();
 
 	if(Health <= 0.0f)
@@ -841,6 +861,19 @@ void ABlasterCharacter::OnRep_Health(float LastHealth)
 	}
 }
 
+void ABlasterCharacter::OnRep_Shield(float LastShield)
+{
+	UpdateHUDShield();
+
+	if(Shield < LastShield)
+	{
+		if(!bEliminated)
+		{
+			PlayHitReactMontage();
+		}
+	}
+}
+
 void ABlasterCharacter::UpdateHUDHealth()
 {
 	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
@@ -854,6 +887,23 @@ void ABlasterCharacter::UpdateHUDHealth()
 		if(const auto Widget = Cast<UOverheadWidget>(OverheadWidget->GetWidget()))
 		{
 			Widget->UpdateOverlayHealth(Health, MaxHealth);
+		}
+	}
+}
+
+void ABlasterCharacter::UpdateHUDShield()
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDShield(Shield, MaxShield);
+	}
+
+	if(OverheadWidget)
+	{
+		if(const auto Widget = Cast<UOverheadWidget>(OverheadWidget->GetWidget()))
+		{
+			Widget->UpdateOverlayShield(Shield, MaxShield);
 		}
 	}
 }

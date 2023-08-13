@@ -131,3 +131,12 @@ void UOverheadWidget::UpdateOverlayHealth(float Health, float MaxHealth)
 		DisplayHealth->SetPercent(Percent);
 	}
 }
+
+void UOverheadWidget::UpdateOverlayShield(float Shield, float MaxShield)
+{
+	if(DisplayShield)
+	{
+		const float Percent = Shield / MaxShield;
+		DisplayShield->SetPercent(Percent);
+	}
+}

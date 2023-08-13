@@ -26,6 +26,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* DisplayHealth;
 
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* DisplayShield;
+
 	void SetDisplayText(const FString& TextToDisplay) const;
 	
 	UFUNCTION(BlueprintCallable)
@@ -43,6 +46,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateOverlayHealth(float Health, float MaxHealth);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateOverlayShield(float Shield, float MaxShield);
 
 private:
 	
