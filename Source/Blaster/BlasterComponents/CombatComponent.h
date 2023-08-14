@@ -238,7 +238,7 @@ private:
 	UFUNCTION()
 	void OnRep_CombatState();
 
-	UPROPERTY(ReplicatedUsing = OnRep_Grenades)
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Grenades)
 	int32 Grenades = 4;
 
 	UFUNCTION()
