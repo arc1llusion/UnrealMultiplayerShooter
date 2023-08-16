@@ -60,6 +60,9 @@ void AWeapon::BeginPlay()
 		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
 		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 	}
+
+	StartingLocation = GetActorLocation();
+	StartingRotation = GetActorRotation();
 }
 
 void AWeapon::Tick(float DeltaTime)
@@ -159,6 +162,7 @@ void AWeapon::SetWeaponState(EWeaponState State)
 				WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 			}
 			EnableCustomDepth(false);
+			ClearRespawnTimer();
     		break;
 		case EWeaponState::EWS_Dropped:
 			if(HasAuthority())
@@ -176,24 +180,11 @@ void AWeapon::SetWeaponState(EWeaponState State)
 			WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 			WeaponMesh->MarkRenderStateDirty();
 			EnableCustomDepth(true);
+			StartRespawnOnDrop();
 			break;
     	default:
     		break;
     }
-}
-
-FHUDPackage AWeapon::GetHUDPackage(float CrosshairRangeFactor, FLinearColor CrosshairsColor) const
-{
-	return FHUDPackage
-			{
-				CrosshairsCenter,
-				CrosshairsLeft,
-				CrosshairsRight,
-				CrosshairsTop,
-				CrosshairsBottom,
-				CrosshairRangeFactor,
-				CrosshairsColor
-			};
 }
 
 void AWeapon::OnRep_WeaponState()
@@ -213,6 +204,7 @@ void AWeapon::OnRep_WeaponState()
 				WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 			}
 			EnableCustomDepth(false);
+			ClearRespawnTimer();
 			break;
 		case EWeaponState::EWS_Dropped:
 			WeaponMesh->SetSimulatePhysics(true);
@@ -226,10 +218,59 @@ void AWeapon::OnRep_WeaponState()
 			WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 			WeaponMesh->MarkRenderStateDirty();
 			EnableCustomDepth(true);
+			StartRespawnOnDrop();
 			break;
 		default:
 			break;
 	}
+}
+
+void AWeapon::StartRespawnOnDrop()
+{
+	if(HasAuthority())
+	{
+		GetWorld()->GetTimerManager().SetTimer(RespawnOnDropTimer, this, &AWeapon::RespawnWeapon, 15.0f);
+	}
+}
+
+void AWeapon::RespawnWeapon()
+{
+	WeaponMesh->SetSimulatePhysics(false);
+	WeaponMesh->SetEnableGravity(false);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	SetActorLocationAndRotation(StartingLocation, StartingRotation, false, nullptr, ETeleportType::ResetPhysics);
+
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->SetEnableGravity(true);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	Ammo = AmmoCapacity;
+}
+
+void AWeapon::ClearRespawnTimer()
+{
+	if(HasAuthority())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(RespawnOnDropTimer);
+	}
+}
+
+FHUDPackage AWeapon::GetHUDPackage(float CrosshairRangeFactor, FLinearColor CrosshairsColor) const
+{
+	return FHUDPackage
+			{
+				CrosshairsCenter,
+				CrosshairsLeft,
+				CrosshairsRight,
+				CrosshairsTop,
+				CrosshairsBottom,
+				CrosshairRangeFactor,
+				CrosshairsColor
+			};
 }
 
 void AWeapon::ShowPickupWidget(bool bShowWidget)

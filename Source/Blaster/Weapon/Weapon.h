@@ -171,6 +171,19 @@ private:
 	UPROPERTY()
 	ABlasterPlayerController* BlasterOwnerController;
 
+	/*
+	 * Respawn when dropped
+	 */
+
+	FVector StartingLocation;
+	FRotator StartingRotation;
+
+	FTimerHandle RespawnOnDropTimer;
+
+	void StartRespawnOnDrop();
+	void RespawnWeapon();
+	void ClearRespawnTimer();
+
 public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
