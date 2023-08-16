@@ -35,6 +35,9 @@ private:
 	FTimerHandle SpawnPickupTimer;
 
 	UPROPERTY(EditAnywhere)
+	bool bSpawnImmediately = false;
+
+	UPROPERTY(EditAnywhere)
 	float MinimumSpawnTime = 10.0;
 
 	UPROPERTY(EditAnywhere)
