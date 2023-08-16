@@ -519,6 +519,8 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		Character->bUseControllerRotationYaw = true;
 
 		PlayEquippedWeaponSound();
+
+		Character->UpdateHUDAmmo();
 	}
 }
 
@@ -795,7 +797,7 @@ void UCombatComponent::OnRep_CarriedAmmo()
 }
 
 void UCombatComponent::InitializeCarriedAmmo()
-{
+{	
 	for(auto& MapElement : StartingAmmoMap)
 	{
 		if(CarriedAmmoMap.Contains(MapElement.Key))

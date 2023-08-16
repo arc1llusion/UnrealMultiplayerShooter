@@ -184,6 +184,8 @@ private:
 	void RespawnWeapon();
 	void ClearRespawnTimer();
 
+	bool bIsDefaultWeapon = false;
+
 public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
@@ -209,4 +211,7 @@ public:
 	bool IsFull() const;
 
 	FORCEINLINE USoundCue* GetEquippedSound() const { return EquipSound; }
+
+	FORCEINLINE bool IsDefaultWeapon() const { return bIsDefaultWeapon; }
+	FORCEINLINE void SetIsDefaultWeapon(const bool bInDefaultWeapon) { bIsDefaultWeapon = bInDefaultWeapon; }
 };

@@ -102,7 +102,14 @@ void ABlasterCharacter::Eliminate()
 {
 	if(Combat && Combat->EquippedWeapon)
 	{
-		Combat->EquippedWeapon->Drop();
+		if(Combat->EquippedWeapon->IsDefaultWeapon())
+		{
+			Combat->EquippedWeapon->Destroy();
+		}
+		else
+		{
+			Combat->EquippedWeapon->Drop();
+		}
 	}
 	
 	MulticastEliminate();
@@ -184,6 +191,9 @@ void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SpawnDefaultWeapon();
+	
+	UpdateHUDAmmo();
 	UpdateHUDHealth();
 	UpdateHUDShield();
 
@@ -904,6 +914,31 @@ void ABlasterCharacter::UpdateHUDShield()
 		if(const auto Widget = Cast<UOverheadWidget>(OverheadWidget->GetWidget()))
 		{
 			Widget->UpdateOverlayShield(Shield, MaxShield);
+		}
+	}
+}
+
+void ABlasterCharacter::UpdateHUDAmmo()
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if(BlasterPlayerController && Combat && Combat->EquippedWeapon)
+	{
+		BlasterPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
+		BlasterPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+	}
+}
+
+void ABlasterCharacter::SpawnDefaultWeapon()
+{
+	UWorld* World = GetWorld();
+	if(World && !bEliminated && DefaultWeaponClass && Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->SetIsDefaultWeapon(true);
+		
+		if(Combat)
+		{
+			Combat->EquipWeapon(StartingWeapon);
 		}
 	}
 }

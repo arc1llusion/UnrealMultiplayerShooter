@@ -96,6 +96,7 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	{
 		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
 		SetHUDShield(BlasterCharacter->GetShield(), BlasterCharacter->GetMaxShield());
+		BlasterCharacter->UpdateHUDAmmo();
 
 		if(BlasterCharacter->GetCombat())
 		{
@@ -216,6 +217,7 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	
 	if(bHudValid)
 	{
+		
 		const float HealthPercent = Health / MaxHealth;
 		BlasterHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 

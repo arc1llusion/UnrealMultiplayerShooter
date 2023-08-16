@@ -229,7 +229,7 @@ void AWeapon::StartRespawnOnDrop()
 {
 	if(HasAuthority())
 	{
-		GetWorld()->GetTimerManager().SetTimer(RespawnOnDropTimer, this, &AWeapon::RespawnWeapon, 15.0f);
+		GetWorld()->GetTimerManager().SetTimer(RespawnOnDropTimer, this, &AWeapon::RespawnWeapon, 30.0f);
 	}
 }
 

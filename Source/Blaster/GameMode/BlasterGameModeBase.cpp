@@ -67,8 +67,6 @@ AActor* ABlasterGameModeBase::GetRespawnPointWithLargestMinimumDistance() const
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Largest Minimum Distance Found: %f"), LargestMinimumDistance);
-
 	return SelectedSpawnPoint;
 }
 
