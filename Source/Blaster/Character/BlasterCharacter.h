@@ -40,6 +40,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 
+	void UpdateHUDReadyOverlay();
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
 	void UpdateHUDAmmo();
@@ -84,6 +85,8 @@ protected:
 	void StopFireAction(const FInputActionValue &Value);
 
 	void ChangeCharacterAction(const FInputActionValue &Value);
+
+	void ReadyAction(const FInputActionValue &Value);
 	
 	void ReloadAction(const FInputActionValue &Value);
 
@@ -134,6 +137,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction *ChangeCharacterAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction *ReadyInputAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction *ReloadInputAsset;
@@ -231,7 +237,7 @@ private:
 	float Shield = 100.0f;
 
 	UFUNCTION()
-	void OnRep_Shield(float LastShield);	
+	void OnRep_Shield(float LastShield);
 
 	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;

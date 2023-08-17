@@ -6,6 +6,7 @@
 #include "BlasterGameModeBase.h"
 #include "LobbyGameMode.generated.h"
 
+class ABlasterPlayerController;
 /**
  * 
  */
@@ -21,4 +22,14 @@ public:
 	void GoToMainLevel();
 
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
+
+	void SetPlayerReady(ABlasterPlayerController* PlayerController);
+
+protected:
+	virtual void Tick(float DeltaSeconds) override;
+	
+private:
+	TMap<ABlasterPlayerController*, bool> PlayersReady;
+
+	bool AreAllPlayersReady();
 };

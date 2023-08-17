@@ -12,6 +12,8 @@
 #include "Blaster/HUD/AnnouncementWidget.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Blaster/HUD/CharacterOverlay.h"
+#include "Blaster/HUD/LobbyHUD.h"
+#include "Blaster/HUD/LobbyOverlay.h"
 #include "Blaster/HUD/SniperScope.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/ProgressBar.h"
@@ -28,6 +30,7 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(ABlasterPlayerController, DesiredPawn)
 	DOREPLIFETIME(ABlasterPlayerController, MatchState);
 	DOREPLIFETIME(ABlasterPlayerController, bDisableGameplay);
+	DOREPLIFETIME_CONDITION_NOTIFY(ABlasterPlayerController, PlayersReady, COND_None, REPNOTIFY_Always);
 }
 
 void ABlasterPlayerController::BeginPlay()
@@ -97,6 +100,7 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 		SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
 		SetHUDShield(BlasterCharacter->GetShield(), BlasterCharacter->GetMaxShield());
 		BlasterCharacter->UpdateHUDAmmo();
+		BlasterCharacter->UpdateHUDReadyOverlay();
 
 		if(BlasterCharacter->GetCombat())
 		{
@@ -171,27 +175,6 @@ void ABlasterPlayerController::SelectCharacter()
 			{
 				BlasterGameInstance->SelectCharacter(NetId->GetHexEncodedString(), DesiredPawn);
 			}
-			else
-			{
-				if(GetPawn())
-				{
-					UE_LOG(LogTemp, Warning, TEXT("%s: No Unique Id"), *GetPawn()->GetActorNameOrLabel());
-				}
-			}
-		}
-		else
-		{
-			if(GetPawn())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("%s: No Player State"), *GetPawn()->GetActorNameOrLabel());
-			}
-		}
-	}
-	else
-	{
-		if(GetPawn())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s: No Game Instance"), *GetPawn()->GetActorNameOrLabel());
 		}
 	}
 }
@@ -204,6 +187,111 @@ void ABlasterPlayerController::ForwardDesiredPawn()
 void ABlasterPlayerController::BackDesiredPawn()
 {
 	ServerSetPawn(DesiredPawn - 1, true);
+}
+
+void ABlasterPlayerController::SetReady()
+{
+	ServerSetReady();
+}
+
+void ABlasterPlayerController::ServerSetReady_Implementation()
+{
+	if(const auto LobbyGameMode = Cast<ALobbyGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		LobbyGameMode->SetPlayerReady(this);
+	}
+}
+
+void ABlasterPlayerController::RegisterPlayersReady(TMap<ABlasterPlayerController*, bool> ReadyMap)
+{
+	PlayersReady.Empty();
+
+	for(const auto& Item : ReadyMap)
+	{
+		if(!Item.Key->PlayerState)
+		{
+			continue;
+		}
+		
+		FPlayersReady NewPlayersReady;
+		NewPlayersReady.bIsReady = Item.Value;
+		NewPlayersReady.PlayerName = Item.Key->PlayerState->GetPlayerName();
+
+		PlayersReady.Add(NewPlayersReady);
+	}
+
+	for(const auto Item : PlayersReady)
+	{
+		const FString Ready = Item.bIsReady ? TEXT("READY") : TEXT("NOT READY");
+		UE_LOG(LogTemp, Warning, TEXT("%s is %s"), *Item.PlayerName, *Ready);
+	}
+
+	SetHUDPlayersReady();
+}
+
+void ABlasterPlayerController::OnRep_PlayersReady()
+{
+	for(const auto Item : PlayersReady)
+	{
+		const FString Ready = Item.bIsReady ? TEXT("READY") : TEXT("NOT READY");
+		UE_LOG(LogTemp, Warning, TEXT("%s: %s is %s"), *GetCharacter()->GetActorNameOrLabel(), *Item.PlayerName, *Ready);
+	}
+
+	SetHUDPlayersReady();
+}
+
+FString ABlasterPlayerController::GetPlayerId() const
+{
+	if(PlayerState)
+	{
+		const auto NetId = PlayerState->GetUniqueId();
+		if(NetId.IsValid())
+		{
+			return NetId->GetHexEncodedString();
+		}
+	}
+
+	return "";
+}
+
+void ABlasterPlayerController::SetHUDPlayersReady()
+{
+	LobbyHUD = !LobbyHUD ? Cast<ALobbyHUD>(GetHUD()) : LobbyHUD;
+
+	bool bHudValid = LobbyHUD &&
+		LobbyHUD->LobbyOverlay &&
+		LobbyHUD->LobbyOverlay->PlayersReadyText;
+	
+	if(bHudValid)
+	{
+		TArray<FString> Lines;
+
+		for(auto ReadyItem : PlayersReady)
+		{
+			FString Ready = ReadyItem.bIsReady ? TEXT("READY") : TEXT("NOT READY");
+			Lines.Add(FString::Printf(TEXT("%s is %s"), *ReadyItem.PlayerName, *Ready));
+		}
+		
+		const FString Output = UKismetStringLibrary::JoinStringArray(Lines, TEXT("\n"));
+		LobbyHUD->LobbyOverlay->PlayersReadyText->SetText(FText::FromString(Output));
+	}
+	else
+	{
+		if(!LobbyHUD)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Lobby HUD Invalid"));
+		}
+
+		if(LobbyHUD && !LobbyHUD->LobbyOverlay)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Lobby HUD Overlay Invalid"));
+		}
+
+		if(LobbyHUD && LobbyHUD->LobbyOverlay && !LobbyHUD->LobbyOverlay->PlayersReadyText)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Lobby HUD Players Ready Text Invalid"));
+		}		
+	}
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
@@ -338,8 +426,8 @@ void ABlasterPlayerController::SetHUDGrenades(int32 InGrenades)
 void ABlasterPlayerController::SetHUDSniperScope(bool bIsAiming)
 {
 	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
-     
-	bool bHUDValid = BlasterHUD &&
+
+	const bool bHUDValid = BlasterHUD &&
 		BlasterHUD->SniperScope &&
 		BlasterHUD->SniperScope->ScopeZoomIn;
      

@@ -192,7 +192,8 @@ void ABlasterCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	SpawnDefaultWeapon();
-	
+
+	UpdateHUDReadyOverlay();
 	UpdateHUDAmmo();
 	UpdateHUDHealth();
 	UpdateHUDShield();
@@ -251,6 +252,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 
 		//Change Character in Lobby
 		EnhancedInputComponent->BindAction(ChangeCharacterAsset, ETriggerEvent::Started, this, &ABlasterCharacter::ChangeCharacterAction);
+
+		//Set ready status in lobby
+		EnhancedInputComponent->BindAction(ReadyInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::ReadyAction);
 
 		//Reload
 		EnhancedInputComponent->BindAction(ReloadInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::ReloadAction);
@@ -666,6 +670,15 @@ void ABlasterCharacter::ChangeCharacterAction(const FInputActionValue& Value)
 	}
 }
 
+void ABlasterCharacter::ReadyAction(const FInputActionValue& Value)
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController; 
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetReady();
+	}
+}
+
 void ABlasterCharacter::ReloadAction(const FInputActionValue& Value)
 {
 	if(Combat)
@@ -881,6 +894,15 @@ void ABlasterCharacter::OnRep_Shield(float LastShield)
 		{
 			PlayHitReactMontage();
 		}
+	}
+}
+
+void ABlasterCharacter::UpdateHUDReadyOverlay()
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDPlayersReady();
 	}
 }
 

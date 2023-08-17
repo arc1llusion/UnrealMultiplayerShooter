@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blaster/BlasterTypes/FPlayersReady.h"
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
 
+class ALobbyHUD;
 class ABlasterPlayerState;
 class ABlasterHUD;
 class UInputMappingContext;
@@ -21,7 +23,16 @@ class BLASTER_API ABlasterPlayerController : public APlayerController
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/*
+	 * Lobby HUD
+	 */
+
+	void SetHUDPlayersReady();
 	
+	/*
+	 * Blaster HUD
+	 */ 
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDShield(float Shield, float MaxShield);
 	void SetHUDScore(float Score);
@@ -50,6 +61,11 @@ public:
 	void SetDesiredPawn(const int32 InDesiredPawn);
 
 	FORCEINLINE bool IsGameplayDisabled() const { return bDisableGameplay; }
+	
+	void SetReady();
+	void RegisterPlayersReady(TMap<ABlasterPlayerController*, bool> ReadyMap);
+
+	FString GetPlayerId() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -99,11 +115,17 @@ protected:
 
 	UFUNCTION(Reliable, Server)
 	virtual void ServerSetPawn(int32 InDesiredPawn, bool RequestRespawn);
-	virtual void SelectCharacter();	
+	virtual void SelectCharacter();
+
+	UFUNCTION(Reliable, Server)
+	virtual void ServerSetReady();
 	
 private:
 	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
+
+	UPROPERTY()
+	ALobbyHUD* LobbyHUD;
 
 	UPROPERTY()
 	ABlasterGameMode* BlasterGameMode;
@@ -127,4 +149,9 @@ private:
 
 	void SetWinnerText();
 
+	UPROPERTY(ReplicatedUsing = OnRep_PlayersReady)
+	TArray<FPlayersReady> PlayersReady;
+
+	UFUNCTION()
+	void OnRep_PlayersReady();
 };

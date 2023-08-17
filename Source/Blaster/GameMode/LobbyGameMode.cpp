@@ -5,29 +5,37 @@
 
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
+
+void ALobbyGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	
+	if(AreAllPlayersReady())
+	{
+		GoToMainLevel();
+	}
+}
 
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-	
-	// if(GameState)
-	// {
-	// 	if(const int32 NumberOfPlayers = GameState->PlayerArray.Num(); NumberOfPlayers == 2)
-	// 	{
-	// 		if(UWorld* World = GetWorld())
-	// 		{
-	// 			//bUseSeamlessTravel = true;
-	// 			World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
-	// 		}
-	// 	}
-	// }
+
+	if(ABlasterPlayerController* BlasterPlayerController = Cast<ABlasterPlayerController>(NewPlayer))
+	{
+		PlayersReady.Add(BlasterPlayerController, false);
+	}
+
+	for(const auto& Item : PlayersReady)
+	{
+		Item.Key->RegisterPlayersReady(PlayersReady);
+	}
 }
 
 void ALobbyGameMode::GoToMainLevel()
 {
 	if(UWorld* World = GetWorld())
 	{
-		//bUseSeamlessTravel = true;
 		World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap1?listen")));
 	}
 }
@@ -43,4 +51,37 @@ UClass* ALobbyGameMode::GetDefaultPawnClassForController_Implementation(AControl
 	}
 
 	return Super::GetDefaultPawnClassForController_Implementation(InController);
+}
+
+void ALobbyGameMode::SetPlayerReady(ABlasterPlayerController* PlayerController)
+{
+	if(!PlayersReady.Contains(PlayerController))
+	{
+		PlayersReady.Add(PlayerController, true);
+	}
+	else
+	{
+		PlayersReady[PlayerController] = true;
+	}
+
+	for(const auto& Item : PlayersReady)
+	{
+		Item.Key->RegisterPlayersReady(PlayersReady);
+	}
+}
+
+bool ALobbyGameMode::AreAllPlayersReady()
+{
+	bool bIsReady = true;
+
+	for(const auto& Item : PlayersReady)
+	{
+		if(!Item.Value)
+		{
+			bIsReady = false;
+			break;
+		}
+	}
+
+	return bIsReady;
 }
