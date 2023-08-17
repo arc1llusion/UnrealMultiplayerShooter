@@ -126,6 +126,9 @@ private:
 	 */
 
 	UPROPERTY(EditAnywhere)
+	float AimScaleFactor = 1.0f;
+
+	UPROPERTY(EditAnywhere)
 	float ZoomedFOV = 30;
 
 	UPROPERTY(EditAnywhere)
@@ -221,4 +224,6 @@ public:
 
 	FORCEINLINE bool IsDefaultWeapon() const { return bIsDefaultWeapon; }
 	FORCEINLINE void SetIsDefaultWeapon(const bool bInDefaultWeapon) { bIsDefaultWeapon = bInDefaultWeapon; }
+
+	FORCEINLINE float GetAimScaleFactor() const { return AimScaleFactor; }
 };

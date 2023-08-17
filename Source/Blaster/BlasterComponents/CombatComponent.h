@@ -59,6 +59,8 @@ public:
 	
 	void SetMovementSpeed(float InBaseSpeed, float InAimSpeed);
 
+	float GetWeaponAimScaleFactor();
+
 protected:
 	virtual void BeginPlay() override;
 	

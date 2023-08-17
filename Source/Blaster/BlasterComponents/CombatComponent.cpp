@@ -405,6 +405,16 @@ void UCombatComponent::SetMovementSpeed(float InBaseSpeed, float InAimSpeed)
 	AimWalkSpeed = InAimSpeed;
 }
 
+float UCombatComponent::GetWeaponAimScaleFactor()
+{
+	if(EquippedWeapon)
+	{
+		return EquippedWeapon->GetAimScaleFactor();
+	}
+
+	return 1.0f;
+}
+
 void UCombatComponent::OnRep_CombatState()
 {
 	switch(CombatState)
