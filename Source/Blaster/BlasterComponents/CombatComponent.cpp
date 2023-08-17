@@ -26,6 +26,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, SecondaryWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
 	DOREPLIFETIME(UCombatComponent, CombatState);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
@@ -159,6 +160,26 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		return;
 	}
 
+	if(EquippedWeapon && !SecondaryWeapon)
+	{
+		EquipSecondaryWeapon(WeaponToEquip);
+	}
+	else
+	{
+		EquipPrimaryWeapon(WeaponToEquip);
+	}	
+	
+	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+	Character->bUseControllerRotationYaw = true;
+}
+
+void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
+{
+	if(!WeaponToEquip)
+	{
+		return;
+	}
+	
 	DropEquippedWeapon();
 	
 	EquippedWeapon = WeaponToEquip;
@@ -168,13 +189,36 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 	EquippedWeapon->SetOwner(Character);
 	EquippedWeapon->SetHUDWeaponAmmo();
-
 	UpdateCarriedAmmo();
-	PlayEquippedWeaponSound();
-	ReloadIfEmpty();
 	
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
+	PlayEquippedWeaponSound(WeaponToEquip);
+	ReloadIfEmpty();
+
+	EquippedWeapon->EnableCustomDepth(false);
+}
+
+void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
+{
+	if(!WeaponToEquip)
+	{
+		return;
+	}
+	
+	SecondaryWeapon = WeaponToEquip;
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	
+	AttachActorToSecondaryWeaponSocket(WeaponToEquip);
+
+	SecondaryWeapon->SetOwner(Character);
+
+	PlayEquippedWeaponSound(WeaponToEquip);
+
+	if(SecondaryWeapon->GetWeaponMesh())
+	{
+		SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
+		SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
+		SecondaryWeapon->EnableCustomDepth(true);
+	}
 }
 
 void UCombatComponent::DropEquippedWeapon() const
@@ -185,16 +229,16 @@ void UCombatComponent::DropEquippedWeapon() const
 	}
 }
 
-void UCombatComponent::PlayEquippedWeaponSound() const
+void UCombatComponent::PlayEquippedWeaponSound(const AWeapon* WeaponToEquip) const
 {
-	if(!EquippedWeapon || !EquippedWeapon->GetEquippedSound() || !Character)
+	if(!WeaponToEquip || !WeaponToEquip->GetEquippedSound() || !Character)
 	{
 		return;
 	}
 
 	UGameplayStatics::PlaySoundAtLocation(
 			this,
-			EquippedWeapon->GetEquippedSound(),
+			WeaponToEquip->GetEquippedSound(),
 			Character->GetActorLocation());
 }
 
@@ -518,10 +562,30 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 
-		PlayEquippedWeaponSound();
+		PlayEquippedWeaponSound(EquippedWeapon);
 
 		Character->UpdateHUDAmmo();
+
+		EquippedWeapon->EnableCustomDepth(false);
 	}
+}
+
+void UCombatComponent::OnRep_SecondaryWeapon()
+{
+	if(SecondaryWeapon && Character)
+	{
+		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachActorToSecondaryWeaponSocket(SecondaryWeapon);		
+		
+		PlayEquippedWeaponSound(SecondaryWeapon);
+
+		if(SecondaryWeapon->GetWeaponMesh())
+		{
+			SecondaryWeapon->GetWeaponMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
+			SecondaryWeapon->GetWeaponMesh()->MarkRenderStateDirty();
+			SecondaryWeapon->EnableCustomDepth(true);
+		}
+	}	
 }
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -742,6 +806,19 @@ void UCombatComponent::AttachActorToLeftHandSocket(AActor* ActorToAttach) const
 	if(const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(bUsePistolSocket ? PistolSocketName : LeftHandSocketName))
 	{
 		HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
+	}
+}
+
+void UCombatComponent::AttachActorToSecondaryWeaponSocket(AActor* ActorToAttach) const
+{
+	if(!Character || !ActorToAttach || !Character->GetMesh())
+	{
+		return;
+	}
+	
+	if(const USkeletalMeshSocket* SecondaryWeaponSocket = Character->GetMesh()->GetSocketByName(SecondaryWeaponSocketName))
+	{
+		SecondaryWeaponSocket->AttachActor(ActorToAttach, Character->GetMesh());
 	}
 }
 

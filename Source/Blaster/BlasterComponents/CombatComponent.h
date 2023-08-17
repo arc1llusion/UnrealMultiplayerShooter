@@ -69,6 +69,10 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
+	
 	void Fire();
 
 	void FireButtonPressed(bool bPressed);
@@ -102,17 +106,21 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> GrenadeClass;
 
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
+
 private:
 	bool GetCrosshairWorldVector(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection) const;
 	void PerformLineTrace(FHitResult& TraceHitResult, const FVector& CrossHairWorldPosition, const FVector& CrossHairWorldDirection);
 	
 	void AttachActorToRightHandSocket(AActor* ActorToAttach) const;
 	void AttachActorToLeftHandSocket(AActor* ActorToAttach) const;
+	void AttachActorToSecondaryWeaponSocket(AActor* ActorToAttach) const;
 
 	void UpdateAmmoValues();
 	void UpdateShotgunAmmoValues();
 	
-	void PlayEquippedWeaponSound() const;
+	void PlayEquippedWeaponSound(const AWeapon* WeaponToEquip) const;
 	void ReloadIfEmpty();	
 
 	void ShowAttachedGrenade(bool bShowGrenade) const;
@@ -130,9 +138,17 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
 
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+	AWeapon* SecondaryWeapon;
+
+	UPROPERTY(EditAnywhere, Category = "Sockets")
 	FName RightHandSocketName{TEXT("RightHandSocket")};
+	UPROPERTY(EditAnywhere, Category = "Sockets")
 	FName LeftHandSocketName{TEXT("LeftHandSocket")};
+	UPROPERTY(EditAnywhere, Category = "Sockets")
 	FName PistolSocketName{TEXT("PistolSocket")};
+	UPROPERTY(EditAnywhere, Category = "Sockets")
+	FName SecondaryWeaponSocketName{TEXT("SecondaryWeaponSocket")};
 
 	UPROPERTY(Replicated)
 	bool bAiming;
