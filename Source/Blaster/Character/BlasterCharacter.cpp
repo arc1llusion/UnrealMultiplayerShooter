@@ -237,7 +237,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 		EnhancedInputComponent->BindAction(LookActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::LookAction);
 
 		// Equip
-		EnhancedInputComponent->BindAction(EquipActionAsset, ETriggerEvent::Triggered, this, &ABlasterCharacter::EquipAction);
+		EnhancedInputComponent->BindAction(EquipActionAsset, ETriggerEvent::Started, this, &ABlasterCharacter::EquipAction);
 
 		// Crouching
 		EnhancedInputComponent->BindAction(CrouchInputAsset, ETriggerEvent::Started, this, &ABlasterCharacter::CrouchAction);
@@ -692,7 +692,14 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if(Combat)
 	{
-		Combat->EquipWeapon(OverlappingWeapon);
+		if(OverlappingWeapon)
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else if (Combat->ShouldSwapWeapons())
+		{
+			Combat->SwapWeapons();
+		}
 	}
 }
 
