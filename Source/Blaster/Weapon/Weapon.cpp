@@ -11,7 +11,6 @@
 #include "Components/WidgetComponent.h"
 #include "Animation/AnimationAsset.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
-#include "Blaster/HUD/OverheadWidget.h"
 #include "Blaster/HUD/PickupWidget.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Net/UnrealNetwork.h"
