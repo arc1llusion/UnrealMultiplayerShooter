@@ -64,6 +64,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastEliminate();
 
+	void HandleWeaponOnElimination(AWeapon* Weapon);
+
 	virtual void Destroyed() override;
 protected:
 
@@ -364,7 +366,7 @@ private:
 
 	void SpawnEliminationBot();
 	
-	void HideAimingScope();
+	void HideAimingScope() const;
 
 	UFUNCTION()
 	void OnReloadMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted) const;

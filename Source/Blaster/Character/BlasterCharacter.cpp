@@ -89,6 +89,29 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(ABlasterCharacter, Shield);
 }
 
+void ABlasterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SpawnDefaultWeapon();
+
+	UpdateHUDReadyOverlay();
+	UpdateHUDAmmo();
+	UpdateHUDHealth();
+	UpdateHUDShield();
+
+	if(HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
+		OnActorBeginOverlap.AddDynamic(this, &ABlasterCharacter::KillZOverlap);
+	}
+
+	if(AttachedGrenade)
+	{
+		AttachedGrenade->SetVisibility(false);
+	}
+}
+
 void ABlasterCharacter::OnRep_ReplicatedMovement()
 {
 	Super::OnRep_ReplicatedMovement();
@@ -100,29 +123,15 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 
 void ABlasterCharacter::Eliminate()
 {
-	if(Combat && Combat->EquippedWeapon)
+	if(Combat)
 	{
-		if(Combat->EquippedWeapon->IsDefaultWeapon())
-		{
-			Combat->EquippedWeapon->Destroy();
-		}
-		else
-		{
-			Combat->EquippedWeapon->Drop();
-		}
+		HandleWeaponOnElimination(Combat->EquippedWeapon);
+		HandleWeaponOnElimination(Combat->SecondaryWeapon);
 	}
 	
 	MulticastEliminate();
 
 	GetWorldTimerManager().SetTimer(EliminateHandle, this, &ABlasterCharacter::EliminateTimerFinished, EliminateDelay);
-}
-
-void ABlasterCharacter::HideAimingScope()
-{
-	if(IsLocallyControlled() && Combat)
-	{
-		Combat->SetAiming(false);
-	}
 }
 
 void ABlasterCharacter::MulticastEliminate_Implementation()
@@ -187,26 +196,26 @@ void ABlasterCharacter::SpawnEliminationBot()
 	}
 }
 
-void ABlasterCharacter::BeginPlay()
+void ABlasterCharacter::HandleWeaponOnElimination(AWeapon* Weapon)
 {
-	Super::BeginPlay();
-
-	SpawnDefaultWeapon();
-
-	UpdateHUDReadyOverlay();
-	UpdateHUDAmmo();
-	UpdateHUDHealth();
-	UpdateHUDShield();
-
-	if(HasAuthority())
+	if(Weapon)
 	{
-		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
-		OnActorBeginOverlap.AddDynamic(this, &ABlasterCharacter::KillZOverlap);
+		if(Weapon->IsDefaultWeapon())
+		{
+			Weapon->Destroy();
+		}
+		else
+		{
+			Weapon->Drop();
+		}
 	}
+}
 
-	if(AttachedGrenade)
+void ABlasterCharacter::HideAimingScope() const
+{
+	if(IsLocallyControlled() && Combat)
 	{
-		AttachedGrenade->SetVisibility(false);
+		Combat->SetAiming(false);
 	}
 }
 
