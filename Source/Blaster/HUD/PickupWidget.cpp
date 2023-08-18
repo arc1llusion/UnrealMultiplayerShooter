@@ -37,5 +37,5 @@ void UPickupWidget::SetWeaponText(const EWeaponType WeaponType) const
 			break;
 	}
 
-	PickupText->SetText(FText::FromString(Output));
+	PickupText->SetText(FText::FromString(FString::Printf(TEXT("E - Pickup: %s"), *Output)));
 }

@@ -83,6 +83,7 @@ ABlasterCharacter::ABlasterCharacter()
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterCharacter, Health);
@@ -527,6 +528,8 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 			Shield = 0.0f;			
 		}
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Damage to Health: %f"), DamageToHealth);
 	
 	Health = FMath::Clamp(Health - DamageToHealth, 0.0f, MaxHealth);
 
@@ -591,7 +594,8 @@ void ABlasterCharacter::LookAction(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	float AimScaleFactor = Combat ? Combat->GetWeaponAimScaleFactor() : 1.0f;	
+	//IsAiming checks for Combat
+	const float AimScaleFactor = IsAiming() ? Combat->GetWeaponAimScaleFactor() : 1.0f;	
 
 	if (Controller != nullptr)
 	{
