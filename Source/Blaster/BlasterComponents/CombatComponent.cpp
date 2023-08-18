@@ -88,6 +88,7 @@ void UCombatComponent::Fire()
 	{
 		bCanFire = false;
 		ServerFire(HitTarget);
+		LocalFire(HitTarget);
 
 		if(EquippedWeapon)
 		{
@@ -131,7 +132,17 @@ void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& Trac
 }
 
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{	
+{
+	if(Character && Character->IsLocallyControlled() && !Character->HasAuthority())
+	{
+		return;
+	}
+	
+	LocalFire(TraceHitTarget);
+}
+
+void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
+{
 	if(!EquippedWeapon || !Character)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Servr RPC - No Character or equipped weapon"));
@@ -146,7 +157,7 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 		return;
 	}
 	
-	if(CombatState == ECombatState::ECS_Unoccupied)
+	if(Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
@@ -175,6 +186,11 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::SwapWeapons()
 {
+	if(CombatState != ECombatState::ECS_Unoccupied)
+	{
+		return;
+	}
+	
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
 	SecondaryWeapon = TempWeapon;
