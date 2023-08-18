@@ -104,6 +104,11 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientJoinMidGame(FName InMatchState, float InWarmupTime, float InCooldownTime, float InMatchTime, float InStartingTime);
 
+	void CheckPing(float DeltaSeconds);
+	void StartHighPingWarning();
+	void StopHighPingWarning();	
+	bool IsHighPingAnimationPlaying() const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;
 
@@ -154,4 +159,17 @@ private:
 
 	UFUNCTION()
 	void OnRep_PlayersReady();
+
+	float HighPingRunningTime = 0.0f;
+
+	float PingAnimationRunningTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category = "High Ping Warning")
+	float HighPingDuration = 5.0f;
+
+	UPROPERTY(EditAnywhere, Category = "High Ping Warning")
+	float CheckPingFrequency = 20.0f;
+
+	UPROPERTY(EditAnywhere, Category = "High Ping Warning")
+	float HighPingThreshold = 50.0f;
 };

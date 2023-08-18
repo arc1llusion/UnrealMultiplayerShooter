@@ -5,6 +5,7 @@
 #include "CharacterOverlay.generated.h"
 
 
+class UImage;
 class UProgressBar;
 class UTextBlock;
 
@@ -49,4 +50,10 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* GrenadesText;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* HighPingImage;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* HighPingAnimation;
 };
