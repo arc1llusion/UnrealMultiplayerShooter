@@ -78,6 +78,11 @@ protected:
 	void OnRep_SecondaryWeapon();
 	
 	void Fire();
+
+	void FireProjectileWeapon();
+	void FireHitScanWeapon();
+	void FireShotgunWeapon();
+	
 	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
 	void FireButtonPressed(bool bPressed);

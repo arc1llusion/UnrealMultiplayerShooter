@@ -29,6 +29,16 @@ enum class EWeaponState : uint8
 	EWS_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
+UENUM(BlueprintType)
+enum class EFireType : uint8
+{
+	EFT_HitScan UMETA(DisplayName = "Hit Scan Weapon"),
+	EFT_Projectile UMETA(DisplayName = "Projectile Weapon"),
+	EFT_Shotgun  UMETA(DisplayName = "Shotgun Weapon"),
+
+	EFT_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
 UCLASS()
 class BLASTER_API AWeapon : public AActor
 {
@@ -49,7 +59,10 @@ public:
 
 	void AddAmmo(int32 AmmoToAdd);
 
-	void EnableCustomDepth(bool bInEnable);
+	void EnableCustomDepth(bool bInEnable);	
+	
+	FVector TraceEndWithScatter(const FVector& HitTarget) const;
+	FORCEINLINE bool UseScatter() const { return bUseScatter; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -59,6 +72,25 @@ protected:
 	virtual void OnWeaponStateEquippedSecondary();
 	virtual void OnWeaponStateDropped();
 	
+	UPROPERTY(EditAnywhere)
+	FName MuzzleSocketFlashName{"MuzzleFlash"};
+	
+	void GetSocketInformation(FTransform& OutSocketTransform, FVector& OutStart) const;	
+
+	/*
+	 * Trace End With Scatter
+	 */
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bShowDebugSpheres = false;
 
 	UFUNCTION()
 	virtual void OnSphereOverlap(
@@ -87,6 +119,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon Properties")
 	EWeaponState WeaponState;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	EFireType FireType;
 
 	UFUNCTION()
 	void OnRep_WeaponState();
@@ -194,7 +229,7 @@ private:
 	void RespawnWeapon();
 	void ClearRespawnTimer();
 
-	bool bIsDefaultWeapon = false;
+	bool bIsDefaultWeapon = false;	
 
 public:
 	void SetWeaponState(EWeaponState State);
@@ -213,6 +248,7 @@ public:
 	FORCEINLINE bool IsAutomatic() const { return bAutomatic; }
 
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE EFireType GetFireType() const { return FireType; }
 
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetAmmoCapacity() const { return AmmoCapacity; }

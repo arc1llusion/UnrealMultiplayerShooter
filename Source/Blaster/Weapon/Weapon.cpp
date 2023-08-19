@@ -13,6 +13,7 @@
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/HUD/PickupWidget.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -359,4 +360,40 @@ bool AWeapon::IsFull() const
 {
 	return Ammo == AmmoCapacity;
 }
+
+void AWeapon::GetSocketInformation(FTransform& OutSocketTransform, FVector& OutStart) const
+{
+	OutSocketTransform = FTransform::Identity;
+	OutStart = FVector::ZeroVector;
+	
+	if(const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(MuzzleSocketFlashName))
+	{
+		OutSocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+		OutStart = OutSocketTransform.GetLocation();		
+	}
+}
+
+FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget) const
+{
+	FTransform SocketTransform;
+	FVector TraceStart;
+	GetSocketInformation(SocketTransform, TraceStart);
+	
+	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+
+	const FVector RandomVector = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.0f, SphereRadius);
+	const FVector EndLocation = SphereCenter + RandomVector;
+	const FVector ToEndLocation = EndLocation - TraceStart;
+
+	if(bShowDebugSpheres)
+	{
+		DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Red, true);
+		DrawDebugSphere(GetWorld(), EndLocation, 4.0f, 12, FColor::Orange, true);
+		DrawDebugLine(GetWorld(), TraceStart, FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size()), FColor::Cyan, true);
+	}
+	
+	return FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size());
+}
+
 

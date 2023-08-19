@@ -29,7 +29,7 @@ void AShotgun::GetHitActors(UWorld* World, FTransform SocketTransform, FVector S
 	
 	for(uint32 i = 0; i < NumberOfShots; ++i)
 	{
-		FVector End = TraceEndWithScatter(Start, HitTarget);
+		FVector End = TraceEndWithScatter(HitTarget);
 
 		FHitResult FireHit;
 		PerformLineTrace(World, Start, End, FireHit);
