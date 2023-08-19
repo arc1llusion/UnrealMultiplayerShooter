@@ -62,6 +62,7 @@ public:
 	void EnableCustomDepth(bool bInEnable);	
 	
 	FVector TraceEndWithScatter(const FVector& HitTarget) const;
+	FVector TraceEndWithScatter(const FVector& HitTarget, const FVector& TraceStart) const;
 	FORCEINLINE bool UseScatter() const { return bUseScatter; }
 	
 protected:

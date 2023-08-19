@@ -57,3 +57,16 @@ void AShotgun::ApplyDamageToAllHitActors(const TMap<AActor*, uint32>& HitActors)
 		ApplyDamage(HitCheck.Key, HitCheck.Value * Damage);
 	}
 }
+
+void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& OutHitTargets)
+{
+	FTransform SocketTransform;
+	FVector TraceStart;
+	GetSocketInformation(SocketTransform, TraceStart);
+	
+	for(uint32 Shot = 0; Shot < NumberOfShots; ++Shot)
+	{
+		OutHitTargets.Add(TraceEndWithScatter(HitTarget, TraceStart));
+	}
+}
+

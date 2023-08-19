@@ -379,6 +379,11 @@ FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget) const
 	FVector TraceStart;
 	GetSocketInformation(SocketTransform, TraceStart);
 	
+	return TraceEndWithScatter(HitTarget, TraceStart);
+}
+
+FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget, const FVector& TraceStart) const
+{
 	const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
 	const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
 

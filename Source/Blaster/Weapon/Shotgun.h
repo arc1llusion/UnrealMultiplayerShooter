@@ -17,10 +17,11 @@ class BLASTER_API AShotgun : public AHitScanWeapon
 public:
 	virtual void Fire(const FVector& HitTarget) override;
 
+	virtual void ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& OutHitTargets);
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	uint32 NumberOfShots = 10;
-
 
 	void GetHitActors(UWorld* World, FTransform SocketTransform, FVector Start, const FVector& HitTarget, TMap<AActor*, uint32>& OutHits);
 	void ApplyDamageToAllHitActors(const TMap<AActor*, uint32>& HitActors);
