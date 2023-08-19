@@ -115,10 +115,13 @@ void UCombatComponent::Fire()
 
 void UCombatComponent::FireProjectileWeapon()
 {
-	if(EquippedWeapon)
+	if(Character && EquippedWeapon)
 	{
 		HitTarget = EquippedWeapon->UseScatter() ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
-		LocalFire(HitTarget);
+		if(!Character->HasAuthority())
+		{
+			LocalFire(HitTarget);
+		}
 		ServerFire(HitTarget);
 	}
 }
@@ -128,7 +131,10 @@ void UCombatComponent::FireHitScanWeapon()
 	if(EquippedWeapon)
 	{
 		HitTarget = EquippedWeapon->UseScatter() ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
-		LocalFire(HitTarget);
+		if(!Character->HasAuthority())
+		{
+			LocalFire(HitTarget);
+		}
 		ServerFire(HitTarget);
 	}
 }
@@ -137,8 +143,14 @@ void UCombatComponent::FireShotgunWeapon()
 {
 	if(const auto ShotgunWeapon = Cast<AShotgun>(EquippedWeapon))
 	{
-		TArray<FVector> HitTargets;
+		TArray<FVector_NetQuantize> HitTargets;
 		ShotgunWeapon->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
+
+		if(!Character->HasAuthority())
+		{
+			LocalShotgunFire(HitTargets);
+		}
+		ServerShotgunFire(HitTargets);
 	}
 }
 
@@ -184,19 +196,26 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 	LocalFire(TraceHitTarget);
 }
 
+void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	MulticastShotgunFire(TraceHitTargets);
+}
+
+void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	if(Character && Character->IsLocallyControlled() && !Character->HasAuthority())
+	{
+		return;
+	}
+	
+	LocalShotgunFire(TraceHitTargets);
+}
+
 void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 {
 	if(!EquippedWeapon || !Character)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Servr RPC - No Character or equipped weapon"));
-		return;
-	}
-
-	if(Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
-	{
-		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
-		CombatState = ECombatState::ECS_Unoccupied;
+		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Local Fire - No Character or equipped weapon"));
 		return;
 	}
 	
@@ -204,6 +223,24 @@ void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
+	}
+}
+
+void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
+	
+	if(!Shotgun || !Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Local Shotgun Fire - No Character or equipped weapon"));
+		return;
+	}
+
+	if(CombatState == ECombatState::ECS_Reloading || CombatState == ECombatState::ECS_Unoccupied)
+	{
+		Character->PlayFireMontage(bAiming);
+		Shotgun->FireShotgun(TraceHitTargets);		
+		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }
 
