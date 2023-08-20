@@ -295,7 +295,7 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 	}
 }
 
-void AWeapon::Fire(const FVector& HitTarget)
+void AWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 {
 	if(FireAnimation)
 	{
@@ -401,4 +401,15 @@ FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget, const FVector& Tr
 	return FVector(TraceStart + ToEndLocation * TRACE_LENGTH / ToEndLocation.Size());
 }
 
+void AWeapon::BurstTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& OutResult) const
+{
+	FTransform SocketTransform;
+	FVector TraceStart;
+	GetSocketInformation(SocketTransform, TraceStart);
+	
+	for(uint32 Shot = 0; Shot < NumberOfBurstShots; ++Shot)
+	{
+		OutResult.Add(TraceEndWithScatter(HitTarget, TraceStart));
+	}
+}
 

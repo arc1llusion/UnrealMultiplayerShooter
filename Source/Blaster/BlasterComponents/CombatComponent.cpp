@@ -13,9 +13,7 @@
 #include "Camera/CameraComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
-#include "Blaster/Character/BlasterAnimInstance.h"
 #include "Blaster/Weapon/Projectile.h"
-#include "Blaster/Weapon/Shotgun.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -141,10 +139,10 @@ void UCombatComponent::FireHitScanWeapon()
 
 void UCombatComponent::FireShotgunWeapon()
 {
-	if(const auto ShotgunWeapon = Cast<AShotgun>(EquippedWeapon))
+	if(EquippedWeapon)
 	{
 		TArray<FVector_NetQuantize> HitTargets;
-		ShotgunWeapon->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
+		EquippedWeapon->BurstTraceEndWithScatter(HitTarget, HitTargets);
 
 		if(!Character->HasAuthority())
 		{
@@ -222,15 +220,16 @@ void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 	if(Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
+
+		auto Hits = TArray<FVector_NetQuantize>();
+		Hits.Add(TraceHitTarget);
+		EquippedWeapon->Fire(Hits);
 	}
 }
 
 void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets)
-{
-	AShotgun* Shotgun = Cast<AShotgun>(EquippedWeapon);
-	
-	if(!Shotgun || !Character)
+{	
+	if(!EquippedWeapon || !Character)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CombatComponent Local Shotgun Fire - No Character or equipped weapon"));
 		return;
@@ -239,7 +238,7 @@ void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& Trace
 	if(CombatState == ECombatState::ECS_Reloading || CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
-		Shotgun->FireShotgun(TraceHitTargets);		
+		EquippedWeapon->Fire(TraceHitTargets);		
 		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }

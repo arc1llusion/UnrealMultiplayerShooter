@@ -54,7 +54,7 @@ public:
 
 	void ShowPickupWidget(bool bShowWidget);
 
-	virtual void Fire(const FVector& HitTarget);
+	virtual void Fire(const TArray<FVector_NetQuantize>& HitTargets);
 	void Drop();
 
 	void AddAmmo(int32 AmmoToAdd);
@@ -62,6 +62,7 @@ public:
 	void EnableCustomDepth(bool bInEnable);	
 	
 	FVector TraceEndWithScatter(const FVector& HitTarget) const;
+	void BurstTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& Result) const;
 	FVector TraceEndWithScatter(const FVector& HitTarget, const FVector& TraceStart) const;
 	FORCEINLINE bool UseScatter() const { return bUseScatter; }
 	
@@ -92,6 +93,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	bool bShowDebugSpheres = false;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	uint32 NumberOfBurstShots = 10;
 
 	UFUNCTION()
 	virtual void OnSphereOverlap(
@@ -230,7 +234,9 @@ private:
 	void RespawnWeapon();
 	void ClearRespawnTimer();
 
-	bool bIsDefaultWeapon = false;	
+	bool bIsDefaultWeapon = false;
+
+	bool bIsBurst = false;
 
 public:
 	void SetWeaponState(EWeaponState State);
@@ -263,4 +269,6 @@ public:
 	FORCEINLINE void SetIsDefaultWeapon(const bool bInDefaultWeapon) { bIsDefaultWeapon = bInDefaultWeapon; }
 
 	FORCEINLINE float GetAimScaleFactor() const { return AimScaleFactor; }
+
+	FORCEINLINE bool IsBurst() const { return bIsBurst; }
 };

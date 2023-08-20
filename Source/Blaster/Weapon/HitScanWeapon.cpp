@@ -8,9 +8,16 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
-void AHitScanWeapon::Fire(const FVector& HitTarget)
+void AHitScanWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 {
-	Super::Fire(HitTarget);	
+	Super::Fire(HitTargets);
+	
+	if(HitTargets.Num() == 0)
+	{
+		return;
+	}
+
+	const auto HitTarget = HitTargets[0];
 
 	FTransform SocketTransform;
 	FVector Start;

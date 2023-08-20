@@ -5,9 +5,9 @@
 #include "Projectile.h"
 #include "Engine/SkeletalMeshSocket.h"
 
-void AProjectileWeapon::Fire(const FVector& HitTarget)
+void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 {
-	Super::Fire(HitTarget);
+	Super::Fire(HitTargets);
 
 	if(!HasAuthority())
 	{
@@ -20,6 +20,13 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 	{
 		return;
 	}
+
+	if(HitTargets.Num() == 0)
+	{
+		return;
+	}
+
+	const auto HitTarget = HitTargets[0];
 
 	if(const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName(TEXT("MuzzleFlash"))))
 	{
