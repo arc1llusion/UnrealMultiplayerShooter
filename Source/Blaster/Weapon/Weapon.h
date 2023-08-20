@@ -187,17 +187,26 @@ private:
 	/*
 	 * Ammo
 	 */
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 	int32 Ammo = 0;
-
-	UFUNCTION()
-	void OnRep_Ammo();
-
-	void SpendRound();
 
 	UPROPERTY(EditAnywhere)
 	int32 AmmoCapacity = 0;
 
+	void SpendRound();
+	
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToAdd);
+
+	/**
+	 * @brief Number of unprocessed server requests for Ammo
+	 * Incremented in SpendRound, Decremented in ClientUpdateAmmo
+	 */
+	int32 UnprocessedAmmoServerRequests = 0;
+	
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
 
