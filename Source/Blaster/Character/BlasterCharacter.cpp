@@ -23,6 +23,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 #include "Blaster/HUD/OverheadWidget.h"
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/KillZVolume.h"
 
@@ -110,6 +111,37 @@ void ABlasterCharacter::BeginPlay()
 	if(AttachedGrenade)
 	{
 		AttachedGrenade->SetVisibility(false);
+	}
+
+	CreateCapsuleHitBoxes();
+}
+
+void ABlasterCharacter::CreateCapsuleHitBoxes()
+{
+	if(GetMesh())
+	{
+		for (auto SkeletalBodySetup : GetMesh()->GetPhysicsAsset()->SkeletalBodySetups)
+		{
+			auto BoneName = SkeletalBodySetup->BoneName;
+			auto BoneWorldTransform = GetMesh()->GetBoneTransform(GetMesh()->GetBoneIndex(BoneName));
+		
+			for (auto Capsule : SkeletalBodySetup->AggGeom.SphylElems)
+			{
+				auto LocTransform = Capsule.GetTransform();
+				auto WorldTransform = LocTransform * BoneWorldTransform;
+
+				auto HitCapsule = NewObject<UCapsuleComponent>(this, UCapsuleComponent::StaticClass(), BoneName, RF_Transient);
+				HitCapsule->SetupAttachment(GetMesh(), BoneName);
+				HitCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				HitCapsule->SetWorldTransform(WorldTransform);
+				HitCapsule->SetCapsuleHalfHeight(Capsule.Length / 2 + Capsule.Radius);
+				HitCapsule->SetCapsuleRadius(Capsule.Radius);
+
+				HitCapsule->RegisterComponent();
+
+				HitCapsules.Add(HitCapsule);
+			}
+		}
 	}
 }
 
@@ -227,6 +259,8 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	RotateInPlace(DeltaTime);	
 	HideCharacterIfCameraClose();
 	PollInit();
+
+	DrawDebugHitBoxes();
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -571,6 +605,23 @@ void ABlasterCharacter::PollInit()
 		{
 			BlasterPlayerState->AddToScore(0.0f);
 			BlasterPlayerState->AddToDefeats(0);
+		}
+	}
+}
+
+void ABlasterCharacter::DrawDebugHitBoxes()
+{
+	if(bDrawHitBoxes)
+	{
+		for(const auto Capsule : HitCapsules)
+		{
+			DrawDebugCapsule(
+				GetWorld(),
+				Capsule->GetComponentLocation(),
+				Capsule->GetScaledCapsuleHalfHeight(),
+				Capsule->GetScaledCapsuleRadius(),
+				Capsule->GetComponentRotation().Quaternion(),
+				FColor::Red);
 		}
 	}
 }

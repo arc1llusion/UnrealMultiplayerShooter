@@ -12,6 +12,7 @@
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
+class UBoxComponent;
 class UBuffComponent;
 class USphereComponent;
 class UOverheadWidget;
@@ -38,6 +39,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	virtual void PostInitializeComponents() override;
 
 	void UpdateHUDReadyOverlay();
@@ -67,6 +69,9 @@ public:
 	void HandleWeaponOnElimination(AWeapon* Weapon);
 
 	virtual void Destroyed() override;
+
+	TArray<UCapsuleComponent*> HitCapsules;
+	
 protected:
 
 	virtual void BeginPlay() override;
@@ -305,6 +310,17 @@ private:
 	 */
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeapon> DefaultWeaponClass;
+
+
+	/*
+	 * Hit Boxes for server side rewind
+	 */
+	UPROPERTY(EditAnywhere, Category = "Server Side Rewind")
+	bool bDrawHitBoxes;
+	
+	void CreateCapsuleHitBoxes();
+	
+	void DrawDebugHitBoxes();
 	
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
