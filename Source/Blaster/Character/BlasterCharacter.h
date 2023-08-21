@@ -12,6 +12,7 @@
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
+class ULagCompensationComponent;
 class UBoxComponent;
 class UBuffComponent;
 class USphereComponent;
@@ -179,6 +180,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UBuffComponent* Buff;
 
+	UPROPERTY(VisibleAnywhere)
+	ULagCompensationComponent* LagCompensation;
+
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 
@@ -336,6 +340,7 @@ public:
 	FORCEINLINE bool IsEliminated() const { return bEliminated; }
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
 	FORCEINLINE UBuffComponent* GetBuffComponent() const { return Buff; }
+	FORCEINLINE ULagCompensationComponent* GetLagCompensationComponent() const { return LagCompensation; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 
 	FVector GetHitTarget() const;
