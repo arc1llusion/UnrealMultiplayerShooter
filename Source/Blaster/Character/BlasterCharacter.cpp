@@ -120,27 +120,47 @@ void ABlasterCharacter::CreateCapsuleHitBoxes()
 {
 	if(GetMesh())
 	{
-		for (auto SkeletalBodySetup : GetMesh()->GetPhysicsAsset()->SkeletalBodySetups)
+		for (TObjectPtr<USkeletalBodySetup> SkeletalBodySetup : GetMesh()->GetPhysicsAsset()->SkeletalBodySetups)
 		{
-			auto BoneName = SkeletalBodySetup->BoneName;
-			auto BoneWorldTransform = GetMesh()->GetBoneTransform(GetMesh()->GetBoneIndex(BoneName));
+			FName BoneName = SkeletalBodySetup->BoneName;
+			FTransform BoneWorldTransform = GetMesh()->GetBoneTransform(GetMesh()->GetBoneIndex(BoneName));
 		
-			for (auto Capsule : SkeletalBodySetup->AggGeom.SphylElems)
+			for (FKSphylElem Capsule : SkeletalBodySetup->AggGeom.SphylElems)
 			{
-				auto LocTransform = Capsule.GetTransform();
-				auto WorldTransform = LocTransform * BoneWorldTransform;
+				FTransform LocTransform = Capsule.GetTransform();
+				FTransform WorldTransform = LocTransform * BoneWorldTransform;
 
 				auto HitCapsule = NewObject<UCapsuleComponent>(this, UCapsuleComponent::StaticClass(), BoneName, RF_Transient);
 				HitCapsule->SetupAttachment(GetMesh(), BoneName);
 				HitCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				HitCapsule->SetWorldTransform(WorldTransform);
-				HitCapsule->SetCapsuleHalfHeight(Capsule.Length / 2 + Capsule.Radius);
-				HitCapsule->SetCapsuleRadius(Capsule.Radius);
+
+				//Set the radius first, because capsule half height takes the maximum between 0, radius, and half height
+				//By default the radius is possibly 22, so if you set a lower half height it'll set the half height to 22
+				HitCapsule->SetCapsuleRadius(Capsule.Radius, false);
+				HitCapsule->SetCapsuleHalfHeight(Capsule.Length / 2 + Capsule.Radius, false);
 
 				HitCapsule->RegisterComponent();
 
 				HitCapsules.Add(HitCapsule);
 			}
+		}
+	}
+}
+
+void ABlasterCharacter::DrawDebugHitBoxes()
+{
+	if(bDrawHitBoxes)
+	{
+		for(const UCapsuleComponent* Capsule : HitCapsules)
+		{
+			DrawDebugCapsule(
+				GetWorld(),
+				Capsule->GetComponentLocation(),
+				Capsule->GetScaledCapsuleHalfHeight(),
+				Capsule->GetScaledCapsuleRadius(),
+				Capsule->GetComponentRotation().Quaternion(),
+				FColor::Red);
 		}
 	}
 }
@@ -605,23 +625,6 @@ void ABlasterCharacter::PollInit()
 		{
 			BlasterPlayerState->AddToScore(0.0f);
 			BlasterPlayerState->AddToDefeats(0);
-		}
-	}
-}
-
-void ABlasterCharacter::DrawDebugHitBoxes()
-{
-	if(bDrawHitBoxes)
-	{
-		for(const auto Capsule : HitCapsules)
-		{
-			DrawDebugCapsule(
-				GetWorld(),
-				Capsule->GetComponentLocation(),
-				Capsule->GetScaledCapsuleHalfHeight(),
-				Capsule->GetScaledCapsuleRadius(),
-				Capsule->GetComponentRotation().Quaternion(),
-				FColor::Red);
 		}
 	}
 }
