@@ -26,7 +26,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, SecondaryWeapon);
-	DOREPLIFETIME(UCombatComponent, bAiming);
+	DOREPLIFETIME(UCombatComponent, bIsAiming);
 	DOREPLIFETIME(UCombatComponent, CombatState);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, Grenades);
@@ -219,7 +219,7 @@ void UCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 	
 	if(Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
-		Character->PlayFireMontage(bAiming);
+		Character->PlayFireMontage(bIsAiming);
 
 		auto Hits = TArray<FVector_NetQuantize>();
 		Hits.Add(TraceHitTarget);
@@ -237,7 +237,7 @@ void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& Trace
 
 	if(CombatState == ECombatState::ECS_Reloading || CombatState == ECombatState::ECS_Unoccupied)
 	{
-		Character->PlayFireMontage(bAiming);
+		Character->PlayFireMontage(bIsAiming);
 		EquippedWeapon->Fire(TraceHitTargets);		
 		CombatState = ECombatState::ECS_Unoccupied;
 	}
@@ -771,22 +771,27 @@ void UCombatComponent::SetAiming(bool bInAiming)
 		return;
 	}
 	
-	bAiming = bInAiming;
+	bIsAiming = bInAiming;
 	ServerSetAiming(bInAiming);
 
-	Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
+	Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	if (Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
 	{
 		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 		if (Controller)
 		{
-			Controller->SetHUDSniperScope(bAiming);
+			Controller->SetHUDSniperScope(bIsAiming);
 		}
 	}
 
 	if(Character->IsLocallyControlled())
+	{
+		bIsLocalAiming = bIsAiming;
+	}
+
+	if(Character->IsLocallyControlled())
 	{		
-		if (bAiming)
+		if (bIsAiming)
 		{
 			if(EquippedWeapon->GetZoomInSound())
 			{
@@ -803,12 +808,20 @@ void UCombatComponent::SetAiming(bool bInAiming)
 	}
 }
 
+void UCombatComponent::OnRep_Aiming()
+{
+	if(Character && Character->IsLocallyControlled())
+	{
+		bIsAiming = bIsLocalAiming;
+	}
+}
+
 void UCombatComponent::ServerSetAiming_Implementation(bool bInAiming)
 {
-	bAiming = bInAiming;
+	bIsAiming = bInAiming;
 	if(Character)
 	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = bAiming ? AimWalkSpeed : BaseWalkSpeed;
+		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 	}
 }
 
@@ -851,7 +864,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				CrosshairInAirFactor = FMath::FInterpTo(CrosshairInAirFactor, 0.0f, DeltaTime, CrosshairFallingReturnInterpolationSpeed);
 			}
 
-			if(bAiming)
+			if(bIsAiming)
 			{
 				CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, CrosshairAimingScaleFactor, DeltaTime, CrosshairAimingInterpolationSpeed);
 			}
@@ -941,7 +954,7 @@ void UCombatComponent::InterpolateFOV(float DeltaTime)
 		return;
 	}
 
-	if(bAiming)
+	if(bIsAiming)
 	{
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpolationSpeed());
 	}

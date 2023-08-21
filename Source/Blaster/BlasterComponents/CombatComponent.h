@@ -167,8 +167,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Sockets")
 	FName SecondaryWeaponSocketName{TEXT("SecondaryWeaponSocket")};
 
-	UPROPERTY(Replicated)
-	bool bAiming;
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
+	bool bIsAiming = false;
+
+	bool bIsLocalAiming = false;
+
+	UFUNCTION()
+	void OnRep_Aiming();
 
 	UPROPERTY(EditAnywhere)
 	float BaseWalkSpeed{600.0f};

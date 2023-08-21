@@ -1059,7 +1059,7 @@ bool ABlasterCharacter::IsWeaponEquipped() const
 
 bool ABlasterCharacter::IsAiming() const
 {
-	return Combat && Combat->bAiming;
+	return Combat && Combat->bIsAiming;
 }
 
 AWeapon* ABlasterCharacter::GetEquippedWeapon() const
