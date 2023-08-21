@@ -335,6 +335,8 @@ public:
 	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	
 	ECombatState GetCombatState() const;
+
+	bool IsLocallyReloading() const;
 	
 	UFUNCTION()
 	void OnOverheadOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,

@@ -172,6 +172,8 @@ private:
 
 	bool bIsLocalAiming = false;
 
+	bool bLocallyReloading = false;
+
 	UFUNCTION()
 	void OnRep_Aiming();
 

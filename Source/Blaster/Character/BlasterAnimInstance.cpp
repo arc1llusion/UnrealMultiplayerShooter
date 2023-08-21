@@ -55,6 +55,11 @@ void UBlasterAnimInstance::SetAnimationVariables()
 
 	AimOffsetYaw = BlasterCharacter->GetAimOffsetYaw();
 	AimOffsetPitch = BlasterCharacter->GetAimOffsetPitch();
+
+	if(BlasterCharacter->IsLocallyControlled())
+	{
+		bUseFabrik = !BlasterCharacter->IsLocallyReloading() && BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade;
+	}
 }
 
 void UBlasterAnimInstance::CalculateYawOffset(float DeltaSeconds)

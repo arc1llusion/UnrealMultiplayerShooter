@@ -1092,6 +1092,16 @@ ECombatState ABlasterCharacter::GetCombatState() const
 	return Combat->CombatState;
 }
 
+bool ABlasterCharacter::IsLocallyReloading() const
+{
+	if(!Combat)
+	{
+		return false;
+	}
+
+	return Combat->bLocallyReloading;
+}
+
 // ReSharper disable once CppMemberFunctionMayBeConst
 void ABlasterCharacter::OnOverheadOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                                UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
