@@ -20,6 +20,31 @@ void ULagCompensationComponent::BeginPlay()
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if(FrameHistory.Num() <= 1)
+	{
+		FFramePackage ThisFrame;
+		SaveFramePackage(ThisFrame);
+		
+		FrameHistory.AddHead(ThisFrame);
+	}
+	else
+	{
+		float HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+
+		while(HistoryLength > MaxRecordTime)
+		{
+			FrameHistory.RemoveNode(FrameHistory.GetTail());
+			HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
+		}
+
+		FFramePackage ThisFrame;
+		SaveFramePackage(ThisFrame);
+		
+		FrameHistory.AddHead(ThisFrame);
+
+		//ShowFramePackage(ThisFrame, FColor::Red);
+	}
 }
 
 void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
@@ -57,7 +82,79 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 			CapsulePair.Value.Radius,
 			FQuat(CapsulePair.Value.Rotation),
 			Color,
-			true
+			false,
+			4.0f
 		);
+	}
+}
+
+void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
+	const FVector_NetQuantize& HitLocation, float HitTime)
+{
+	bool bReturn =
+		!HitCharacter ||
+		!HitCharacter->GetLagCompensationComponent() ||
+		!HitCharacter->GetLagCompensationComponent()->FrameHistory.GetHead() ||
+		!HitCharacter->GetLagCompensationComponent()->FrameHistory.GetTail(); 
+
+	if(bReturn)
+	{
+		return;
+	}
+
+	// Frame package that we check to verify a hit
+	FFramePackage FrameToCheck;
+	bool bShouldInterpolate = true;
+
+	//Frame history of the hit character
+	const auto& History = HitCharacter->GetLagCompensationComponent()->FrameHistory;
+	const float OldestHistoryTime = History.GetTail()->GetValue().Time;
+	const float NewestHistoryTime = History.GetHead()->GetValue().Time;
+	if(OldestHistoryTime > HitTime)
+	{
+		// too far back - too much lag to do server side rewind
+		return;
+	}
+
+	if(OldestHistoryTime == HitTime)
+	{
+		FrameToCheck = History.GetTail()->GetValue();
+		bShouldInterpolate = false;
+	}
+
+	if(NewestHistoryTime <= HitTime)
+	{
+		FrameToCheck = History.GetHead()->GetValue();
+		bShouldInterpolate = false;
+	}
+
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Younger = History.GetHead();
+	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Older = History.GetHead();
+
+	//Is older still younger than HitTime?
+	while(Older->GetValue().Time > HitTime)
+	{
+		// March back until: OlderTime < HitTime < YoungerTime
+		if(Older->GetNextNode() == nullptr)
+		{
+			break;
+		}
+		Older = Older->GetNextNode();
+
+		if(Older->GetValue().Time > HitTime)
+		{
+			Younger = Older;
+		}
+	}
+
+	if(Older->GetValue().Time == HitTime)
+	{
+		FrameToCheck = Older->GetValue();
+		bShouldInterpolate = false;
+	}
+
+	if(bShouldInterpolate)
+	{
+		//Interpolate between younger and older
 	}
 }

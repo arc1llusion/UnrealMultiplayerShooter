@@ -51,6 +51,8 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color) const;
+
+	void ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -63,4 +65,9 @@ private:
 
 	UPROPERTY()
 	ABlasterPlayerController* Controller;
+
+	TDoubleLinkedList<FFramePackage> FrameHistory;
+
+	UPROPERTY(EditAnywhere)
+	float MaxRecordTime = 4.0;
 };
