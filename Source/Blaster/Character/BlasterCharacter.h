@@ -322,9 +322,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Server Side Rewind")
 	bool bDrawHitBoxes;
 	
-	void CreateCapsuleHitBoxes();
-	
+	void CreateCapsuleHitBoxes();	
 	void DrawDebugHitBoxes();
+
+	UPROPERTY(EditAnywhere, Category = "Server Side Rewind")
+	FName HeadHitBoxName{"head"};
 	
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -342,6 +344,7 @@ public:
 	FORCEINLINE UBuffComponent* GetBuffComponent() const { return Buff; }
 	FORCEINLINE ULagCompensationComponent* GetLagCompensationComponent() const { return LagCompensation; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
+	FORCEINLINE FName GetHeadHitBoxName() const { return HeadHitBoxName; }
 
 	FVector GetHitTarget() const;
 
