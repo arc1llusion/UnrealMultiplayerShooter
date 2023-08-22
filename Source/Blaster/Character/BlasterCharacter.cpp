@@ -121,8 +121,12 @@ void ABlasterCharacter::BeginPlay()
 
 void ABlasterCharacter::CreateCapsuleHitBoxes()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Blaster Character BeginPlay"));
+	
 	if(GetMesh())
 	{
+		HitCollisionCapsules.Empty();
+		
 		for (TObjectPtr<USkeletalBodySetup> SkeletalBodySetup : GetMesh()->GetPhysicsAsset()->SkeletalBodySetups)
 		{
 			FName BoneName = SkeletalBodySetup->BoneName;
@@ -137,6 +141,7 @@ void ABlasterCharacter::CreateCapsuleHitBoxes()
 				HitCapsule->SetupAttachment(GetMesh(), BoneName);
 				HitCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				HitCapsule->SetWorldTransform(WorldTransform);
+				HitCapsule->SetHiddenInGame(!bDrawHitBoxes);
 
 				//Set the radius first, because capsule half height takes the maximum between 0, radius, and half height
 				//By default the radius is possibly 22, so if you set a lower half height it'll set the half height to 22
@@ -145,7 +150,7 @@ void ABlasterCharacter::CreateCapsuleHitBoxes()
 
 				HitCapsule->RegisterComponent();
 
-				HitCapsules.Add(HitCapsule);
+				HitCollisionCapsules.Add(BoneName, HitCapsule);
 			}
 		}
 	}
@@ -155,14 +160,14 @@ void ABlasterCharacter::DrawDebugHitBoxes()
 {
 	if(bDrawHitBoxes)
 	{
-		for(const UCapsuleComponent* Capsule : HitCapsules)
+		for(const auto& Capsule : HitCollisionCapsules)
 		{
 			DrawDebugCapsule(
 				GetWorld(),
-				Capsule->GetComponentLocation(),
-				Capsule->GetScaledCapsuleHalfHeight(),
-				Capsule->GetScaledCapsuleRadius(),
-				Capsule->GetComponentRotation().Quaternion(),
+				Capsule.Value->GetComponentLocation(),
+				Capsule.Value->GetScaledCapsuleHalfHeight(),
+				Capsule.Value->GetScaledCapsuleRadius(),
+				Capsule.Value->GetComponentRotation().Quaternion(),
 				FColor::Red);
 		}
 	}
@@ -282,8 +287,6 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	RotateInPlace(DeltaTime);	
 	HideCharacterIfCameraClose();
 	PollInit();
-
-	DrawDebugHitBoxes();
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)

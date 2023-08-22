@@ -71,7 +71,7 @@ public:
 
 	virtual void Destroyed() override;
 
-	TArray<UCapsuleComponent*> HitCapsules;
+	TMap<FName, UCapsuleComponent*> HitCollisionCapsules;
 	
 protected:
 
