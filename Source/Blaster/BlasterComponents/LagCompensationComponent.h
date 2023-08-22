@@ -59,6 +59,8 @@ protected:
 	
 	void SaveFramePackage(FFramePackage& Package);
 
+	FFramePackage InterpolationBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime) const;
+
 private:
 	UPROPERTY()
 	ABlasterCharacter* Character;

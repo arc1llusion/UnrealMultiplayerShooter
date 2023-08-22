@@ -42,8 +42,6 @@ void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		SaveFramePackage(ThisFrame);
 		
 		FrameHistory.AddHead(ThisFrame);
-
-		//ShowFramePackage(ThisFrame, FColor::Red);
 	}
 }
 
@@ -69,6 +67,40 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 		
 		Package.HitBoxInfo.Add(CapsulePair.Key, CapsuleInformation);
 	}
+}
+
+FFramePackage ULagCompensationComponent::InterpolationBetweenFrames(const FFramePackage& OlderFrame,
+	const FFramePackage& YoungerFrame, const float HitTime) const
+{
+	const float Distance = YoungerFrame.Time - OlderFrame.Time;
+	const float InterpolationFraction = FMath::Clamp((HitTime - OlderFrame.Time) / Distance, 0.0f, 1.0f);
+
+	FFramePackage InterpolationFramePackage;
+	InterpolationFramePackage.Time = HitTime;
+
+	for(auto& YoungerPair : YoungerFrame.HitBoxInfo)
+	{
+		const FName& BoneName = YoungerPair.Key;
+
+		if(!OlderFrame.HitBoxInfo.Contains(BoneName))
+		{
+			continue;
+		}
+
+		const FCapsuleInformation& YoungerCapsule = YoungerPair.Value;
+		const FCapsuleInformation& OlderCapsule = OlderFrame.HitBoxInfo[BoneName];
+		
+		FCapsuleInformation InterpolationCapsuleInformation;
+
+		InterpolationCapsuleInformation.Location = FMath::Lerp(OlderCapsule.Location, YoungerCapsule.Location, InterpolationFraction);
+		InterpolationCapsuleInformation.Rotation = FMath::Lerp(OlderCapsule.Rotation, YoungerCapsule.Rotation, InterpolationFraction);
+		InterpolationCapsuleInformation.HalfHeight = YoungerCapsule.HalfHeight;
+		InterpolationCapsuleInformation.Radius = YoungerCapsule.Radius;
+
+		InterpolationFramePackage.HitBoxInfo.Add(BoneName, InterpolationCapsuleInformation);
+	}
+
+	return InterpolationFramePackage;
 }
 
 void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, const FColor& Color) const
@@ -118,12 +150,15 @@ void ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter
 
 	if(OldestHistoryTime == HitTime)
 	{
+		//Unlikely, but found an exact match at the tail end of the history, so we don't need to interpolate
 		FrameToCheck = History.GetTail()->GetValue();
 		bShouldInterpolate = false;
 	}
 
 	if(NewestHistoryTime <= HitTime)
 	{
+		// Unlikely, but we were given a HitTime that is greater than or equal to the newest time in the history
+		// In this case, just use the newest history frame package
 		FrameToCheck = History.GetHead()->GetValue();
 		bShouldInterpolate = false;
 	}
