@@ -114,6 +114,20 @@ protected:
 		UPrimitiveComponent* OtherComponent,
 		int32 OtherBodyIndex
 	);
+	
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.0f;	
+
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewind = false;
+	
+	/*
+	 * Stored properties
+	 */
+	UPROPERTY()
+	ABlasterCharacter* BlasterOwnerCharacter;
+	UPROPERTY()
+	ABlasterPlayerController* BlasterOwnerController;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
@@ -223,14 +237,6 @@ private:
 	USoundCue* ZoomOutSound;	
 
 	/*
-	 * Stored properties
-	 */
-	UPROPERTY()
-	ABlasterCharacter* BlasterOwnerCharacter;
-	UPROPERTY()
-	ABlasterPlayerController* BlasterOwnerController;
-
-	/*
 	 * Respawn when dropped
 	 */
 
@@ -268,6 +274,8 @@ public:
 
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetAmmoCapacity() const { return AmmoCapacity; }
+
+	FORCEINLINE float GetDamage() const { return Damage; }
 
 	bool IsEmpty() const;
 	bool IsFull() const;

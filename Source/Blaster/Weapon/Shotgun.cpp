@@ -47,7 +47,7 @@ void AShotgun::ApplyDamageToAllHitActors(const TMap<AActor*, uint32>& HitActors)
 {
 	for(auto& HitCheck : HitActors)
 	{
-		ApplyDamage(HitCheck.Key, HitCheck.Value * Damage);
+		ApplyDamage(HitCheck.Key, HitCheck.Value * Damage, FVector::ZeroVector, FVector::ZeroVector);
 	}
 }
 

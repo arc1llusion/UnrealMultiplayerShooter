@@ -67,6 +67,8 @@ public:
 
 	FString GetPlayerId() const;
 
+	FORCEINLINE float GetSingleTripTime() const { return SingleTripTime; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -172,4 +174,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "High Ping Warning")
 	float HighPingThreshold = 50.0f;
+
+	float SingleTripTime = 0.0f;
 };

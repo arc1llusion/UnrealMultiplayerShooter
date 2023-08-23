@@ -40,12 +40,9 @@ private:
 	USoundCue* FireSound;
 
 protected:
-	
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.0f;
-	
+		
 	void PerformLineTrace(const UWorld* World, const FVector& Start, const FVector& End, FHitResult& FireHit);
-	void ApplyDamage(AActor* HitActor, float InDamage);
+	void ApplyDamage(AActor* HitActor, float InDamage, FVector TraceStart, FVector HitTarget);
 	void PerformFireEffects(UWorld* World, const FHitResult& FireHit, const FTransform& SocketTransform) const;
 	bool PerformHit(const UWorld* World, const FHitResult& FireHit) const;
 	void PerformHitEffects(bool bIsCharacterTarget, const UWorld* World, const FHitResult& FireHit) const;

@@ -3,7 +3,9 @@
 
 #include "HitScanWeapon.h"
 
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
@@ -32,7 +34,7 @@ void AHitScanWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 		PerformFireEffects(World, FireHit, SocketTransform);			
 		if(PerformHit(World, FireHit))
 		{
-			ApplyDamage(FireHit.GetActor(), Damage);
+			ApplyDamage(FireHit.GetActor(), Damage, Start, HitTarget);
 		}
 	}
 }
@@ -110,21 +112,38 @@ bool AHitScanWeapon::PerformHit(const UWorld* World, const FHitResult& FireHit) 
 	return bHitBlasterCharacter;
 }
 
-void AHitScanWeapon::ApplyDamage(AActor* HitActor, float InDamage)
+void AHitScanWeapon::ApplyDamage(AActor* HitActor, float InDamage, FVector TraceStart, FVector HitTarget)
 {
 	if(const auto OwnerPawn = Cast<APawn>(GetOwner()))
 	{
-		const auto InstigatorController = Cast<AController>(OwnerPawn->Controller);
-			
-		if(HasAuthority() && InstigatorController)
+		if(const auto InstigatorController = Cast<AController>(OwnerPawn->Controller))
 		{
-			UGameplayStatics::ApplyDamage(
-				HitActor,
-				InDamage,
-				InstigatorController,
-				this,
-				UDamageType::StaticClass()
-			);						
+			if(HasAuthority() && !bUseServerSideRewind)
+			{
+				UGameplayStatics::ApplyDamage(
+					HitActor,
+					InDamage,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass()
+				);						
+			}
+			
+			if(!HasAuthority() && bUseServerSideRewind)
+			{
+				BlasterOwnerCharacter = !BlasterOwnerCharacter ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
+				BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
+				if(BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensationComponent())
+				{
+					BlasterOwnerCharacter->GetLagCompensationComponent()->ServerScoreRequest(
+						Cast<ABlasterCharacter>(HitActor),
+						TraceStart,
+						HitTarget,
+						BlasterOwnerController->GetServerTime() - BlasterOwnerController->GetSingleTripTime(),
+						this
+					);
+				}
+			}
 		}
 	}
 }

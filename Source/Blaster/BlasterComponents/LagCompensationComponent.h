@@ -65,6 +65,9 @@ public:
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color) const;
 
 	FServerSideRewindResult ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
+
+	UFUNCTION(Server, Reliable)
+	void ServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -79,6 +82,8 @@ protected:
 	void MoveHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
 	void ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
 	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type InCollisionEnabled);
+
+	void SaveFrameHistory();
 
 private:
 	UPROPERTY()
