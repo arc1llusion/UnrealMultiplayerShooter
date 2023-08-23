@@ -112,7 +112,7 @@ bool AHitScanWeapon::PerformHit(const UWorld* World, const FHitResult& FireHit) 
 	return bHitBlasterCharacter;
 }
 
-void AHitScanWeapon::ApplyDamage(AActor* HitActor, float InDamage, FVector TraceStart, FVector HitTarget)
+void AHitScanWeapon::ApplyDamage(AActor* HitActor, float InDamage, const FVector& TraceStart, const FVector& HitTarget)
 {
 	if(const auto OwnerPawn = Cast<APawn>(GetOwner()))
 	{
