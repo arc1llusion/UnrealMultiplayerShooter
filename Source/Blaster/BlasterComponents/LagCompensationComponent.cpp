@@ -164,11 +164,13 @@ void ULagCompensationComponent::ShotgunServerScoreRequest_Implementation(
 			const float HeadShotDamage = Confirm.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
 			TotalDamage += HeadShotDamage;
 		}
-		if(Confirm.HeadShots.Contains(HitCharacter))
+		if(Confirm.BodyShots.Contains(HitCharacter))
 		{
 			const float BodyShotDamage = Confirm.BodyShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
 			TotalDamage += BodyShotDamage;
 		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Total Damage: %f"), TotalDamage);
 		
 		UGameplayStatics::ApplyDamage(
 			HitCharacter,
@@ -237,7 +239,6 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitC
 	// Frame package that we check to verify a hit
 	FFramePackage FrameToCheck;
 	FrameToCheck.Time = 0; //Gets rid of a Rider warning
-	FrameToCheck.Character = HitCharacter; //Gets rid of a Rider warning
 	
 	bool bShouldInterpolate = true;
 
@@ -304,7 +305,8 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitC
 		//Interpolate between younger and older
 		FrameToCheck = InterpolationBetweenFrames(Older->GetValue(), Younger->GetValue(), HitTime);
 	}
-
+	
+	FrameToCheck.Character = HitCharacter; //Gets rid of a Rider warning
 	return FrameToCheck;
 }
 
@@ -458,6 +460,8 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 			ValidFramePackages.Add(Frame);
 		}
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Valid packages: %d"), ValidFramePackages.Num());
 
 	//Cached character hit box data
 	TArray<FFramePackage> CurrentFrames;

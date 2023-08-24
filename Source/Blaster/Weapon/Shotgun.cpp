@@ -3,6 +3,10 @@
 
 #include "Shotgun.h"
 
+#include "Blaster/BlasterComponents/LagCompensationComponent.h"
+#include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
+
 void AShotgun::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 {
 	AWeapon::Fire(HitTargets);
@@ -14,12 +18,12 @@ void AShotgun::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 		return;
 	}
 	
-	FTransform SocketTransform ;
+	FTransform SocketTransform;
 	FVector Start;
 	GetSocketInformation(SocketTransform, Start);
 
 	//Maps hit character to the number of times that character was hit by shotgun scatter shots
-	TMap<AActor*, uint32> Hits;
+	TMap<ABlasterCharacter*, uint32> Hits;
 	for(const auto Hit : HitTargets)
 	{
 		FHitResult FireHit;
@@ -28,22 +32,45 @@ void AShotgun::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 		
 		if(PerformHit(World, FireHit))
 		{
-			AActor* HitActor = FireHit.GetActor();
-			if(!Hits.Contains(HitActor))
+			if(ABlasterCharacter* HitActor = Cast<ABlasterCharacter>(FireHit.GetActor()))
 			{
-				Hits.Emplace(HitActor, 1);
-			}
-			else
-			{
-				Hits[HitActor]++;
+				if(!Hits.Contains(HitActor))
+				{
+					Hits.Emplace(HitActor, 1);
+				}
+				else
+				{
+					Hits[HitActor]++;
+				}
 			}
 		}
 	}
 
-	ApplyDamageToAllHitActors(Hits);
+	if(HasAuthority() && !bUseServerSideRewind)
+	{
+		ApplyDamageToAllHitActors(Hits);				
+	}
+	if(!HasAuthority() && bUseServerSideRewind)
+	{	
+		TArray<ABlasterCharacter*> HitCharacters;
+		Hits.GetKeys(HitCharacters);
+		
+		BlasterOwnerCharacter = !BlasterOwnerCharacter ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
+		if(BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensationComponent() && BlasterOwnerCharacter->IsLocallyControlled())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Performing shotgun server score request"));
+			BlasterOwnerCharacter->GetLagCompensationComponent()->ShotgunServerScoreRequest(
+				HitCharacters,
+				Start,
+				HitTargets,
+				BlasterOwnerController->GetServerTime() - BlasterOwnerController->GetSingleTripTime()
+			);
+		}
+	}
 }
 
-void AShotgun::ApplyDamageToAllHitActors(const TMap<AActor*, uint32>& HitActors)
+void AShotgun::ApplyDamageToAllHitActors(const TMap<ABlasterCharacter*, uint32>& HitActors)
 {
 	for(auto& HitCheck : HitActors)
 	{
