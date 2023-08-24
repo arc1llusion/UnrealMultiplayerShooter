@@ -36,7 +36,7 @@ void ALobbyGameMode::GoToMainLevel()
 {
 	if(UWorld* World = GetWorld())
 	{
-		World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap1?listen")));
+		World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
 	}
 }
 

@@ -406,6 +406,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 			ResetHitBoxes(HitCharacter, CurrentFrame);
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 
+			UE_LOG(LogTemp, Warning, TEXT("Confirmed headshot SSR"));
 			return FServerSideRewindResult{true, true};
 		}
 	}
@@ -430,6 +431,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 		ResetHitBoxes(HitCharacter, CurrentFrame);
 		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 
+		UE_LOG(LogTemp, Warning, TEXT("Confirmed hit SSR"));
 		return FServerSideRewindResult{true, false};
 	}
 
