@@ -131,6 +131,55 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharac
 	}
 }
 
+
+/**
+ * @brief Rewinds for the shotgun and applies damage if a hit is successful. This is called when a client claims to have
+ * made a hit, but it did not go through on the server
+ * @param HitCharacters Characters being damaged
+ * @param TraceStart The start of the trace
+ * @param HitLocations The locations on the hit characters
+ * @param HitTime The time the characters claim to have been hit
+ * @return 
+ */
+void ULagCompensationComponent::ShotgunServerScoreRequest_Implementation(
+	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
+	const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
+{
+	if(!Character)
+	{
+		return;
+	}
+	
+	FShotgunServerSideRewindResult Confirm = ShotgunServerSideRewind(HitCharacters, TraceStart, HitLocations, HitTime);
+
+	for(auto& HitCharacter : HitCharacters)
+	{
+		if(!HitCharacter || !Character->GetEquippedWeapon())
+			continue;
+
+		float TotalDamage = 0.0f;
+		
+		if(Confirm.HeadShots.Contains(HitCharacter))
+		{
+			const float HeadShotDamage = Confirm.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
+			TotalDamage += HeadShotDamage;
+		}
+		if(Confirm.HeadShots.Contains(HitCharacter))
+		{
+			const float BodyShotDamage = Confirm.BodyShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
+			TotalDamage += BodyShotDamage;
+		}
+		
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,
+			TotalDamage,
+			Character->Controller,
+			Character->GetEquippedWeapon(),
+			UDamageType::StaticClass()
+		);
+	}
+}
+
 /**
  * @brief Performs server side rewind by rewinding the frame history, determining a frame to check, and performing a
  * line trace to confirm the hit of the character
@@ -149,8 +198,8 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 
 
 /**
- * @brief Performs server side rewind for the shotgun specificall by rewinding the frame history,
- * determining a frame to check, and performing a line trace to confirm the hit of the character
+ * @brief Performs server side rewind for the shotgun specifically by rewinding the frame history,
+ * determining a frame to check, and performing a line trace to confirm the hit of the character(s)
  * @param HitCharacters Characters being damaged
  * @param TraceStart The start of the trace
  * @param HitLocations The locations on the hit characters
@@ -327,8 +376,6 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 		return FServerSideRewindResult({false, false});
 	}
 
-	DrawDebugSphere(World, HitLocation, 12.0f, 12, FColor::Black, true);
-
 	FFramePackage CurrentFrame;
 
 	// Cache and move the hit boxes of the hit character. Caching enables us to move the hit boxes BACK to where they were
@@ -438,7 +485,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		}
 	}
 
-	// Iterate each hit location and perform the line trace to find collisions with the characters hit boxes
+	// Iterate each hit location and perform the line trace to find collisions with the characters head hit boxes
 	for(auto& HitLocation : HitLocations)
 	{
 		FHitResult ConfirmHitResult;
