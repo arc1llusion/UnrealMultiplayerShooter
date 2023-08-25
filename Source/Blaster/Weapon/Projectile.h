@@ -26,6 +26,16 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void Destroyed() override;
+
+	float GetInitialSpeed() const;
+
+	FORCEINLINE bool IsServerSideRewind() const { return bUseServerSideRewind; }
+	FORCEINLINE void SetServerSideRewind(bool InServerSideRewind) { bUseServerSideRewind = InServerSideRewind; }
+
+	FORCEINLINE void SetTraceStart(const FVector_NetQuantize& InStart) { TraceStart = InStart; }
+	FORCEINLINE void SetInitialVelocity(const FVector_NetQuantize100& InInitialVelocity) { InitialVelocity = InInitialVelocity; }
+
+	FORCEINLINE void SetDamage(float InDamage) { Damage = InDamage; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -47,7 +57,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;
 
-	UPROPERTY(EditAnywhere)
 	float Damage = 20.0f;	
 
 	UPROPERTY(EditAnywhere)

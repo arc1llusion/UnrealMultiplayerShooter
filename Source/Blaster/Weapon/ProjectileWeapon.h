@@ -24,4 +24,13 @@ public:
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
+
+	AProjectile* SpawnProjectile(
+		UWorld* World,
+		const FActorSpawnParameters& InSpawnParams,
+		const FVector& SpawnLocation,
+		const FRotator& SpawnRotation,
+		bool bInReplicated,
+		bool bInUseServerSideRewind
+	) const;
 };

@@ -9,14 +9,10 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 {
 	Super::Fire(HitTargets);
 
-	if(!HasAuthority())
-	{
-		return;
-	}
-
 	APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+	UWorld* World = GetWorld();
 	
-	if(!ProjectileClass || !InstigatorPawn)
+	if(!ProjectileClass || !InstigatorPawn || !World)
 	{
 		return;
 	}
@@ -28,21 +24,76 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 
 	const auto HitTarget = HitTargets[0];
 
-	if(const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName(FName(TEXT("MuzzleFlash"))))
-	{
-		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+	FTransform SocketTransform;
+	FVector Start;
+	GetSocketInformation(SocketTransform, Start);
+	
+	//From muzzle flash socket to hit location from TraceUnderCrossHairs
+	const FVector ToTarget = HitTarget - Start;
+	const FRotator TargetRotation = ToTarget.Rotation();
+	
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = GetOwner();
+	SpawnParameters.Instigator = InstigatorPawn;
 
-		//From muzzle flash socket to hit location from TraceUnderCrossHairs
-		const FVector ToTarget = HitTarget - SocketTransform.GetLocation();
-		const FRotator TargetRotation = ToTarget.Rotation();
-		
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.Owner = GetOwner();
-		SpawnParameters.Instigator = InstigatorPawn;
-		
-		if(UWorld* World = GetWorld())
+	AProjectile* SpawnedProjectile = nullptr;
+
+	if(bUseServerSideRewind)
+	{
+		if(InstigatorPawn->HasAuthority())
 		{
-			World->SpawnActor<AProjectile>(ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParameters);
-		}		
+			//On the server
+			if(InstigatorPawn->IsLocallyControlled())
+			{
+				// Server, host, use replicated projectile
+				// No need to use SSR on the server
+				SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, true, false);
+				SpawnedProjectile->SetDamage(Damage);
+			}
+			else
+			{
+				// Server, not locally controller, spawn non-replicated projectile no server side rewind
+				SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, false, false);
+			}
+		}
+		else //Client, using server side rewind
+		{			
+			if(InstigatorPawn->IsLocallyControlled())
+			{
+				// Client, locally controlled, spawn non-replicated projectile and use ServerSideRewind
+				SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, false, true);
+				SpawnedProjectile->SetTraceStart(Start);
+				SpawnedProjectile->SetInitialVelocity(SpawnedProjectile->GetActorForwardVector() * SpawnedProjectile->GetInitialSpeed());
+				SpawnedProjectile->SetDamage(Damage);
+			}
+			else
+			{
+				// Client, locally controlled, spawn non-replicated projectile and no ServerSideRewind
+				SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, false, false);
+			}
+		}
 	}
+	else // Weapon not using ServerSideRewind
+	{
+		if(InstigatorPawn->HasAuthority())
+		{
+			SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, true, false);
+			SpawnedProjectile->SetDamage(Damage);
+		}
+	}
+}
+
+AProjectile* AProjectileWeapon::SpawnProjectile(UWorld* World, const FActorSpawnParameters& InSpawnParams, const FVector& SpawnLocation,
+                                                const FRotator& SpawnRotation, bool bInReplicated, bool bInUseServerSideRewind) const
+{
+	if(!World)
+	{
+		return nullptr;
+	}
+
+	const auto SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, InSpawnParams);
+	SpawnedProjectile->SetReplicates(bInReplicated);
+	SpawnedProjectile->SetServerSideRewind(bInUseServerSideRewind);
+
+	return SpawnedProjectile;
 }

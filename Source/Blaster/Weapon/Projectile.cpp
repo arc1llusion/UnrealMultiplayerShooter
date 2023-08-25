@@ -7,6 +7,7 @@
 #include "Blaster/Blaster.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -15,7 +16,7 @@
 AProjectile::AProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
+	//bReplicates = true;
 
 	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	SetRootComponent(CollisionBox);
@@ -124,6 +125,16 @@ void AProjectile::DestroyTimerFinished()
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();
+}
+
+float AProjectile::GetInitialSpeed() const
+{
+	if(ProjectileMovementComponent)
+	{
+		return ProjectileMovementComponent->InitialSpeed;
+	}
+
+	return 0.0f;
 }
 
 void AProjectile::MulticastPlayHitEffect_Implementation(bool bHitEnemy)
