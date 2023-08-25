@@ -139,7 +139,6 @@ void ABlasterCharacter::CreateCapsuleHitBoxes()
 
 				auto HitCapsule = NewObject<UCapsuleComponent>(this, UCapsuleComponent::StaticClass(), BoneName, RF_Transient);
 				HitCapsule->SetupAttachment(GetMesh(), BoneName);
-				HitCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				HitCapsule->SetWorldTransform(WorldTransform);
 				HitCapsule->SetHiddenInGame(!bDrawHitBoxes);
 
@@ -147,6 +146,11 @@ void ABlasterCharacter::CreateCapsuleHitBoxes()
 				//By default the radius is possibly 22, so if you set a lower half height it'll set the half height to 22
 				HitCapsule->SetCapsuleRadius(Capsule.Radius, false);
 				HitCapsule->SetCapsuleHalfHeight(Capsule.Length / 2 + Capsule.Radius, false);
+
+				HitCapsule->SetCollisionObjectType(ECC_HitBox);
+				HitCapsule->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+				HitCapsule->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
+				HitCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 				HitCapsule->RegisterComponent();
 

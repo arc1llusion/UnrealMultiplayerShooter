@@ -3,6 +3,7 @@
 
 #include "LagCompensationComponent.h"
 
+#include "Blaster/Blaster.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Components/CapsuleComponent.h"
@@ -397,12 +398,19 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	if(UCapsuleComponent* HeadCapsule = HitCharacter->HitCollisionCapsules[HitCharacter->GetHeadHitBoxName()])
 	{
 		HeadCapsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		HeadCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+		HeadCapsule->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 	
-		World->LineTraceSingleByChannel(ConfirmHitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);
+		World->LineTraceSingleByChannel(ConfirmHitResult, TraceStart, TraceEnd, ECC_HitBox);
 
 		if(ConfirmHitResult.bBlockingHit) //Hit the head, return
 		{
+			if(ConfirmHitResult.Component.IsValid())
+			{
+				if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
+				{
+					DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
+				}
+			}
 			ResetHitBoxes(HitCharacter, CurrentFrame);
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 
@@ -420,14 +428,22 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 		}
 
 		CapsulePair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		CapsulePair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+		CapsulePair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 	}	
 
 	//Perform the line trace now that all hit boxes are enabled
-	World->LineTraceSingleByChannel(ConfirmHitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);
+	World->LineTraceSingleByChannel(ConfirmHitResult, TraceStart, TraceEnd, ECC_HitBox);
 
 	if(ConfirmHitResult.bBlockingHit) //Got a hit, not a headshot
 	{
+		if(ConfirmHitResult.Component.IsValid())
+		{
+			if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
+			{
+				DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
+			}
+		}
+		
 		ResetHitBoxes(HitCharacter, CurrentFrame);
 		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 
@@ -463,8 +479,6 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Valid packages: %d"), ValidFramePackages.Num());
-
 	//Cached character hit box data
 	TArray<FFramePackage> CurrentFrames;
 
@@ -487,7 +501,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		if(UCapsuleComponent* HeadCapsule = Frame.Character->HitCollisionCapsules[Frame.Character->GetHeadHitBoxName()])
 		{
 			HeadCapsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			HeadCapsule->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+			HeadCapsule->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 		}
 	}
 
@@ -497,11 +511,19 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		FHitResult ConfirmHitResult;
 		const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
 
-		World->LineTraceSingleByChannel(ConfirmHitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);
+		World->LineTraceSingleByChannel(ConfirmHitResult, TraceStart, TraceEnd, ECC_HitBox);
 
 		//Store any hits in the headshot TMap of the shotgun result
 		if(ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 		{
+			if(ConfirmHitResult.Component.IsValid())
+			{
+				if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
+				{
+					DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
+				}
+			}
+			
 			if(!ShotgunResult.HeadShots.Contains(BlasterCharacter))
 			{
 				ShotgunResult.HeadShots.Emplace(BlasterCharacter, 1);
@@ -524,7 +546,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 			}
 
 			CapsulePair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			CapsulePair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+			CapsulePair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 		}
 
 		if(UCapsuleComponent* HeadCapsule = Frame.Character->HitCollisionCapsules[Frame.Character->GetHeadHitBoxName()])
@@ -539,10 +561,18 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		FHitResult ConfirmHitResult;
 		const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
 
-		World->LineTraceSingleByChannel(ConfirmHitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility);
+		World->LineTraceSingleByChannel(ConfirmHitResult, TraceStart, TraceEnd, ECC_HitBox);
 		
 		if(ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 		{
+			if(ConfirmHitResult.Component.IsValid())
+			{
+				if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
+				{
+					DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
+				}
+			}
+			
 			if(!ShotgunResult.BodyShots.Contains(BlasterCharacter))
 			{
 				ShotgunResult.BodyShots.Emplace(BlasterCharacter, 1);
