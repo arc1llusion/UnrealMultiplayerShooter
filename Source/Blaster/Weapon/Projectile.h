@@ -81,7 +81,20 @@ protected:
 	UStaticMeshComponent* ProjectileMesh;
 	
 	UPROPERTY(VisibleAnywhere)
-	UProjectileMovementComponent* ProjectileMovementComponent;
+	UProjectileMovementComponent* ProjectileMovementComponent;	
+
+	/*
+	 * Server Side Rewind
+	 */
+
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewind = false;
+
+	FVector_NetQuantize TraceStart;
+	FVector_NetQuantize100 InitialVelocity;
+
+	// The course uses an outside InitialSpeed float, but I'm choosing to rely on the projectile movement component
+	// Initial Speed to set the values.
 	
 private:
 	UPROPERTY(EditAnywhere)
@@ -105,17 +118,4 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
 	float MinimumDamage = 10.0f;
-
-	/*
-	 * Server Side Rewind
-	 */
-
-	UPROPERTY(EditAnywhere)
-	bool bUseServerSideRewind = false;
-
-	FVector_NetQuantize TraceStart;
-	FVector_NetQuantize100 InitialVelocity;
-
-	// The course uses an outside InitialSpeed float, but I'm choosing to rely on the projectile movement component
-	// Initial Speed to set the values.
 };

@@ -90,19 +90,30 @@ public:
 	 * @param HitCharacter The Character being damaged
 	 * @param TraceStart The start of the trace
 	 * @param HitLocation The location on the hit character
-	 * @param HitTime The time the client recorded a hit + Single Trip Time
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @param DamageCauser The weapon causing the damage
 	 */
 	UFUNCTION(Server, Reliable)
 	void ServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser);
 
 	/**
+	 * @brief Applies damage to a character if server side rewind for projectiles is successful. This is called when a client claims to
+	 * have made a hit, but it did not go through on the server
+	 * @param HitCharacter The Character being damaged
+	 * @param TraceStart The start of the trace
+	 * @param InitialVelocity The initial velocity of the projectile
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
+	 */
+	UFUNCTION(Server, Reliable)
+	void ProjectileServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime);
+	
+	/**
 	 * @brief Rewinds for the shotgun and applies damage if a hit is successful. This is called when a client claims to have
 	 * made a hit, but it did not go through on the server
 	 * @param HitCharacters Characters being damaged
 	 * @param TraceStart The start of the trace
 	 * @param HitLocations The locations on the hit characters
-	 * @param HitTime The time the client recorded a hit + Single Trip Time
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return 
 	 */
 	UFUNCTION(Server, Reliable)
@@ -121,7 +132,7 @@ protected:
 	 * @brief Interpolates the positions and rotations between two frame packages
 	 * @param OlderFrame The older (less time passed) frame
 	 * @param YoungerFrame  The younger (More time passed) frame
-	 * @param HitTime The time the client recorded a hit + Single Trip Time
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return An interpolated values frames between the Older and Younger Frame
 	 * i.e. A Capsule will have their HalfHeight and Radius interpolated
 	 */
@@ -148,10 +159,11 @@ protected:
 
 	/**
 	 * @brief Confirms the hit deduced by the server side rewind frame interpolation for projectiles
+	 * @param Package The exact match or interpolated frame to check
 	 * @param HitCharacter The Character being damaged
 	 * @param TraceStart The start of the trace
 	 * @param InitialVelocity The initial velocity of the projectile
-	 * @param HitTime The time the client recorded a hit + Single Trip Time
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return Result indicating whether or not the server found a hit on the head of body
 	 */
 	FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime);
@@ -206,7 +218,7 @@ protected:
 	/**
 	 * @brief Walks the linked list to find the FramePackage that best matches the passed in HitTime
 	 * @param HitCharacter The character being hit
-	 * @param HitTime The time the client recorded a hit + Single Trip Time
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return A FramePackage that either exactly matches in item in the frame history, or one that has been interpolated
 	 * between two moments in history
 	 */
@@ -221,7 +233,7 @@ protected:
 	 * @param HitCharacter The Character being damaged
 	 * @param TraceStart The start of the trace
 	 * @param HitLocation The location on the hit character
-	 * @param HitTime The time the client recorded a hit + Single Trip Time
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return Result indicating whether or not the server found a hit on the head of body
 	 */
 	FServerSideRewindResult ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
@@ -235,7 +247,7 @@ protected:
 	 * @param HitCharacter Character being damaged
 	 * @param TraceStart The start of the trace
 	 * @param InitialVelocity The initial velocity of the projectile
-	 * @param HitTime The time the client recorded a hit + Single Trip Time
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return Result indicating whether or not the server found a hit on the head of body
 	 */
 	FServerSideRewindResult ProjectileServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime);
@@ -249,7 +261,7 @@ protected:
 	 * @param HitCharacters Characters being damaged
 	 * @param TraceStart The start of the trace
 	 * @param HitLocations Each location the client recorded a hit
-	 * @param HitTime The time the client recorded a hit + Single Trip Time
+	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return A hit result with successful headshots and body shots
 	 */
 	FShotgunServerSideRewindResult ShotgunServerSideRewind(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);

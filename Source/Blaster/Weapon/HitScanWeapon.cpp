@@ -118,7 +118,8 @@ void AHitScanWeapon::ApplyDamage(AActor* HitActor, float InDamage, const FVector
 	{
 		if(const auto InstigatorController = Cast<AController>(OwnerPawn->Controller))
 		{
-			if(HasAuthority() && !bUseServerSideRewind)
+			const bool bCauseAuthorityDamage = !bUseServerSideRewind || OwnerPawn->IsLocallyControlled(); 
+			if(HasAuthority() && bCauseAuthorityDamage)
 			{
 				UGameplayStatics::ApplyDamage(
 					HitActor,
