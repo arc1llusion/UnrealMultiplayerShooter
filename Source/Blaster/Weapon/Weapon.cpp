@@ -61,6 +61,8 @@ void AWeapon::BeginPlay()
 
 	StartingLocation = GetActorLocation();
 	StartingRotation = GetActorRotation();
+
+	bUseServerSideRewindDefault = bUseServerSideRewind;
 }
 
 void AWeapon::Tick(float DeltaTime)
@@ -73,6 +75,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME_CONDITION(AWeapon, bUseServerSideRewind, COND_OwnerOnly);
 }
 
 void AWeapon::OnRep_Owner()
@@ -110,6 +113,20 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if(ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor))
 	{
 		BlasterCharacter->SetOverlappingWeapon(nullptr);
+	}
+}
+
+void AWeapon::OnPingTooHigh(bool bPingTooHigh)
+{
+	if(bPingTooHigh)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Ping too high, set use server side rewind to false"), *GetActorNameOrLabel());
+		bUseServerSideRewind = false;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Ping okay, set use server side rewind to: %d"), *GetActorNameOrLabel(), bUseServerSideRewindDefault);
+		bUseServerSideRewind = bUseServerSideRewindDefault;
 	}
 }
 
@@ -228,6 +245,8 @@ void AWeapon::OnWeaponStateEquipped()
 	}
 	EnableCustomDepth(false);	
 	ClearRespawnTimer();
+
+	AddOrRemoveHighPingDelegate(true);
 }
 
 void AWeapon::OnWeaponStateEquippedSecondary()
@@ -250,6 +269,8 @@ void AWeapon::OnWeaponStateEquippedSecondary()
 	EnableCustomDepth(true);
 	
 	ClearRespawnTimer();
+
+	AddOrRemoveHighPingDelegate(false);
 }
 
 void AWeapon::OnWeaponStateDropped()
@@ -271,6 +292,37 @@ void AWeapon::OnWeaponStateDropped()
 	WeaponMesh->MarkRenderStateDirty();
 	EnableCustomDepth(true);
 	StartRespawnOnDrop();
+
+	AddOrRemoveHighPingDelegate(false);
+}
+
+void AWeapon::AddOrRemoveHighPingDelegate(bool bAddDelegate)
+{
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if(BlasterOwnerCharacter && !BlasterOwnerCharacter->IsLocallyControlled() && bUseServerSideRewindDefault)
+	{
+		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
+
+		if(BlasterOwnerController)
+		{			
+			if(bAddDelegate)
+			{
+				if(HasAuthority() && !BlasterOwnerController->HighPingDelegate.IsBound())
+				{
+					UE_LOG(LogTemp, Warning, TEXT("%s: High Ping Delegate Added"), *GetActorNameOrLabel());
+					BlasterOwnerController->HighPingDelegate.AddDynamic(this, &AWeapon::AWeapon::OnPingTooHigh);
+				}
+			}
+			else
+			{				
+				if(HasAuthority() && BlasterOwnerController->HighPingDelegate.IsBound())
+				{
+					UE_LOG(LogTemp, Warning, TEXT("%s: High Ping Delegate Removed"), *GetActorNameOrLabel());
+					BlasterOwnerController->HighPingDelegate.RemoveDynamic(this, &AWeapon::AWeapon::OnPingTooHigh);
+				}
+			}
+		}
+	}
 }
 
 void AWeapon::StartRespawnOnDrop()

@@ -118,8 +118,14 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.0f;	
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Replicated, EditAnywhere)
 	bool bUseServerSideRewind = false;
+
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewindDefault = false;
+
+	UFUNCTION()
+	void OnPingTooHigh(bool bPingTooHigh);
 	
 	/*
 	 * Stored properties
@@ -252,6 +258,8 @@ private:
 	bool bIsDefaultWeapon = false;
 
 	bool bIsBurst = false;
+
+	void AddOrRemoveHighPingDelegate(bool bAddDelegate);
 
 public:
 	void SetWeaponState(EWeaponState State);

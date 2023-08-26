@@ -12,6 +12,9 @@ class ABlasterPlayerState;
 class ABlasterHUD;
 class UInputMappingContext;
 class ABlasterGameMode;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHighPingDelegate, bool, bPingTooHigh);
+
 /**
  * 
  */
@@ -68,6 +71,8 @@ public:
 	FString GetPlayerId() const;
 
 	FORCEINLINE float GetSingleTripTime() const { return SingleTripTime; }
+
+	FHighPingDelegate HighPingDelegate;
 
 protected:
 	virtual void BeginPlay() override;
@@ -174,6 +179,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "High Ping Warning")
 	float HighPingThreshold = 50.0f;
+
+	UFUNCTION(Server, Reliable)
+	void ServerReportPingStatus(bool bHighPing);
 
 	float SingleTripTime = 0.0f;
 };
