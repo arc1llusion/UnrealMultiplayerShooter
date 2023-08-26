@@ -61,10 +61,6 @@ void ULagCompensationComponent::SaveFrameHistory()
 	}
 }
 
-/**
- * @brief Saves the current frame data for the owning character (Location, rotation, radius, half height) and puts it as part of the container
- * @param Package 
- */
 void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 {
 	Character = !Character ? Cast<ABlasterCharacter>(GetOwner()) : Character;
@@ -90,11 +86,7 @@ void ULagCompensationComponent::SaveFramePackage(FFramePackage& Package)
 	}
 }
 
-/**
- * @brief 
- * @param Package Debug Method for showing the frame history
- * @param Color Color of the debug boxes
- */
+
 void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, const FColor& Color) const
 {
 	for(const auto & CapsulePair : Package.HitBoxInfo)
@@ -111,15 +103,7 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 	}
 }
 
-/**
- * @brief Applies damage to a character if server side rewind is successful. This is called when a client claims to
- * have made a hit, but it did not go through on the server
- * @param HitCharacter The Character being damaged
- * @param TraceStart The start of the trace
- * @param HitLocation The location on the hit character
- * @param HitTime The time the character claims to have been hit
- * @param DamageCauser The weapon causing the damage
- */
+
 void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter,
                                                                   const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
 {
@@ -132,16 +116,6 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharac
 	}
 }
 
-
-/**
- * @brief Rewinds for the shotgun and applies damage if a hit is successful. This is called when a client claims to have
- * made a hit, but it did not go through on the server
- * @param HitCharacters Characters being damaged
- * @param TraceStart The start of the trace
- * @param HitLocations The locations on the hit characters
- * @param HitTime The time the characters claim to have been hit
- * @return 
- */
 void ULagCompensationComponent::ShotgunServerScoreRequest_Implementation(
 	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
 	const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
@@ -183,15 +157,7 @@ void ULagCompensationComponent::ShotgunServerScoreRequest_Implementation(
 	}
 }
 
-/**
- * @brief Performs server side rewind by rewinding the frame history, determining a frame to check, and performing a
- * line trace to confirm the hit of the character
- * @param HitCharacter The Character being damaged
- * @param TraceStart The start of the trace
- * @param HitLocation The location on the hit character
- * @param HitTime The time the character claims to have been hit
- * @return 
- */
+
 FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
                                                                     const FVector_NetQuantize& HitLocation, float HitTime)
 {
@@ -200,15 +166,13 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 }
 
 
-/**
- * @brief Performs server side rewind for the shotgun specifically by rewinding the frame history,
- * determining a frame to check, and performing a line trace to confirm the hit of the character(s)
- * @param HitCharacters Characters being damaged
- * @param TraceStart The start of the trace
- * @param HitLocations The locations on the hit characters
- * @param HitTime The time the characters claim to have been hit
- * @return 
- */
+FServerSideRewindResult ULagCompensationComponent::ProjectileServerSideRewind(ABlasterCharacter* HitCharacter,
+                                                                              const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime)
+{
+	const FFramePackage FrameToCheck = GetFrameToCheck(HitCharacter, HitTime);
+	return ProjectileConfirmHit(FrameToCheck, HitCharacter, TraceStart, InitialVelocity, HitTime);
+}
+
 FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunServerSideRewind(
 	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
 	const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
@@ -311,13 +275,7 @@ FFramePackage ULagCompensationComponent::GetFrameToCheck(ABlasterCharacter* HitC
 	return FrameToCheck;
 }
 
-/**
- * @brief Interpolates the positions and rotations between two frame packages
- * @param OlderFrame The older (less time passed) frame
- * @param YoungerFrame  The younger (More time passed) frame
- * @param HitTime The time in between the younger and older frames 
- * @return 
- */
+
 FFramePackage ULagCompensationComponent::InterpolationBetweenFrames(const FFramePackage& OlderFrame,
                                                                     const FFramePackage& YoungerFrame, const float HitTime) const
 {
@@ -361,14 +319,6 @@ FFramePackage ULagCompensationComponent::InterpolationBetweenFrames(const FFrame
 	return InterpolationFramePackage;
 }
 
-/**
- * @brief Confirms the hit deduced by the server side rewind frame interpolation
- * @param Package The exact match or interpolated frame to check
- * @param HitCharacter The Character being damaged
- * @param TraceStart The start of the trace
- * @param HitLocation The location on the hit character
- * @return 
- */
 FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackage& Package,
                                                               ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation)
 {
@@ -457,8 +407,108 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	return FServerSideRewindResult{false, false};
 }
 
+FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter,
+	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime)
+{
+	UWorld* World = GetWorld();
+	if(!HitCharacter || !World)
+	{
+		//If this data is invalid we don't need to do anything, no hit
+		return FServerSideRewindResult({false, false});
+	}
+
+	FFramePackage CurrentFrame;
+
+	// Cache and move the hit boxes of the hit character. Caching enables us to move the hit boxes BACK to where they were
+	// before we attempted to confirm the hit
+	CacheHitBoxPositions(HitCharacter, CurrentFrame);
+	MoveHitBoxes(HitCharacter, Package);
+	
+	//Mesh can get in the way of collision checks, so disable it for the moment
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
+
+	FPredictProjectilePathParams PathParams;
+	PathParams.bTraceWithChannel = true;
+	PathParams.bTraceWithCollision = true;
+	PathParams.DrawDebugTime = 5.0f;
+	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+	PathParams.LaunchVelocity = InitialVelocity;
+	PathParams.MaxSimTime = MaxRecordTime;
+	PathParams.ProjectileRadius = 5.0f;
+	PathParams.SimFrequency = 15.0f;
+	PathParams.StartLocation = TraceStart;
+	PathParams.TraceChannel = ECC_HitBox;
+	PathParams.ActorsToIgnore.Add(GetOwner());
+
+	FPredictProjectilePathResult PathResult;
+	
+	// Determine the head capsule component and enable it if found
+	// If no head capsule found we can't check for a head shot, so move on
+	if(UCapsuleComponent* HeadCapsule = HitCharacter->HitCollisionCapsules[HitCharacter->GetHeadHitBoxName()])
+	{
+		HeadCapsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		HeadCapsule->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);		
+
+		//Perform projectile prediction on the head box
+		UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);		
+
+		if(PathResult.HitResult.bBlockingHit) //Hit the head, return
+		{
+			if(PathResult.HitResult.Component.IsValid())
+			{
+				if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(PathResult.HitResult.Component))
+				{
+					DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
+				}
+			}
+			ResetHitBoxes(HitCharacter, CurrentFrame);
+			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+
+			UE_LOG(LogTemp, Warning, TEXT("Confirmed headshot projectile SSR"));
+			return FServerSideRewindResult{true, true};
+		}
+	}
+
+	//Past this point we didn't get a head shot, enable the remaining hit boxes
+	for(const auto & CapsulePair : HitCharacter->HitCollisionCapsules)
+	{
+		if(CapsulePair.Value == nullptr)
+		{
+			continue;
+		}
+
+		CapsulePair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		CapsulePair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
+	}	
+
+	//Perform the projectile prediction now that all hit boxes are enabled
+	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
+
+	if(PathResult.HitResult.bBlockingHit) //Got a hit, not a headshot
+	{
+		if(PathResult.HitResult.Component.IsValid())
+		{
+			if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(PathResult.HitResult.Component))
+			{
+				DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
+			}
+		}
+		
+		ResetHitBoxes(HitCharacter, CurrentFrame);
+		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+
+		UE_LOG(LogTemp, Warning, TEXT("Confirmed hit Projectile SSR"));
+		return FServerSideRewindResult{true, false};
+	}
+
+	//Past this point, we didn't score a hit so reset the hit boxes, character mesh collision, and return no hit
+	ResetHitBoxes(HitCharacter, CurrentFrame);
+	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+	return FServerSideRewindResult{false, false};
+}
+
 FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(const TArray<FFramePackage>& FramePackages,
-	const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations)
+                                                                            const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations)
 {
 	FShotgunServerSideRewindResult ShotgunResult;
 
@@ -594,11 +644,7 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 	return ShotgunResult;
 }
 
-/**
- * @brief Caches the HitCharacters hit boxes for later use
- * @param HitCharacter The Character being damaged
- * @param OutFramePackage The cached frame package of the HitCharacter's hit boxes
- */
+
 void ULagCompensationComponent::CacheHitBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage)
 {
 	if(!HitCharacter)
@@ -625,11 +671,7 @@ void ULagCompensationComponent::CacheHitBoxPositions(ABlasterCharacter* HitChara
 	}
 }
 
-/**
- * @brief Moves the hit characters hit boxes to the package information provided
- * @param HitCharacter The Character being damaged
- * @param Package Moves the hit characters hit boxes to the package information provided
- */
+
 void ULagCompensationComponent::MoveHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package)
 {
 	if(!HitCharacter)
@@ -651,12 +693,7 @@ void ULagCompensationComponent::MoveHitBoxes(ABlasterCharacter* HitCharacter, co
 	}
 }
 
-/**
- * @brief Resets the hit characters hit boxes to the package provided. Additionally resets the collision of each
- * hit box to No Collision
- * @param HitCharacter The Character being damaged
- * @param Package The package information to reset the hit character frame hit boxes to
- */
+
 void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package)
 {
 	if(!HitCharacter)
@@ -679,11 +716,7 @@ void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, c
 	}	
 }
 
-/**
- * @brief Enables or disables the collision hit boxes of the characters mesh
- * @param HitCharacter The character being damaged
- * @param InCollisionEnabled The collision type to set to
- */
+
 void ULagCompensationComponent::EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter,
                                                              ECollisionEnabled::Type InCollisionEnabled)
 {

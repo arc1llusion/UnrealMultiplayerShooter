@@ -52,7 +52,7 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 			}
 			else
 			{
-				// Server, not locally controller, spawn non-replicated projectile no server side rewind
+				// Server, not locally controlled, spawn non-replicated projectile no server side rewind
 				SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, false, false);
 			}
 		}
@@ -68,7 +68,7 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 			}
 			else
 			{
-				// Client, locally controlled, spawn non-replicated projectile and no ServerSideRewind
+				// Client, not locally controlled, spawn non-replicated projectile and no ServerSideRewind
 				SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, false, false);
 			}
 		}
