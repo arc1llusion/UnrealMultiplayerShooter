@@ -4,6 +4,7 @@
 #include "PauseMenu.h"
 
 #include "MultiplayerSessionsSubsystem.h"
+#include "Blaster/GameInstance/BlasterGameInstance.h"
 #include "Components/Button.h"
 #include "GameFramework/GameModeBase.h"
 
@@ -35,7 +36,7 @@ void UPauseMenu::MenuSetup()
 		}
 	}	
 
-	if(ReturnButton)
+	if(ReturnButton && !ReturnButton->OnClicked.IsBound())
 	{
 		ReturnButton->OnClicked.AddDynamic(this, &UPauseMenu::ReturnButtonClicked);
 	}
@@ -66,6 +67,16 @@ void UPauseMenu::MenuTearDown()
 			PlayerController->SetShowMouseCursor(false);
 		}
 	}
+
+	if(ReturnButton && ReturnButton->OnClicked.IsBound())
+	{
+		ReturnButton->OnClicked.RemoveDynamic(this, &UPauseMenu::ReturnButtonClicked);
+	}
+
+	if(MultiplayerSessionsSubsystem && MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
+	{
+		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.RemoveDynamic(this, &UPauseMenu::OnDestroySession);
+	}
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
@@ -87,7 +98,7 @@ void UPauseMenu::OnDestroySession(bool bWasSuccessful)
 	}
 	
 	if(const UWorld* World = GetWorld())
-	{
+	{		
 		if(const auto GameMode = World->GetAuthGameMode<AGameModeBase>())
 		{
 			GameMode->ReturnToMainMenuHost();

@@ -15,20 +15,20 @@ void UBlasterGameInstance::OnStart()
 {
 	Super::OnStart();
 
-	if(const UWorld* World = GetWorld())
-	{
-		if(GEngine)
-		{
-			const FString MapName = FString::Printf(TEXT("Map Name: %s"), *World->GetMapName());
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, MapName);
-		}
-		
-		if(World->GetMapName().Contains("Main"))
-		{				
-			CreateMenuWidget();
-			NotifyPreClientTravelDelegates.AddUObject(this, &UBlasterGameInstance::OnGameInstancePreClientTravel);
-		}
-	}
+	// if(const UWorld* World = GetWorld())
+	// {
+	// 	if(GEngine)
+	// 	{
+	// 		const FString MapName = FString::Printf(TEXT("Map Name: %s"), *World->GetMapName());
+	// 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, MapName);
+	// 	}
+	// 	
+	// 	if(World->GetMapName().Contains("Main"))
+	// 	{				
+	// 		CreateMenuWidget();
+	// 		NotifyPreClientTravelDelegates.AddUObject(this, &UBlasterGameInstance::OnGameInstancePreClientTravel);
+	// 	}
+	// }
 }
 
 void UBlasterGameInstance::CreateMenuWidget()
@@ -70,10 +70,17 @@ int32 UBlasterGameInstance::GetSelectedCharacter(const FString& PlayerId) const
 
 void UBlasterGameInstance::OnGameInstancePreClientTravel(const FString& PendingURL, ETravelType TravelType,
                                                          bool bIsSeamlessTravel)
-{	
-	if(OpeningWidget)
+{
+	if(PendingURL.Contains("Main"))
 	{		
-		OpeningWidget->MenuTearDown();
-		OpeningWidget = nullptr;
+		CreateMenuWidget();
+	}
+	else
+	{		
+		if(OpeningWidget)
+		{		
+			OpeningWidget->MenuTearDown();
+			OpeningWidget = nullptr;
+		}
 	}
 }

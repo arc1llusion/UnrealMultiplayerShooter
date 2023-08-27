@@ -5,12 +5,15 @@
 #include "CoreMinimal.h"
 #include "Blaster/BlasterTypes/FPlayersReady.h"
 #include "GameFramework/PlayerController.h"
+#include "InputActionValue.h"
 #include "BlasterPlayerController.generated.h"
 
+class UPauseMenu;
 class ALobbyHUD;
 class ABlasterPlayerState;
 class ABlasterHUD;
 class UInputMappingContext;
+class UInputAction;
 class ABlasterGameMode;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHighPingDelegate, bool, bPingTooHigh);
@@ -46,7 +49,8 @@ public:
 	void SetHUDGrenades(int32 InGrenades);
 	void SetHUDSniperScope(bool bIsAiming);
 	void SetHUDMatchCountdown(float CountdownTime);
-	void SetHUDAnnouncementCountdown(float CountdownTime);
+	void SetHUDAnnouncementCountdown(float CountdownTime);	
+	void SetHUDTime();
 
 	//Synced with server world clock
 	virtual float GetServerTime() const;
@@ -75,10 +79,40 @@ public:
 	FHighPingDelegate HighPingDelegate;
 
 protected:
-	virtual void BeginPlay() override;
+	virtual void BeginPlay() override;	
 
-	void SetHUDTime();
+	/*
+	 * Input
+	 */	
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputMappingContext *DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputMappingContext *LookOnlyMappingContext;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction *PauseInputAsset;
+	
+	UPROPERTY(Replicated)
+	bool bDisableGameplay;
+	
+	/*
+	 * Pause
+	 */
+
+	virtual void SetupInputComponent() override;	
+
+	void PauseAction(const FInputActionValue &Value);
+
+	UPROPERTY(EditAnywhere, Category = "HUD")
+	TSubclassOf<UUserWidget> PauseWidget;
+
+	UPROPERTY()
+	UPauseMenu* PauseMenu;
+
+	bool bPauseOpen = false;
+	
 	/*
 	 * Sync time between client and server
 	 */
@@ -115,15 +149,6 @@ protected:
 	void StartHighPingWarning();
 	void StopHighPingWarning();	
 	bool IsHighPingAnimationPlaying() const;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputMappingContext *DefaultMappingContext;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputMappingContext *LookOnlyMappingContext;
-
-	UPROPERTY(Replicated)
-	bool bDisableGameplay;
 
 	UFUNCTION(Reliable, Server)
 	virtual void ServerSetPawn(int32 InDesiredPawn, bool RequestRespawn);

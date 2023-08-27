@@ -4,6 +4,7 @@
 // ReSharper disable CppTooWideScope
 #include "BlasterPlayerController.h"
 
+#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/GameInstance/BlasterGameInstance.h"
@@ -15,6 +16,7 @@
 #include "Blaster/HUD/CharacterOverlay.h"
 #include "Blaster/HUD/LobbyHUD.h"
 #include "Blaster/HUD/LobbyOverlay.h"
+#include "Blaster/HUD/PauseMenu.h"
 #include "Blaster/HUD/SniperScope.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Components/Image.h"
@@ -33,6 +35,48 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(ABlasterPlayerController, MatchState);
 	DOREPLIFETIME(ABlasterPlayerController, bDisableGameplay);
 	DOREPLIFETIME_CONDITION_NOTIFY(ABlasterPlayerController, PlayersReady, COND_None, REPNOTIFY_Always);
+}
+
+void ABlasterPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if(InputComponent == nullptr)
+	{
+		return;
+	}
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
+	{
+		EnhancedInputComponent->BindAction(PauseInputAsset, ETriggerEvent::Started, this, &ABlasterPlayerController::PauseAction);
+	}
+}
+
+void ABlasterPlayerController::PauseAction(const FInputActionValue& Value)
+{
+	if(PauseWidget == nullptr)
+	{
+		return;
+	}
+
+	if(PauseMenu == nullptr)
+	{
+		PauseMenu = CreateWidget<UPauseMenu>(this, PauseWidget);
+	}
+
+	if(PauseMenu)
+	{
+		bPauseOpen = !bPauseOpen;
+
+		if(bPauseOpen)
+		{
+			PauseMenu->MenuSetup();
+		}
+		else
+		{
+			PauseMenu->MenuTearDown();
+		}
+	}
 }
 
 void ABlasterPlayerController::BeginPlay()

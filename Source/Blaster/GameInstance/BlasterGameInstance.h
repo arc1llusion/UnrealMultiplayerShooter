@@ -24,6 +24,7 @@ public:
 
 	void SelectCharacter(const FString& PlayerId, int32 InDesiredPawn);
 	int32 GetSelectedCharacter(const FString& PlayerId) const;
+
 private:
 	UPROPERTY()
 	UMenu* OpeningWidget;
