@@ -120,7 +120,7 @@ void UCombatComponent::FireProjectileWeapon()
 		{
 			LocalFire(HitTarget);
 		}
-		ServerFire(HitTarget);
+		ServerFire(HitTarget, EquippedWeapon->GetFireDelay());
 	}
 }
 
@@ -133,7 +133,7 @@ void UCombatComponent::FireHitScanWeapon()
 		{
 			LocalFire(HitTarget);
 		}
-		ServerFire(HitTarget);
+		ServerFire(HitTarget, EquippedWeapon->GetFireDelay());
 	}
 }
 
@@ -148,7 +148,7 @@ void UCombatComponent::FireShotgunWeapon()
 		{
 			LocalShotgunFire(HitTargets);
 		}
-		ServerShotgunFire(HitTargets);
+		ServerShotgunFire(HitTargets, EquippedWeapon->GetFireDelay());
 	}
 }
 
@@ -179,9 +179,19 @@ void UCombatComponent::FireTimerFinished()
 	ReloadIfEmpty();
 }
 
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget, float FireDelay)
 {
 	MulticastFire(TraceHitTarget);
+}
+
+bool UCombatComponent::ServerFire_Validate(const FVector_NetQuantize& TraceHitTarget, float FireDelay)
+{
+	if(EquippedWeapon)
+	{
+		return FMath::IsNearlyEqual(EquippedWeapon->GetFireDelay(), FireDelay, 0.001f);
+	}
+
+	return true;
 }
 
 void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
@@ -194,9 +204,19 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& T
 	LocalFire(TraceHitTarget);
 }
 
-void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+void UCombatComponent::ServerShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
 {
 	MulticastShotgunFire(TraceHitTargets);
+}
+
+bool UCombatComponent::ServerShotgunFire_Validate(const TArray<FVector_NetQuantize>& TraceHitTargets, float FireDelay)
+{
+	if(EquippedWeapon)
+	{
+		return FMath::IsNearlyEqual(EquippedWeapon->GetFireDelay(), FireDelay, 0.001f);
+	}
+
+	return true;
 }
 
 void UCombatComponent::MulticastShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
