@@ -240,6 +240,7 @@ void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize>& Trace
 		Character->PlayFireMontage(bIsAiming);
 		EquippedWeapon->Fire(TraceHitTargets);		
 		CombatState = ECombatState::ECS_Unoccupied;
+		bLocallyReloading = false;
 	}
 }
 
@@ -265,24 +266,19 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 void UCombatComponent::SwapWeapons()
 {
-	if(CombatState != ECombatState::ECS_Unoccupied)
+	if(!Character || CombatState != ECombatState::ECS_Unoccupied || !Character->HasAuthority())
 	{
 		return;
 	}
-	
-	AWeapon* TempWeapon = EquippedWeapon;
-	EquippedWeapon = SecondaryWeapon;
-	SecondaryWeapon = TempWeapon;	
-	
-	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-	AttachActorToSecondaryWeaponSocket(SecondaryWeapon);
 
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	AttachActorToRightHandSocket(EquippedWeapon);
-	
-	EquippedWeapon->SetHUDWeaponAmmo();
-	UpdateCarriedAmmo();
-	PlayEquippedWeaponSound(EquippedWeapon);	
+	Character->PlaySwapMontage();
+	Character->SetFinishedSwapping(false);
+	CombatState = ECombatState::ECS_SwappingWeapons;
+
+	if(SecondaryWeapon)
+	{
+		SecondaryWeapon->EnableCustomDepth(false);
+	}
 }
 
 bool UCombatComponent::ShouldSwapWeapons() const
@@ -307,7 +303,7 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 
 	EquippedWeapon->SetHUDWeaponAmmo();
 	UpdateCarriedAmmo();
-	
+
 	PlayEquippedWeaponSound(EquippedWeapon);
 	ReloadIfEmpty();
 }
@@ -420,6 +416,59 @@ void UCombatComponent::FinishReloading()
 	if(bFireButtonPressed)
 	{
 		Fire();
+	}
+}
+
+void UCombatComponent::FinishSwap()
+{
+	if(Character && Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+	}	
+
+	if(Character)
+	{
+		Character->SetFinishedSwapping(true);
+	}
+
+	if(SecondaryWeapon)
+	{
+		SecondaryWeapon->EnableCustomDepth(true);
+	}
+}
+
+void UCombatComponent::FinishSwapAttachWeapons()
+{
+	if(Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: AnimNotify Finish Swap Attach Weapons"), *Character->GetActorNameOrLabel());
+	}
+
+	if(!Character || !Character->HasAuthority())
+	{
+		//We only want to do the swap on the server, otherwise the animation notify can fire after the rep notify for
+		// EquipWeapon and SecondaryWeapon causing the weapons to switch a second time on clients
+		return;
+	}
+	
+	AWeapon* TempWeapon = EquippedWeapon;
+	EquippedWeapon = SecondaryWeapon;
+	SecondaryWeapon = TempWeapon;
+	
+	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
+	AttachActorToSecondaryWeaponSocket(SecondaryWeapon);
+
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	AttachActorToRightHandSocket(EquippedWeapon);
+	
+	EquippedWeapon->SetHUDWeaponAmmo();
+	UpdateCarriedAmmo();
+
+	PlayEquippedWeaponSound(EquippedWeapon);
+
+	if(EquippedWeapon && SecondaryWeapon && Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: After Swap, Primary: %s, Secondary %s"), *Character->GetActorNameOrLabel(), *EquippedWeapon->GetActorNameOrLabel(), *SecondaryWeapon->GetActorNameOrLabel());
 	}
 }
 
@@ -542,6 +591,13 @@ void UCombatComponent::OnRep_CombatState()
 				Character->PlayThrowGrenadeMontage();
 				AttachActorToLeftHandSocket(EquippedWeapon);
 				ShowAttachedGrenade(true);
+			}
+			break;
+
+		case ECombatState::ECS_SwappingWeapons:
+			if(Character && !Character->IsLocallyControlled())
+			{
+				Character->PlaySwapMontage();
 			}
 			break;
 
@@ -688,8 +744,12 @@ void UCombatComponent::UpdateHUDGrenades()
 
 void UCombatComponent::OnRep_EquippedWeapon()
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_Equipped Weapon"));
+	
 	if(EquippedWeapon && Character)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("%s, %s: OnRep_Equipped Weapon"), *Character->GetActorNameOrLabel(), *EquippedWeapon->GetActorNameOrLabel());
+
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		AttachActorToRightHandSocket(EquippedWeapon);
 		
@@ -707,11 +767,14 @@ void UCombatComponent::OnRep_EquippedWeapon()
 
 void UCombatComponent::OnRep_SecondaryWeapon()
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_SecondaryWeapon Weapon"));
 	if(SecondaryWeapon && Character)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("%s, %s: OnRep_Secondary Weapon"), *Character->GetActorNameOrLabel(), *SecondaryWeapon->GetActorNameOrLabel());
+
 		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToSecondaryWeaponSocket(SecondaryWeapon);		
-		
+
 		PlayEquippedWeaponSound(SecondaryWeapon);
 	}	
 }
@@ -1003,7 +1066,8 @@ void UCombatComponent::OnRep_CarriedAmmo()
 		Controller->SetHUDCarriedAmmo(CarriedAmmo);
 	}
 
-	bool bJumpToShotgunEnd = CombatState == ECombatState::ECS_Reloading &&
+	// ReSharper disable once CppTooWideScope
+	const bool bJumpToShotgunEnd = CombatState == ECombatState::ECS_Reloading &&
 											EquippedWeapon &&
 											EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
 											CarriedAmmo == 0;

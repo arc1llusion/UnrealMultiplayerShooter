@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+// ReSharper disable CppTooWideScope
 #include "BlasterPlayerController.h"
 
 #include "EnhancedInputSubsystems.h"
@@ -259,7 +260,7 @@ void ABlasterPlayerController::SetHUDPlayersReady()
 {
 	LobbyHUD = !LobbyHUD ? Cast<ALobbyHUD>(GetHUD()) : LobbyHUD;
 
-	bool bHudValid = LobbyHUD &&
+	const bool bHudValid = LobbyHUD &&
 		LobbyHUD->LobbyOverlay &&
 		LobbyHUD->LobbyOverlay->PlayersReadyText;
 	
@@ -299,7 +300,7 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->HealthBar &&
 		BlasterHUD->CharacterOverlay->HealthText;
@@ -319,7 +320,7 @@ void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->ShieldBar &&
 		BlasterHUD->CharacterOverlay->ShieldText;
@@ -338,7 +339,7 @@ void ABlasterPlayerController::SetHUDScore(float Score)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->ScoreAmount;
 
@@ -353,7 +354,7 @@ void ABlasterPlayerController::SetHUDDefeats(int32 InDefeats)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->DefeatsAmount;
 
@@ -368,7 +369,7 @@ void ABlasterPlayerController::SetHUDDefeatsLog(const TArray<FString>& Logs)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->DefeatsRelay;
 
@@ -383,7 +384,7 @@ void ABlasterPlayerController::SetHUDWeaponAmmo(int32 InAmmo)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->WeaponAmmoAmount;
 
@@ -398,7 +399,7 @@ void ABlasterPlayerController::SetHUDCarriedAmmo(int32 InAmmo)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->CarriedAmmoAmount;
 
@@ -413,7 +414,7 @@ void ABlasterPlayerController::SetHUDGrenades(int32 InGrenades)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->GrenadesText;
 
@@ -459,7 +460,7 @@ void ABlasterPlayerController::SetHUDMatchCountdown(float CountdownTime)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->MatchCountdownText;
 
@@ -483,7 +484,7 @@ void ABlasterPlayerController::SetHUDAnnouncementCountdown(float CountdownTime)
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->AnnouncementOverlay &&
 		BlasterHUD->AnnouncementOverlay->WarmupTime;
 
@@ -677,7 +678,7 @@ void ABlasterPlayerController::CheckPing(float DeltaSeconds)
 		PlayerState = !PlayerState ? GetPlayerState<APlayerState>() : PlayerState;
 		if(PlayerState)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayerState->GetPingInMilliseconds(): %f"), PlayerState->GetPingInMilliseconds());
+			//UE_LOG(LogTemp, Warning, TEXT("PlayerState->GetPingInMilliseconds(): %f"), PlayerState->GetPingInMilliseconds());
 			//GetPingInMilliseconds multiplies by 4 for us
 			if (PlayerState->GetPingInMilliseconds() > HighPingThreshold)
 			{
@@ -714,7 +715,7 @@ void ABlasterPlayerController::StartHighPingWarning()
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 	BlasterHUD->CharacterOverlay &&
 	BlasterHUD->CharacterOverlay->HighPingImage &&
 	BlasterHUD->CharacterOverlay->HighPingAnimation;
@@ -730,7 +731,7 @@ void ABlasterPlayerController::StopHighPingWarning()
 {
 	BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
 
-	bool bHudValid = BlasterHUD &&
+	const bool bHudValid = BlasterHUD &&
 	BlasterHUD->CharacterOverlay &&
 	BlasterHUD->CharacterOverlay->HighPingImage &&
 	BlasterHUD->CharacterOverlay->HighPingAnimation;

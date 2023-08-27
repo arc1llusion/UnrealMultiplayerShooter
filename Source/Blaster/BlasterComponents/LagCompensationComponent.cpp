@@ -46,7 +46,7 @@ void ULagCompensationComponent::SaveFrameHistory()
 		//The total time between the oldest (Tail) and youngest (Head) of the linked list
 		float HistoryLength = FrameHistory.GetHead()->GetValue().Time - FrameHistory.GetTail()->GetValue().Time;
 
-		//Remove nodes until the history length is less than the maximum alotted amount of time
+		//Remove nodes until the history length is less than the maximum allotted amount of time
 		while(HistoryLength > MaxRecordTime)
 		{
 			FrameHistory.RemoveNode(FrameHistory.GetTail());
@@ -180,7 +180,7 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 
 
 FServerSideRewindResult ULagCompensationComponent::ProjectileServerSideRewind(ABlasterCharacter* HitCharacter,
-                                                                              const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime)
+                                                                              const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime)
 {
 	const FFramePackage FrameToCheck = GetFrameToCheck(HitCharacter, HitTime);
 	return ProjectileConfirmHit(FrameToCheck, HitCharacter, TraceStart, InitialVelocity, HitTime);
@@ -421,7 +421,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 }
 
 FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter,
-	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime)
+	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime)
 {
 	UWorld* World = GetWorld();
 	if(!HitCharacter || !World)
@@ -730,7 +730,7 @@ void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, c
 }
 
 
-void ULagCompensationComponent::EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter,
+void ULagCompensationComponent::EnableCharacterMeshCollision(const ABlasterCharacter* HitCharacter,
                                                              ECollisionEnabled::Type InCollisionEnabled)
 {
 	if(!HitCharacter || !HitCharacter->GetMesh())

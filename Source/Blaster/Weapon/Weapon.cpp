@@ -120,12 +120,12 @@ void AWeapon::OnPingTooHigh(bool bPingTooHigh)
 {
 	if(bPingTooHigh)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: Ping too high, set use server side rewind to false"), *GetActorNameOrLabel());
+		//UE_LOG(LogTemp, Warning, TEXT("%s: Ping too high, set use server side rewind to false"), *GetActorNameOrLabel());
 		bUseServerSideRewind = false;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: Ping okay, set use server side rewind to: %d"), *GetActorNameOrLabel(), bUseServerSideRewindDefault);
+		//UE_LOG(LogTemp, Warning, TEXT("%s: Ping okay, set use server side rewind to: %d"), *GetActorNameOrLabel(), bUseServerSideRewindDefault);
 		bUseServerSideRewind = bUseServerSideRewindDefault;
 	}
 }
@@ -266,7 +266,6 @@ void AWeapon::OnWeaponStateEquippedSecondary()
 	
 	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_TAN);
 	WeaponMesh->MarkRenderStateDirty();
-	EnableCustomDepth(true);
 	
 	ClearRespawnTimer();
 

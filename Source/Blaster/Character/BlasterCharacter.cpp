@@ -559,6 +559,37 @@ void ABlasterCharacter::OnThrowGrenadeMontageEnd(UAnimMontage* AnimMontage, bool
 	}
 }
 
+void ABlasterCharacter::PlaySwapMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if(AnimInstance && SwapMontage)
+	{
+		AnimInstance->Montage_Play(SwapMontage);
+
+		FOnMontageEnded SwapMontageEndDelegate;
+		SwapMontageEndDelegate.BindUObject(this, &ABlasterCharacter::OnSwapMontageEnd);
+
+		AnimInstance->Montage_SetEndDelegate(SwapMontageEndDelegate, SwapMontage);
+	}
+}
+
+void ABlasterCharacter::OnSwapMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted) const
+{
+	if(!Combat)
+	{
+		return;
+	}
+
+	const FString Interrupted = bInterrupted ? TEXT("True") : TEXT("False");
+	UE_LOG(LogTemp, Warning, TEXT("%s: Swap Montage End %s"), *GetActorNameOrLabel(),  *Interrupted);
+	
+	if(Combat)
+	{
+		Combat->FinishSwap();
+	}
+}
+
 void ABlasterCharacter::PlayHitReactMontage()
 {
 	if(!Combat || !Combat->EquippedWeapon)
@@ -682,7 +713,20 @@ void ABlasterCharacter::EquipAction(const FInputActionValue& Value)
 {
 	if(Combat)
 	{
-		ServerEquipButtonPressed();
+		if(Combat->CombatState == ECombatState::ECS_Unoccupied)
+		{
+			ServerEquipButtonPressed();
+		}
+
+		if(Combat->ShouldSwapWeapons() &&
+		   !HasAuthority() &&
+		   Combat->CombatState == ECombatState::ECS_Unoccupied &&
+		   OverlappingWeapon == nullptr)
+		{
+			PlaySwapMontage();
+			Combat->CombatState = ECombatState::ECS_SwappingWeapons;
+			bIsFinishedSwapping = false;
+		}
 	}
 }
 

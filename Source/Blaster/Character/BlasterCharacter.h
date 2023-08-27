@@ -59,6 +59,8 @@ public:
 
 	void PlayThrowGrenadeMontage();
 
+	void PlaySwapMontage();
+
 	virtual void OnRep_ReplicatedMovement() override;
 
 	//Only called on the server
@@ -210,6 +212,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage* ThrowGrenadeMontage;
 
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAnimMontage* SwapMontage;
+
 	void HideCharacterIfCameraClose();
 
 	UPROPERTY(EditAnywhere)
@@ -327,6 +332,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Server Side Rewind")
 	FName HeadHitBoxName{"head"};
+
+	/*
+	 * Other
+	 */
+	bool bIsFinishedSwapping = false;
 	
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -361,6 +371,9 @@ public:
 	ECombatState GetCombatState() const;
 
 	bool IsLocallyReloading() const;
+
+	FORCEINLINE bool IsFinishedSwapping() const { return bIsFinishedSwapping; }
+	FORCEINLINE void SetFinishedSwapping(bool bInFinishedSwapping) { bIsFinishedSwapping = bInFinishedSwapping; }
 	
 	UFUNCTION()
 	void OnOverheadOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
@@ -399,4 +412,7 @@ private:
 
 	UFUNCTION()
 	void OnThrowGrenadeMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted) const;
+
+	UFUNCTION()
+	void OnSwapMontageEnd(UAnimMontage* AnimMontage, bool bInterrupted) const;
 };

@@ -58,7 +58,10 @@ void UBlasterAnimInstance::SetAnimationVariables()
 
 	if(BlasterCharacter->IsLocallyControlled())
 	{
-		bUseFabrik = !BlasterCharacter->IsLocallyReloading() && BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade;
+		bUseFabrik = !BlasterCharacter->IsLocallyReloading() &&
+					  BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade &&
+					  BlasterCharacter->GetCombatState() != ECombatState::ECS_SwappingWeapons &&
+					  BlasterCharacter->IsFinishedSwapping();
 	}
 }
 

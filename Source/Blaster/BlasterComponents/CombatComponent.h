@@ -40,6 +40,12 @@ public:
 	void FinishReloading();
 
 	UFUNCTION(BlueprintCallable)
+	void FinishSwap();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishSwapAttachWeapons();
+
+	UFUNCTION(BlueprintCallable)
 	void ShotgunShellReload();
 
 	void JumpToShotgunEnd();

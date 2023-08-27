@@ -166,7 +166,7 @@ protected:
 	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return Result indicating whether or not the server found a hit on the head of body
 	 */
-	FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime);
+	FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime);
 	
 	/*
 	 * Shotgun Confirm Hit
@@ -208,7 +208,7 @@ protected:
 	 * @param HitCharacter The character being damaged
 	 * @param InCollisionEnabled The collision type to set to
 	 */
-	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type InCollisionEnabled);
+	void EnableCharacterMeshCollision(const ABlasterCharacter* HitCharacter, ECollisionEnabled::Type InCollisionEnabled);
 
 	/**
 	 * @brief Saves the frame history for the character owning this component
@@ -250,7 +250,7 @@ protected:
 	 * @param HitTime The time the client recorded a hit - Single Trip Time
 	 * @return Result indicating whether or not the server found a hit on the head of body
 	 */
-	FServerSideRewindResult ProjectileServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime);
+	FServerSideRewindResult ProjectileServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime);
 
 	/*
 	 * Shotgun Server Side Rewind
