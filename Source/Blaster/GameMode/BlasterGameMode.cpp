@@ -103,7 +103,7 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
 	
 	if(EliminatedCharacter)
 	{
-		EliminatedCharacter->Eliminate();
+		EliminatedCharacter->Eliminate(false);
 	}
 }
 
@@ -132,7 +132,7 @@ void ABlasterGameMode::PlayerFell(ABlasterCharacter* CharacterThatFell,
 
 	if(CharacterThatFell)
 	{
-		CharacterThatFell->Eliminate();
+		CharacterThatFell->Eliminate(false);
 	}
 }
 

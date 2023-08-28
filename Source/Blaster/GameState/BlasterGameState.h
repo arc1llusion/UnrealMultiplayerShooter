@@ -19,6 +19,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void UpdateTopScore(ABlasterPlayerState* ScoringPlayer);
+	void RemovePlayer(ABlasterPlayerState* LeavingPlayer);
 
 	virtual void AddToDefeatsLog(const FString& Defeated, const FString& DefeatedBy);
 	virtual void AddToDefeatsLogFell(const FString& Fell);

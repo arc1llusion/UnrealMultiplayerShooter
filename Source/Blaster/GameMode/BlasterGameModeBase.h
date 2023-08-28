@@ -4,6 +4,7 @@
 #include "GameFramework/GameMode.h"
 #include "BlasterGameModeBase.generated.h"
 
+class ABlasterPlayerState;
 class ABlasterCharacter;
 /**
  * 
@@ -15,6 +16,8 @@ class BLASTER_API ABlasterGameModeBase : public AGameMode
 
 public:
 	virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController, bool bRestartAtTransform = false, const FTransform& Transform = FTransform::Identity);
+
+	virtual void PlayerLeftGame(ABlasterPlayerState* PlayerLeaving);
 
 	FORCEINLINE int32 GetNumberOfPossibleCharacters() const { return PawnTypes.Num(); }
 

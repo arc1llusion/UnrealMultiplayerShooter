@@ -4,6 +4,8 @@
 
 
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/GameState/BlasterGameState.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
@@ -80,4 +82,22 @@ float ABlasterGameModeBase::GetMinimumDistance(const AActor* SpawnPoint, const T
 	}
 
 	return FMath::Sqrt(Minimum);
+}
+
+void ABlasterGameModeBase::PlayerLeftGame(ABlasterPlayerState* PlayerLeaving)
+{
+	if(PlayerLeaving == nullptr)
+	{
+		return;
+	}
+	
+	if(ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>())
+	{
+		BlasterGameState->RemovePlayer(PlayerLeaving);
+	}
+
+	if(const auto CharacterLeaving = Cast<ABlasterCharacter>(PlayerLeaving->GetPawn()))
+	{
+		CharacterLeaving->Eliminate(true);
+	}
 }

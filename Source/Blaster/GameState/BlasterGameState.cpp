@@ -34,6 +34,14 @@ void ABlasterGameState::UpdateTopScore(ABlasterPlayerState* ScoringPlayer)
 	}
 }
 
+void ABlasterGameState::RemovePlayer(ABlasterPlayerState* LeavingPlayer)
+{
+	if(LeavingPlayer && TopScoringPlayers.Contains(LeavingPlayer))
+	{
+		TopScoringPlayers.Remove(LeavingPlayer);
+	}
+}
+
 void ABlasterGameState::AddToDefeatsLog(const FString& Defeated, const FString& DefeatedBy)
 {
 	DefeatsLog.Add(FString::Printf(TEXT("%s eliminated by %s"), *Defeated, *DefeatedBy));

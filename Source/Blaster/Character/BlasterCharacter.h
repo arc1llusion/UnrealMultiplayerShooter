@@ -12,6 +12,8 @@
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
+
 class ULagCompensationComponent;
 class UBoxComponent;
 class UBuffComponent;
@@ -64,16 +66,16 @@ public:
 	virtual void OnRep_ReplicatedMovement() override;
 
 	//Only called on the server
-	void Eliminate();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastEliminate();
-
-	void HandleWeaponOnElimination(AWeapon* Weapon);
+	void Eliminate(bool bInLeftGame);
 
 	virtual void Destroyed() override;
 
-	TMap<FName, UCapsuleComponent*> HitCollisionCapsules;
+	TMap<FName, UCapsuleComponent*> HitCollisionCapsules;	
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame();
+	
+	FOnLeftGame OnLeftGame;
 	
 protected:
 
@@ -158,6 +160,9 @@ protected:
 	UInputAction *ThrowGrenadeInputAsset;
 
 private:
+	UPROPERTY()
+	ABlasterPlayerController* BlasterPlayerController;
+	
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
 
@@ -255,8 +260,9 @@ private:
 	UFUNCTION()
 	void OnRep_Shield(float LastShield);
 
-	UPROPERTY()
-	ABlasterPlayerController* BlasterPlayerController;
+	/*
+	 * Elimination
+	 */
 
 	bool bEliminated = false;
 
@@ -264,9 +270,20 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly)
 	float EliminateDelay = 3.0f;
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastEliminate(bool bInLeftGame);
 
 	UFUNCTION()
-	void EliminateTimerFinished();
+	void EliminateTimerFinished();	
+
+	void HandleWeaponOnElimination(AWeapon* Weapon);
+
+	/*
+	 * Player Leaving the Game Intentionally
+	 */
+
+	bool bLeftGame = false;
 
 	/*
 	 * Dissolve Effect

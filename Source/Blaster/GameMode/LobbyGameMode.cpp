@@ -4,6 +4,7 @@
 #include "LobbyGameMode.h"
 
 #include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 
@@ -84,4 +85,22 @@ bool ALobbyGameMode::AreAllPlayersReady()
 	}
 
 	return bIsReady;
+}
+
+void ALobbyGameMode::PlayerLeftGame(ABlasterPlayerState* PlayerLeaving)
+{
+	if(const auto PlayerController = Cast<ABlasterPlayerController>(PlayerLeaving->GetPlayerController()))
+	{		
+		if(PlayersReady.Contains(PlayerController))
+		{
+			PlayersReady.Remove(PlayerController);
+		}
+
+		for(const auto& Item : PlayersReady)
+		{
+			Item.Key->RegisterPlayersReady(PlayersReady);
+		}
+	}
+	
+	Super::PlayerLeftGame(PlayerLeaving);
 }

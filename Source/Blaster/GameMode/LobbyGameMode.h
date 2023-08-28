@@ -25,6 +25,8 @@ public:
 
 	void SetPlayerReady(ABlasterPlayerController* PlayerController);
 
+	virtual void PlayerLeftGame(ABlasterPlayerState* PlayerLeaving) override;
+
 protected:
 	virtual void Tick(float DeltaSeconds) override;
 	
