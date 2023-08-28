@@ -4,6 +4,8 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
@@ -16,6 +18,7 @@
 #include "Blaster/BlasterComponents/BuffComponent.h"
 #include "Blaster/BlasterComponents/LagCompensationComponent.h"
 #include "Blaster/GameMode/BlasterGameMode.h"
+#include "Blaster/GameState/BlasterGameState.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -217,6 +220,12 @@ void ABlasterCharacter::MulticastEliminate_Implementation(const bool bInLeftGame
 	SpawnEliminationBot();
 
 	HideAimingScope();
+
+	if(CrownComponent)
+	{
+		CrownComponent->DestroyComponent();
+		CrownComponent = nullptr;
+	}
 	
 	GetWorldTimerManager().SetTimer(EliminateHandle, this, &ABlasterCharacter::EliminateTimerFinished, EliminateDelay);
 }
@@ -300,6 +309,40 @@ void ABlasterCharacter::HideAimingScope() const
 	if(IsLocallyControlled() && Combat)
 	{
 		Combat->SetAiming(false);
+	}
+}
+
+void ABlasterCharacter::MulticastGainedTheLead_Implementation()
+{
+	if(CrownSystem == nullptr)
+	{
+		return;
+	}
+
+	if(CrownComponent == nullptr)
+	{
+		CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+							CrownSystem,
+							GetCapsuleComponent(),
+							NAME_None,
+							GetActorLocation() + FVector(0.0f, 0.0f, 110.0f),
+							GetActorRotation(),
+							EAttachLocation::KeepWorldPosition,
+							false);
+	}
+
+	if(CrownComponent != nullptr)
+	{
+		CrownComponent->Activate();
+	}
+}
+
+void ABlasterCharacter::MulticastLostTheLead_Implementation()
+{
+	if(CrownComponent != nullptr)
+	{
+		CrownComponent->DestroyComponent();
+		CrownComponent = nullptr;
 	}
 }
 
@@ -693,7 +736,17 @@ void ABlasterCharacter::PollInit()
 		if(BlasterPlayerState)
 		{
 			BlasterPlayerState->AddToScore(0.0f);
-			BlasterPlayerState->AddToDefeats(0);
+			BlasterPlayerState->AddToDefeats(0);			
+
+			if(const auto BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this)))
+			{
+				TArray<ABlasterPlayerState*> TopScoringPlayers;
+				BlasterGameState->GetTopScoringPlayers(TopScoringPlayers);
+				if(TopScoringPlayers.Contains(BlasterPlayerState))
+				{
+					MulticastGainedTheLead();
+				}
+			}
 		}
 	}
 }

@@ -30,6 +30,8 @@ class UCameraComponent;
 class UWidgetComponent;
 class UCombatComponent;
 class AWeapon;
+class UNiagaraComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairsInterface
@@ -76,6 +78,12 @@ public:
 	void ServerLeaveGame();
 	
 	FOnLeftGame OnLeftGame;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastGainedTheLead();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLostTheLead();
 	
 protected:
 
@@ -309,7 +317,7 @@ private:
 	void StartDissolve();
 
 	/*
-	 * Elimination Bot
+	 * Elimination Effects
 	 */
 
 	UPROPERTY(EditAnywhere, Category = "Elimination")
@@ -320,6 +328,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Elimination")
 	USoundCue* EliminationBotSound;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* CrownSystem;
+
+	UPROPERTY()
+	UNiagaraComponent* CrownComponent;
 
 	/*
 	 * Grenade

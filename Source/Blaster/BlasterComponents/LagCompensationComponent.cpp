@@ -367,13 +367,13 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 
 		if(ConfirmHitResult.bBlockingHit) //Hit the head, return
 		{
-			if(ConfirmHitResult.Component.IsValid())
-			{
-				if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
-				{
-					DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
-				}
-			}
+			// if(ConfirmHitResult.Component.IsValid())
+			// {
+			// 	if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
+			// 	{
+			// 		DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
+			// 	}
+			// }
 			ResetHitBoxes(HitCharacter, CurrentFrame);
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 
@@ -399,13 +399,13 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 
 	if(ConfirmHitResult.bBlockingHit) //Got a hit, not a headshot
 	{
-		if(ConfirmHitResult.Component.IsValid())
-		{
-			if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
-			{
-				DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
-			}
-		}
+		// if(ConfirmHitResult.Component.IsValid())
+		// {
+		// 	if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
+		// 	{
+		// 		DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
+		// 	}
+		// }
 		
 		ResetHitBoxes(HitCharacter, CurrentFrame);
 		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
@@ -443,8 +443,8 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 	FPredictProjectilePathParams PathParams;
 	PathParams.bTraceWithChannel = true;
 	PathParams.bTraceWithCollision = true;
-	PathParams.DrawDebugTime = 5.0f;
-	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+	// PathParams.DrawDebugTime = 5.0f;
+	// PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
 	PathParams.LaunchVelocity = InitialVelocity;
 	PathParams.MaxSimTime = MaxRecordTime;
 	PathParams.ProjectileRadius = 5.0f;
@@ -467,13 +467,13 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 
 		if(PathResult.HitResult.bBlockingHit) //Hit the head, return
 		{
-			if(PathResult.HitResult.Component.IsValid())
-			{
-				if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(PathResult.HitResult.Component))
-				{
-					DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
-				}
-			}
+			// if(PathResult.HitResult.Component.IsValid())
+			// {
+			// 	if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(PathResult.HitResult.Component))
+			// 	{
+			// 		DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
+			// 	}
+			// }
 			ResetHitBoxes(HitCharacter, CurrentFrame);
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 
@@ -499,13 +499,13 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 
 	if(PathResult.HitResult.bBlockingHit) //Got a hit, not a headshot
 	{
-		if(PathResult.HitResult.Component.IsValid())
-		{
-			if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(PathResult.HitResult.Component))
-			{
-				DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
-			}
-		}
+		// if(PathResult.HitResult.Component.IsValid())
+		// {
+		// 	if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(PathResult.HitResult.Component))
+		// 	{
+		// 		DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
+		// 	}
+		// }
 		
 		ResetHitBoxes(HitCharacter, CurrentFrame);
 		EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
@@ -579,13 +579,13 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		//Store any hits in the headshot TMap of the shotgun result
 		if(ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 		{
-			if(ConfirmHitResult.Component.IsValid())
-			{
-				if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
-				{
-					DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
-				}
-			}
+			// if(ConfirmHitResult.Component.IsValid())
+			// {
+			// 	if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
+			// 	{
+			// 		DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Red, false, 8.0f);
+			// 	}
+			// }
 			
 			if(!ShotgunResult.HeadShots.Contains(BlasterCharacter))
 			{
@@ -628,13 +628,13 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 		
 		if(ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmHitResult.GetActor()))
 		{
-			if(ConfirmHitResult.Component.IsValid())
-			{
-				if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
-				{
-					DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
-				}
-			}
+			// if(ConfirmHitResult.Component.IsValid())
+			// {
+			// 	if(UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(ConfirmHitResult.Component))
+			// 	{
+			// 		DrawDebugCapsule(GetWorld(), Capsule->GetComponentLocation(), Capsule->GetUnscaledCapsuleHalfHeight(), Capsule->GetUnscaledCapsuleRadius(), FQuat(Capsule->GetComponentRotation()), FColor::Blue, false, 8.0f);
+			// 	}
+			// }
 			
 			if(!ShotgunResult.BodyShots.Contains(BlasterCharacter))
 			{

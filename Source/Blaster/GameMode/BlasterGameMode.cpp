@@ -90,8 +90,16 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
 
 	if(AttackerPlayerState && AttackerPlayerState != VictimPlayerState && BlasterGameState)
 	{
+		TArray<ABlasterPlayerState*> PreviousPlayersInLead;
+		BlasterGameState->GetTopScoringPlayers(PreviousPlayersInLead);		
+		
 		AttackerPlayerState->AddToScore(1.0f);
 		BlasterGameState->UpdateTopScore(AttackerPlayerState);
+
+		TArray<ABlasterPlayerState*> UpdatedPlayersInLead;
+		BlasterGameState->GetTopScoringPlayers(UpdatedPlayersInLead);
+
+		HandleTopScoreChange(PreviousPlayersInLead, UpdatedPlayersInLead, AttackerPlayerState);
 	}
 
 	if(VictimPlayerState)
@@ -172,6 +180,34 @@ void ABlasterGameMode::BroadcastDefeat(const ABlasterPlayerState* Attacker, cons
 		if(const auto BlasterGameState = Cast<ABlasterGameState>(GameState))
 		{
 			BlasterGameState->AddToDefeatsLog(Victim->GetPlayerName(), Attacker->GetPlayerName());
+		}
+	}
+}
+
+void ABlasterGameMode::HandleTopScoreChange(const TArray<ABlasterPlayerState*>& PreviousTopScoringPlayers,
+	const TArray<ABlasterPlayerState*>& CurrentTopScoringPlayers, const ABlasterPlayerState* ScoringPlayer) const
+{
+	if(ScoringPlayer == nullptr)
+	{
+		return;
+	}
+	
+	if(CurrentTopScoringPlayers.Contains(ScoringPlayer))
+	{
+		if(const auto Leader = Cast<ABlasterCharacter>(ScoringPlayer->GetPawn()))
+		{
+			Leader->MulticastGainedTheLead();
+		}
+	}
+
+	for(int32 i = 0; i < PreviousTopScoringPlayers.Num(); ++i)
+	{
+		if(!CurrentTopScoringPlayers.Contains(PreviousTopScoringPlayers[i]))
+		{
+			if(const auto Loser = Cast<ABlasterCharacter>(PreviousTopScoringPlayers[i]->GetPawn()))
+			{
+				Loser->MulticastLostTheLead();
+			}
 		}
 	}
 }

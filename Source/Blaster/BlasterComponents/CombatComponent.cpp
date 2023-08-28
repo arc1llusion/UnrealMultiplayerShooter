@@ -459,11 +459,6 @@ void UCombatComponent::FinishSwap()
 
 void UCombatComponent::FinishSwapAttachWeapons()
 {
-	if(Character)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: AnimNotify Finish Swap Attach Weapons"), *Character->GetActorNameOrLabel());
-	}
-
 	if(!Character || !Character->HasAuthority())
 	{
 		//We only want to do the swap on the server, otherwise the animation notify can fire after the rep notify for
@@ -485,11 +480,6 @@ void UCombatComponent::FinishSwapAttachWeapons()
 	UpdateCarriedAmmo();
 
 	PlayEquippedWeaponSound(EquippedWeapon);
-
-	if(EquippedWeapon && SecondaryWeapon && Character)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: After Swap, Primary: %s, Secondary %s"), *Character->GetActorNameOrLabel(), *EquippedWeapon->GetActorNameOrLabel(), *SecondaryWeapon->GetActorNameOrLabel());
-	}
 }
 
 void UCombatComponent::ShotgunShellReload()
@@ -764,12 +754,8 @@ void UCombatComponent::UpdateHUDGrenades()
 
 void UCombatComponent::OnRep_EquippedWeapon()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_Equipped Weapon"));
-	
 	if(EquippedWeapon && Character)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s, %s: OnRep_Equipped Weapon"), *Character->GetActorNameOrLabel(), *EquippedWeapon->GetActorNameOrLabel());
-
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		AttachActorToRightHandSocket(EquippedWeapon);
 		
@@ -787,11 +773,8 @@ void UCombatComponent::OnRep_EquippedWeapon()
 
 void UCombatComponent::OnRep_SecondaryWeapon()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_SecondaryWeapon Weapon"));
 	if(SecondaryWeapon && Character)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s, %s: OnRep_Secondary Weapon"), *Character->GetActorNameOrLabel(), *SecondaryWeapon->GetActorNameOrLabel());
-
 		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToSecondaryWeaponSocket(SecondaryWeapon);		
 

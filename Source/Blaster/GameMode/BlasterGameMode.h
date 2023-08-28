@@ -60,4 +60,6 @@ private:
 	float LevelStartingTime = 0.0f;
 
 	float CountdownTime = 0.0f;
+
+	void HandleTopScoreChange(const TArray<ABlasterPlayerState*>& PreviousTopScoringPlayers, const TArray<ABlasterPlayerState*>& CurrentTopScoringPlayers, const ABlasterPlayerState* ScoringPlayer) const;
 };
