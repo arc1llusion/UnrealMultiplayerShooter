@@ -27,7 +27,6 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 #include "Blaster/HUD/OverheadWidget.h"
-#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/KillZVolume.h"
 
@@ -89,7 +88,6 @@ ABlasterCharacter::ABlasterCharacter()
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);

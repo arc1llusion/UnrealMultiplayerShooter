@@ -107,11 +107,20 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
 		VictimPlayerState->AddToDefeats(1);
 	}
 
-	BroadcastDefeat(AttackerPlayerState, VictimPlayerState);
+	//BroadcastDefeat(AttackerPlayerState, VictimPlayerState);
 	
 	if(EliminatedCharacter)
 	{
 		EliminatedCharacter->Eliminate(false);
+	}
+
+	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
+		if(BlasterPlayer && AttackerPlayerState && VictimPlayerState)
+		{
+			BlasterPlayer->BroadcastElimination(AttackerPlayerState, VictimPlayerState);
+		}
 	}
 }
 

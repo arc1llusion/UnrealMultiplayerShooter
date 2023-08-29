@@ -5,6 +5,7 @@
 
 #include "AnnouncementWidget.h"
 #include "CharacterOverlay.h"
+#include "EliminationAnnouncement.h"
 #include "SniperScope.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
@@ -54,6 +55,18 @@ void ABlasterHUD::AddAnnouncementOverlay()
 				AnnouncementOverlay->AddToViewport();
 			}
 		}
+	}
+}
+
+void ABlasterHUD::AddEliminationAnnouncementOverlay(const FString& AttackerName, const FString& VictimName)
+{
+	OwningPlayer = OwningPlayer == nullptr ? GetOwningPlayerController() : OwningPlayer;
+	if(OwningPlayer && EliminationAnnouncementClass)
+	{
+		EliminationAnnouncement = CreateWidget<UEliminationAnnouncement>(OwningPlayer, EliminationAnnouncementClass);
+
+		EliminationAnnouncement->SetEliminationAnnouncementText(AttackerName, VictimName);
+		EliminationAnnouncement->AddToViewport();
 	}
 }
 

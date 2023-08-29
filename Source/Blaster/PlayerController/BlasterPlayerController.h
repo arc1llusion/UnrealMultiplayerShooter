@@ -51,6 +51,8 @@ public:
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);	
 	void SetHUDTime();
+	
+	void BroadcastElimination(APlayerState* Attacker, APlayerState* Victim);
 
 	//Synced with server world clock
 	virtual float GetServerTime() const;
@@ -156,6 +158,9 @@ protected:
 
 	UFUNCTION(Reliable, Server)
 	virtual void ServerSetReady();
+
+	UFUNCTION(Client, Reliable)
+	void ClientEliminationAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 	
 private:
 	UPROPERTY()

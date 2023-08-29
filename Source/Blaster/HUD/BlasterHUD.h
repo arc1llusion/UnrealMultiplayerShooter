@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "BlasterHUD.generated.h"
 
+class UEliminationAnnouncement;
 class USniperScope;
 class UAnnouncementWidget;
 class UTexture2D;
@@ -47,6 +48,7 @@ public:
 	virtual void DrawHUD() override;
 	void AddCharacterOverlay();
 	void AddAnnouncementOverlay();
+	void AddEliminationAnnouncementOverlay(const FString& AttackerName, const FString& VictimName);
 	void AddSniperScope();
 
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
@@ -55,7 +57,7 @@ public:
 	UPROPERTY()
 	UCharacterOverlay* CharacterOverlay;
 
-	UPROPERTY(EditAnywhere, Category = "Announcments")
+	UPROPERTY(EditAnywhere, Category = "Announcements")
 	TSubclassOf<UUserWidget> AnnouncementClass;
 
 	UPROPERTY()
@@ -73,10 +75,21 @@ protected:
 private:
 	FHUDPackage HUDPackage;
 
+	UPROPERTY()
+	APlayerController* OwningPlayer;
+
 	UPROPERTY(EditAnywhere)
 	float CrosshairSpreadMax = 16.0f;
 
 	void DrawCrosshair(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
+
+	UPROPERTY(EditAnywhere, Category = "Announcements")
+	TSubclassOf<UUserWidget> EliminationAnnouncementClass;
+
+	UPROPERTY()
+	UEliminationAnnouncement* EliminationAnnouncement;
+
+	
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 

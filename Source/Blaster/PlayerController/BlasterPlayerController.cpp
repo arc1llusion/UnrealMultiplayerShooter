@@ -841,3 +841,46 @@ void ABlasterPlayerController::SetWinnerText()
 		}			
 	}
 }
+
+void ABlasterPlayerController::BroadcastElimination(APlayerState* Attacker, APlayerState* Victim)
+{
+	ClientEliminationAnnouncement(Attacker, Victim);
+}
+
+void ABlasterPlayerController::ClientEliminationAnnouncement_Implementation(APlayerState* Attacker,
+	APlayerState* Victim)
+{
+	const APlayerState* Self = GetPlayerState<APlayerState>();
+	if(Self && Attacker && Victim)
+	{
+		BlasterHUD = !BlasterHUD ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+		if(BlasterHUD)
+		{
+			if(Self == Attacker && Victim != Self)
+			{
+				BlasterHUD->AddEliminationAnnouncementOverlay(TEXT("You"), Victim->GetPlayerName());
+				return;
+			}
+
+			if(Self == Victim && Attacker != Self)
+			{
+				BlasterHUD->AddEliminationAnnouncementOverlay(Attacker->GetPlayerName(), TEXT("You"));
+				return;
+			}
+
+			if(Attacker == Victim && Attacker == Self)
+			{
+				BlasterHUD->AddEliminationAnnouncementOverlay(TEXT("You"), TEXT("yourself"));
+				return;
+			}
+
+			if(Attacker == Victim && Attacker != Self)
+			{
+				BlasterHUD->AddEliminationAnnouncementOverlay(Attacker->GetPlayerName(), TEXT("themselves"));
+				return;
+			}
+
+			BlasterHUD->AddEliminationAnnouncementOverlay(Attacker->GetPlayerName(), Victim->GetPlayerName());
+		}
+	}
+}
