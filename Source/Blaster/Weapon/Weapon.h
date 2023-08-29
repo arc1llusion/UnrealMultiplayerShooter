@@ -118,6 +118,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.0f;
 
+	UPROPERTY(EditAnywhere)
+	float HeadShotDamage = 40.0f;
+
 	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
 	float InnerDamageRadius = 200.0f;
 
@@ -293,6 +296,7 @@ public:
 	FORCEINLINE int32 GetAmmoCapacity() const { return AmmoCapacity; }
 
 	FORCEINLINE float GetDamage() const { return Damage; }
+	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
 
 	bool IsEmpty() const;
 	bool IsFull() const;

@@ -23,7 +23,7 @@ void AShotgun::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 	GetSocketInformation(SocketTransform, Start);
 
 	//Maps hit character to the number of times that character was hit by shotgun scatter shots
-	TMap<ABlasterCharacter*, uint32> Hits;
+	TMap<ABlasterCharacter*, float> Hits;
 	for(const auto Hit : HitTargets)
 	{
 		FHitResult FireHit;
@@ -34,13 +34,15 @@ void AShotgun::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 		{
 			if(ABlasterCharacter* HitActor = Cast<ABlasterCharacter>(FireHit.GetActor()))
 			{
+				bool bIsHeadShot = FireHit.BoneName == HitActor->GetHeadHitBoxName();
+				
 				if(!Hits.Contains(HitActor))
 				{
-					Hits.Emplace(HitActor, 1);
+					Hits.Emplace(HitActor, bIsHeadShot ? HeadShotDamage : Damage);
 				}
 				else
 				{
-					Hits[HitActor]++;
+					Hits[HitActor] += bIsHeadShot ? HeadShotDamage : Damage;
 				}
 			}
 		}
@@ -74,11 +76,11 @@ void AShotgun::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 	}
 }
 
-void AShotgun::ApplyDamageToAllHitActors(const TMap<ABlasterCharacter*, uint32>& HitActors)
+void AShotgun::ApplyDamageToAllHitActors(const TMap<ABlasterCharacter*, float>& HitActors)
 {
 	for(auto& HitCheck : HitActors)
 	{
-		ApplyDamage(HitCheck.Key, HitCheck.Value * Damage, FVector::ZeroVector, FVector::ZeroVector);
+		ApplyDamage(HitCheck.Key, HitCheck.Value, FVector::ZeroVector, FVector::ZeroVector);
 	}
 }
 

@@ -34,7 +34,11 @@ void AHitScanWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 		PerformFireEffects(World, FireHit, SocketTransform);			
 		if(PerformHit(World, FireHit))
 		{
-			ApplyDamage(FireHit.GetActor(), Damage, Start, HitTarget);
+			if(auto HitBlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor()))
+			{				
+				bool bIsHeadShot = FireHit.BoneName == HitBlasterCharacter->GetHeadHitBoxName();
+				ApplyDamage(FireHit.GetActor(), bIsHeadShot ? HeadShotDamage : Damage, Start, HitTarget);
+			}
 		}
 	}
 }
@@ -69,6 +73,10 @@ void AHitScanWeapon::PerformFireEffects(UWorld* World, const FHitResult& FireHit
 	{
 		BeamEnd = FireHit.ImpactPoint;
 	}
+	// else
+	// {
+	// 	FireHit.ImpactPoint = FireHit.TraceEnd;
+	// }
 
 	if(bShowDebugSpheres)
 	{
@@ -131,11 +139,13 @@ void AHitScanWeapon::ApplyDamage(AActor* HitActor, float InDamage, const FVector
 			}
 			
 			if(!HasAuthority() && bUseServerSideRewind)
-			{
+			{				
 				BlasterOwnerCharacter = !BlasterOwnerCharacter ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
 				BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
 				if(BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensationComponent() && BlasterOwnerCharacter->IsLocallyControlled())
 				{
+					UE_LOG(LogTemp, Warning, TEXT("Standard server side rewind called"));
+					
 					BlasterOwnerCharacter->GetLagCompensationComponent()->ServerScoreRequest(
 						Cast<ABlasterCharacter>(HitActor),
 						TraceStart,

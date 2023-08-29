@@ -18,8 +18,6 @@ public:
 	virtual void Fire(const TArray<FVector_NetQuantize>& HitTargets) override;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	uint32 NumberOfShots = 10;
 
-	void ApplyDamageToAllHitActors(const TMap<ABlasterCharacter*, uint32>& HitActors);
+	void ApplyDamageToAllHitActors(const TMap<ABlasterCharacter*, float>& HitActors);
 };
