@@ -116,7 +116,16 @@ protected:
 	);
 	
 	UPROPERTY(EditAnywhere)
-	float Damage = 20.0f;	
+	float Damage = 20.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	float InnerDamageRadius = 200.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	float OuterDamageRadius = 500.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	float MinimumDamage = 10.0f;
 
 	UPROPERTY(Replicated, EditAnywhere)
 	bool bUseServerSideRewind = false;

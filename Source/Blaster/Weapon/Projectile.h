@@ -36,6 +36,10 @@ public:
 	FORCEINLINE void SetInitialVelocity(const FVector_NetQuantize100& InInitialVelocity) { InitialVelocity = InInitialVelocity; }
 
 	FORCEINLINE void SetDamage(float InDamage) { Damage = InDamage; }
+
+	FORCEINLINE void SetInnerDamageRadius(float InInnerDamageRadius) { InnerDamageRadius = InInnerDamageRadius; }
+	FORCEINLINE void SetOuterDamageRadius(float InOuterDamageRadius) { OuterDamageRadius = InOuterDamageRadius; }
+	FORCEINLINE void SetMinimumDamage(float InMinimumDamage) { MinimumDamage = InMinimumDamage; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -110,12 +114,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	float DestroyTime = 3.0;
 	
-	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	UPROPERTY()
 	float InnerDamageRadius = 200.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	UPROPERTY()
 	float OuterDamageRadius = 500.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Radial Damage Falloff")
+	UPROPERTY()
 	float MinimumDamage = 10.0f;
 };

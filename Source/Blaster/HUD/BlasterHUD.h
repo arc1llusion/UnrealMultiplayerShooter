@@ -89,7 +89,14 @@ private:
 	UPROPERTY()
 	UEliminationAnnouncement* EliminationAnnouncement;
 
-	
+	UPROPERTY(EditAnywhere)
+	float EliminationAnnouncementTime = 3.0f;
+
+	UFUNCTION()
+	void EliminationAnnouncementTimerFinished(UEliminationAnnouncement* MessageToRemove);
+
+	UPROPERTY()
+	TArray<UEliminationAnnouncement*> EliminationMessages;
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 

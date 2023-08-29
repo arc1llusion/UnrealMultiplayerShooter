@@ -49,6 +49,9 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 				// No need to use SSR on the server
 				SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, true, false);
 				SpawnedProjectile->SetDamage(Damage);
+				SpawnedProjectile->SetInnerDamageRadius(InnerDamageRadius);
+				SpawnedProjectile->SetOuterDamageRadius(OuterDamageRadius);
+				SpawnedProjectile->SetMinimumDamage(MinimumDamage);
 			}
 			else
 			{
@@ -65,6 +68,9 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 				SpawnedProjectile->SetTraceStart(Start);
 				SpawnedProjectile->SetInitialVelocity(SpawnedProjectile->GetActorForwardVector() * SpawnedProjectile->GetInitialSpeed());
 				SpawnedProjectile->SetDamage(Damage);
+				SpawnedProjectile->SetInnerDamageRadius(InnerDamageRadius);
+				SpawnedProjectile->SetOuterDamageRadius(OuterDamageRadius);
+				SpawnedProjectile->SetMinimumDamage(MinimumDamage);
 			}
 			else
 			{
@@ -79,6 +85,9 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 		{
 			SpawnedProjectile = SpawnProjectile(World, SpawnParameters, Start, TargetRotation, true, false);
 			SpawnedProjectile->SetDamage(Damage);
+			SpawnedProjectile->SetInnerDamageRadius(InnerDamageRadius);
+			SpawnedProjectile->SetOuterDamageRadius(OuterDamageRadius);
+			SpawnedProjectile->SetMinimumDamage(MinimumDamage);
 		}
 	}
 }

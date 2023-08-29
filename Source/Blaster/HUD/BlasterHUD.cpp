@@ -9,6 +9,9 @@
 #include "SniperScope.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
 
 const FHUDPackage FHUDPackage::NullPackage{nullptr, nullptr, nullptr, nullptr, nullptr, 0.0f, FLinearColor::White};
 
@@ -67,6 +70,37 @@ void ABlasterHUD::AddEliminationAnnouncementOverlay(const FString& AttackerName,
 
 		EliminationAnnouncement->SetEliminationAnnouncementText(AttackerName, VictimName);
 		EliminationAnnouncement->AddToViewport();
+
+		for(const UEliminationAnnouncement* Message : EliminationMessages)
+		{
+			if(Message && Message->AnnouncementBox)
+			{
+				if(UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Message->AnnouncementBox))
+				{
+					const FVector2D Position = CanvasSlot->GetPosition();
+					const FVector2D NewPosition{Position.X, Position.Y - CanvasSlot->GetSize().Y};
+
+					CanvasSlot->SetPosition(NewPosition);
+				}
+			}
+		}
+
+		EliminationMessages.Add(EliminationAnnouncement);
+
+		FTimerHandle EliminationMessageTimer;
+		FTimerDelegate EliminationMessageDelegate;
+
+		EliminationMessageDelegate.BindUFunction(this, GET_FUNCTION_NAME_STRING_CHECKED(ABlasterHUD, EliminationAnnouncementTimerFinished), EliminationAnnouncement);
+		GetWorldTimerManager().SetTimer(EliminationMessageTimer, EliminationMessageDelegate, EliminationAnnouncementTime, false);
+	}
+}
+
+void ABlasterHUD::EliminationAnnouncementTimerFinished(UEliminationAnnouncement* MessageToRemove)
+{
+	if(MessageToRemove)
+	{
+		MessageToRemove->RemoveFromParent();
+		EliminationMessages.Remove(MessageToRemove);
 	}
 }
 
