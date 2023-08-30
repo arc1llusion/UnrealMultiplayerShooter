@@ -32,5 +32,5 @@ private:
 		const FRotator& SpawnRotation,
 		bool bInReplicated,
 		bool bInUseServerSideRewind
-	) const;
+	);
 };

@@ -21,29 +21,29 @@ public:
 	void UpdateTopScore(ABlasterPlayerState* ScoringPlayer);
 	void RemovePlayer(ABlasterPlayerState* LeavingPlayer);
 
-	virtual void AddToDefeatsLog(const FString& Defeated, const FString& DefeatedBy);
-	virtual void AddToDefeatsLogFell(const FString& Fell);
-
-	UFUNCTION()
-	virtual void OnRep_DefeatsLog();
-
 	virtual void GetTopScoringPlayers(TArray<ABlasterPlayerState*>& OutTopScoringPlayers);
 	
 private:
 	
-	UPROPERTY(ReplicatedUsing = OnRep_DefeatsLog)
-	TArray<FString> DefeatsLog;
-
-	UFUNCTION()
-	void PruneDefeatsLog();
-
-	UFUNCTION()
-	void BroadcastDefeatsLog();
-
 	TArray<FTimerHandle> Timers;
 
 	UPROPERTY(Replicated)
 	TArray<ABlasterPlayerState*> TopScoringPlayers;
-
+	
 	float TopScore = 0.0f;
+
+	TArray<ABlasterPlayerState*> RedTeam;
+	TArray<ABlasterPlayerState*> BlueTeam;
+
+	UPROPERTY(ReplicatedUsing = OnRep_RedTeamScore)
+	float RedTeamScore = 0.0f;
+
+	UFUNCTION()
+	void OnRep_RedTeamScore();
+
+	UPROPERTY(ReplicatedUsing = OnRep_BlueTeamScore)
+	float BlueTeamScore = 0.0f;
+
+	UFUNCTION()
+	void OnRep_BlueTeamScore();
 };

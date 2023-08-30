@@ -46,8 +46,6 @@ protected:
 	virtual void OnMatchStateSet() override;
 	
 private:	
-	void BroadcastDefeat(const ABlasterPlayerState* Attacker, const ABlasterPlayerState* Victim) const;
-
 	UPROPERTY(EditDefaultsOnly)
 	float WarmupTime = 10.0f;
 

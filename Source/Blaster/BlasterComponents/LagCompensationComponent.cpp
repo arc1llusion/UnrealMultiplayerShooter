@@ -128,7 +128,7 @@ void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharac
 
 
 void ULagCompensationComponent::ProjectileServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter,
-	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, const float HitTime, AProjectile* DamageCauser)
+	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, const float HitTime, AWeapon* DamageCauser)
 {
 	if(!Character)
 	{
@@ -136,7 +136,7 @@ void ULagCompensationComponent::ProjectileServerScoreRequest_Implementation(ABla
 	}
 	
 	const FServerSideRewindResult Confirm = ProjectileServerSideRewind(HitCharacter, TraceStart, InitialVelocity, HitTime);
-
+	
 	//If server side rewind was a success, apply damage
 	if(HitCharacter && DamageCauser && Confirm.bIsHit)
 	{

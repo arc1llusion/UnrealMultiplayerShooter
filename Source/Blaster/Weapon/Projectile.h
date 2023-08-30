@@ -44,6 +44,8 @@ public:
 	FORCEINLINE void SetInnerDamageRadius(float InInnerDamageRadius) { InnerDamageRadius = InInnerDamageRadius; }
 	FORCEINLINE void SetOuterDamageRadius(float InOuterDamageRadius) { OuterDamageRadius = InOuterDamageRadius; }
 	FORCEINLINE void SetMinimumDamage(float InMinimumDamage) { MinimumDamage = InMinimumDamage; }
+
+	FORCEINLINE void SetOwningWeapon(AWeapon* InOwningWeapon) { OwningWeapon = InOwningWeapon; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -109,6 +111,11 @@ protected:
 
 	// The course uses an outside InitialSpeed float, but I'm choosing to rely on the projectile movement component
 	// Initial Speed to set the values.
+
+	
+
+	UPROPERTY()
+	AWeapon* OwningWeapon;
 	
 private:
 	UPROPERTY(EditAnywhere)

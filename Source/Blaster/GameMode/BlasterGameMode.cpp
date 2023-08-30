@@ -106,8 +106,6 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
 	{
 		VictimPlayerState->AddToDefeats(1);
 	}
-
-	//BroadcastDefeat(AttackerPlayerState, VictimPlayerState);
 	
 	if(EliminatedCharacter)
 	{
@@ -132,18 +130,16 @@ void ABlasterGameMode::PlayerFell(ABlasterCharacter* CharacterThatFell,
 		return;
 	}
 
-	ABlasterPlayerState* CharacterThatFellPlayerState = CharacterThatFellController ? Cast<ABlasterPlayerState>(CharacterThatFellController->PlayerState) : nullptr;
-
-	if(CharacterThatFellPlayerState)
+	if(ABlasterPlayerState* CharacterThatFellPlayerState = CharacterThatFellController ? Cast<ABlasterPlayerState>(CharacterThatFellController->PlayerState) : nullptr)
 	{
-		CharacterThatFellPlayerState->AddToDefeats(1);
-	}
+		CharacterThatFellPlayerState->AddToDefeats(1);		
 
-	if(GameState)
-	{
-		if(const auto BlasterGameState = Cast<ABlasterGameState>(GameState))
+		for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 		{
-			BlasterGameState->AddToDefeatsLogFell(CharacterThatFellPlayerState->GetPlayerName());
+			if(ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It))
+			{
+				BlasterPlayer->BroadcastFallElimination(CharacterThatFellPlayerState);
+			}
 		}
 	}
 
@@ -175,22 +171,6 @@ UClass* ABlasterGameMode::GetDefaultPawnClassForController_Implementation(AContr
 	}
 
 	return Super::GetDefaultPawnClassForController_Implementation(InController);
-}
-
-void ABlasterGameMode::BroadcastDefeat(const ABlasterPlayerState* Attacker, const ABlasterPlayerState* Victim) const
-{
-	if(!Attacker || !Victim)
-	{
-		return;
-	}
-
-	if(GameState)
-	{
-		if(const auto BlasterGameState = Cast<ABlasterGameState>(GameState))
-		{
-			BlasterGameState->AddToDefeatsLog(Victim->GetPlayerName(), Attacker->GetPlayerName());
-		}
-	}
 }
 
 void ABlasterGameMode::HandleTopScoreChange(const TArray<ABlasterPlayerState*>& PreviousTopScoringPlayers,

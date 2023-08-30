@@ -107,7 +107,7 @@ public:
 	 * @param DamageCauser The weapon that caused the damage (This is to fix an exploit where if the player switches weapons, it can cause nefarious damage)
 	 */
 	UFUNCTION(Server, Reliable)
-	void ProjectileServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, const float HitTime, AProjectile* DamageCauser);
+	void ProjectileServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, const float HitTime, AWeapon* DamageCauser);
 	
 	/**
 	 * @brief Rewinds for the shotgun and applies damage if a hit is successful. This is called when a client claims to have

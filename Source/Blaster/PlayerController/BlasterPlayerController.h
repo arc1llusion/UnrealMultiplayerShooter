@@ -53,6 +53,7 @@ public:
 	void SetHUDTime();
 	
 	void BroadcastElimination(APlayerState* Attacker, APlayerState* Victim);
+	void BroadcastFallElimination(APlayerState* Victim);
 
 	//Synced with server world clock
 	virtual float GetServerTime() const;

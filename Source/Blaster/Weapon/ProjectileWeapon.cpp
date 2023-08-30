@@ -96,7 +96,7 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 }
 
 AProjectile* AProjectileWeapon::SpawnProjectile(UWorld* World, const FActorSpawnParameters& InSpawnParams, const FVector& SpawnLocation,
-                                                const FRotator& SpawnRotation, bool bInReplicated, bool bInUseServerSideRewind) const
+                                                const FRotator& SpawnRotation, bool bInReplicated, bool bInUseServerSideRewind)
 {
 	if(!World)
 	{
@@ -104,6 +104,7 @@ AProjectile* AProjectileWeapon::SpawnProjectile(UWorld* World, const FActorSpawn
 	}
 
 	const auto SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, InSpawnParams);
+	SpawnedProjectile->SetOwningWeapon(this);
 	SpawnedProjectile->SetReplicates(bInReplicated);
 	SpawnedProjectile->SetServerSideRewind(bInUseServerSideRewind);
 

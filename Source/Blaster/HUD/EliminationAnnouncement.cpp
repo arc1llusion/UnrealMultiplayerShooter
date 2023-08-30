@@ -9,7 +9,15 @@ void UEliminationAnnouncement::SetEliminationAnnouncementText(const FString& Att
 {
 	if(AnnouncementText)
 	{
-		const FString EliminationAnnouncementText = FString::Printf(TEXT("%s eliminated %s"), *AttackerName, *VictimName);
-		AnnouncementText->SetText(FText::FromString(EliminationAnnouncementText));
+		if(AttackerName == FString())
+		{
+			const FString EliminationAnnouncementText = FString::Printf(TEXT("%s fell"), *VictimName);
+			AnnouncementText->SetText(FText::FromString(EliminationAnnouncementText));
+		}
+		else
+		{
+			const FString EliminationAnnouncementText = FString::Printf(TEXT("%s eliminated %s"), *AttackerName, *VictimName);
+			AnnouncementText->SetText(FText::FromString(EliminationAnnouncementText));
+		}
 	}
 }

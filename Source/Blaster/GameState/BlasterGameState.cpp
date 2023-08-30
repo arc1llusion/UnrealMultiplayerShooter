@@ -11,8 +11,9 @@ void ABlasterGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ABlasterGameState, DefeatsLog);
 	DOREPLIFETIME(ABlasterGameState, TopScoringPlayers);
+	DOREPLIFETIME(ABlasterGameState, RedTeamScore);
+	DOREPLIFETIME(ABlasterGameState, BlueTeamScore);
 }
 
 void ABlasterGameState::UpdateTopScore(ABlasterPlayerState* ScoringPlayer)
@@ -42,39 +43,6 @@ void ABlasterGameState::RemovePlayer(ABlasterPlayerState* LeavingPlayer)
 	}
 }
 
-void ABlasterGameState::AddToDefeatsLog(const FString& Defeated, const FString& DefeatedBy)
-{
-	DefeatsLog.Add(FString::Printf(TEXT("%s eliminated by %s"), *Defeated, *DefeatedBy));
-	BroadcastDefeatsLog();
-
-	if(HasAuthority())
-	{		
-		FTimerHandle NewTimer;
-		GetWorldTimerManager().SetTimer(NewTimer, this, &ABlasterGameState::PruneDefeatsLog, 5.0f);
-
-		Timers.Add(NewTimer);
-	}
-}
-
-void ABlasterGameState::AddToDefeatsLogFell(const FString& Fell)
-{
-	DefeatsLog.Add(FString::Printf(TEXT("%s fell!"), *Fell));
-	BroadcastDefeatsLog();
-
-	if(HasAuthority())
-	{		
-		FTimerHandle NewTimer;
-		GetWorldTimerManager().SetTimer(NewTimer, this, &ABlasterGameState::PruneDefeatsLog, 5.0f);
-
-		Timers.Add(NewTimer);
-	}
-}
-
-void ABlasterGameState::OnRep_DefeatsLog()
-{
-	BroadcastDefeatsLog();
-}
-
 void ABlasterGameState::GetTopScoringPlayers(TArray<ABlasterPlayerState*>& OutTopScoringPlayers)
 {
 	OutTopScoringPlayers.Empty();
@@ -85,33 +53,10 @@ void ABlasterGameState::GetTopScoringPlayers(TArray<ABlasterPlayerState*>& OutTo
 	}
 }
 
-void ABlasterGameState::PruneDefeatsLog()
+void ABlasterGameState::OnRep_RedTeamScore()
 {
-	if(DefeatsLog.Num() > 0)
-	{
-		DefeatsLog.RemoveAt(0);
-	}
-
-	if(Timers.Num() > 0)
-	{
-		FTimerHandle TimerToRemove = Timers[0];
-		Timers.RemoveAt(0);
-		GetWorldTimerManager().ClearTimer(TimerToRemove);
-	}
-
-	if(HasAuthority())
-	{
-		BroadcastDefeatsLog();
-	}
 }
 
-void ABlasterGameState::BroadcastDefeatsLog()
+void ABlasterGameState::OnRep_BlueTeamScore()
 {
-	for(auto Player : PlayerArray)
-	{
-		if(const auto State = Cast<ABlasterPlayerState>(Player))
-		{
-			State->UpdateHUDDefeatsLog(DefeatsLog);
-		}
-	}
 }
