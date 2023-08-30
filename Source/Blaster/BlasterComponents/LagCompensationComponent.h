@@ -7,6 +7,8 @@
 #include "LagCompensationComponent.generated.h"
 
 
+class AProjectile;
+class AWeapon;
 class ABlasterPlayerController;
 class ABlasterCharacter;
 
@@ -91,10 +93,9 @@ public:
 	 * @param TraceStart The start of the trace
 	 * @param HitLocation The location on the hit character
 	 * @param HitTime The time the client recorded a hit - Single Trip Time
-	 * @param DamageCauser The weapon causing the damage
 	 */
 	UFUNCTION(Server, Reliable)
-	void ServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser);
+	void ServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
 
 	/**
 	 * @brief Applies damage to a character if server side rewind for projectiles is successful. This is called when a client claims to
@@ -103,9 +104,10 @@ public:
 	 * @param TraceStart The start of the trace
 	 * @param InitialVelocity The initial velocity of the projectile
 	 * @param HitTime The time the client recorded a hit - Single Trip Time
+	 * @param DamageCauser The weapon that caused the damage (This is to fix an exploit where if the player switches weapons, it can cause nefarious damage)
 	 */
 	UFUNCTION(Server, Reliable)
-	void ProjectileServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100 InitialVelocity, float HitTime);
+	void ProjectileServerScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, const float HitTime, AProjectile* DamageCauser);
 	
 	/**
 	 * @brief Rewinds for the shotgun and applies damage if a hit is successful. This is called when a client claims to have

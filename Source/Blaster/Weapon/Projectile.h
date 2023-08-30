@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
+class AWeapon;
 class UNiagaraComponent;
 class UNiagaraSystem;
 class UBoxComponent;
@@ -35,6 +36,8 @@ public:
 	FORCEINLINE void SetTraceStart(const FVector_NetQuantize& InStart) { TraceStart = InStart; }
 	FORCEINLINE void SetInitialVelocity(const FVector_NetQuantize100& InInitialVelocity) { InitialVelocity = InInitialVelocity; }
 
+	FORCEINLINE float GetDamage() const { return Damage; }
+	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
 	FORCEINLINE void SetDamage(float InDamage) { Damage = InDamage; }
 	FORCEINLINE void SetHeadShotDamage(float InDamage) { HeadShotDamage = InDamage; }
 

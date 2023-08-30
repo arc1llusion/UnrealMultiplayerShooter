@@ -68,7 +68,8 @@ void AProjectileBullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 					HitCharacter,
 					TraceStart,
 					InitialVelocity,
-					OwnerController->GetServerTime() - OwnerController->GetSingleTripTime()
+					OwnerController->GetServerTime() - OwnerController->GetSingleTripTime(),
+					 this
 				);
 			}
 		}

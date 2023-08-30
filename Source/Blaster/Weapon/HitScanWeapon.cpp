@@ -150,8 +150,7 @@ void AHitScanWeapon::ApplyDamage(AActor* HitActor, float InDamage, const FVector
 						Cast<ABlasterCharacter>(HitActor),
 						TraceStart,
 						HitTarget,
-						BlasterOwnerController->GetServerTime() - BlasterOwnerController->GetSingleTripTime(),
-						this
+						BlasterOwnerController->GetServerTime() - BlasterOwnerController->GetSingleTripTime()
 					);
 				}
 			}
