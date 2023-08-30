@@ -36,6 +36,7 @@ public:
 	FORCEINLINE void SetInitialVelocity(const FVector_NetQuantize100& InInitialVelocity) { InitialVelocity = InInitialVelocity; }
 
 	FORCEINLINE void SetDamage(float InDamage) { Damage = InDamage; }
+	FORCEINLINE void SetHeadShotDamage(float InDamage) { HeadShotDamage = InDamage; }
 
 	FORCEINLINE void SetInnerDamageRadius(float InInnerDamageRadius) { InnerDamageRadius = InInnerDamageRadius; }
 	FORCEINLINE void SetOuterDamageRadius(float InOuterDamageRadius) { OuterDamageRadius = InOuterDamageRadius; }
@@ -61,7 +62,13 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* CollisionBox;
 
-	float Damage = 20.0f;	
+	// Only set this for grenades and rockets
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.0f;
+
+	// Doesn't matter for grenades and rockets
+	UPROPERTY(EditAnywhere)
+	float HeadShotDamage = 40.0f;
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactParticles;
@@ -114,12 +121,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	float DestroyTime = 3.0;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	float InnerDamageRadius = 200.0f;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	float OuterDamageRadius = 500.0f;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	float MinimumDamage = 10.0f;
 };

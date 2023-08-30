@@ -49,7 +49,14 @@ void AProjectileBullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 		{
 			if(OwnerCharacter->HasAuthority() && !bUseServerSideRewind)
 			{
-				UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+				bool bIsHeadShot = false;
+
+				if(const auto HitBlasterCharacter = Cast<ABlasterCharacter>(Hit.GetActor()))
+				{
+					bIsHeadShot = Hit.BoneName == HitBlasterCharacter->GetHeadHitBoxName();
+				}
+				
+				UGameplayStatics::ApplyDamage(OtherActor, bIsHeadShot ? HeadShotDamage : Damage, OwnerController, this, UDamageType::StaticClass());
 				Super::OnHit(HitComponent, OtherActor, OtherComponent, NormalImpulse, Hit);
 				return;
 			}

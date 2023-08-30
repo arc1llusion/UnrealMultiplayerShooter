@@ -52,6 +52,7 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 				SpawnedProjectile->SetInnerDamageRadius(InnerDamageRadius);
 				SpawnedProjectile->SetOuterDamageRadius(OuterDamageRadius);
 				SpawnedProjectile->SetMinimumDamage(MinimumDamage);
+				SpawnedProjectile->SetHeadShotDamage(HeadShotDamage);
 			}
 			else
 			{
@@ -71,6 +72,7 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 				SpawnedProjectile->SetInnerDamageRadius(InnerDamageRadius);
 				SpawnedProjectile->SetOuterDamageRadius(OuterDamageRadius);
 				SpawnedProjectile->SetMinimumDamage(MinimumDamage);
+				SpawnedProjectile->SetHeadShotDamage(HeadShotDamage);
 			}
 			else
 			{
@@ -88,6 +90,7 @@ void AProjectileWeapon::Fire(const TArray<FVector_NetQuantize>& HitTargets)
 			SpawnedProjectile->SetInnerDamageRadius(InnerDamageRadius);
 			SpawnedProjectile->SetOuterDamageRadius(OuterDamageRadius);
 			SpawnedProjectile->SetMinimumDamage(MinimumDamage);
+			SpawnedProjectile->SetHeadShotDamage(HeadShotDamage);
 		}
 	}
 }
