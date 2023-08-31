@@ -64,3 +64,33 @@ void ATeamsGameMode::SortPlayerIntoTeam(ABlasterPlayerState* BlasterPlayerState)
 		}
 	}
 }
+
+float ATeamsGameMode::CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage)
+{
+	const float CurrentDamage =  Super::CalculateDamage(Attacker, Victim, BaseDamage);
+
+	if(Attacker == nullptr || Victim == nullptr)
+	{
+		return CurrentDamage;
+	}
+
+	const auto AttackerPlayerState = Attacker->GetPlayerState<ABlasterPlayerState>();
+	const auto VictimPlayerState = Victim->GetPlayerState<ABlasterPlayerState>();
+
+	if(AttackerPlayerState == nullptr || VictimPlayerState == nullptr)
+	{
+		return CurrentDamage;
+	}
+
+	if(VictimPlayerState == AttackerPlayerState)
+	{
+		return CurrentDamage;
+	}
+
+	if(AttackerPlayerState->GetTeam() == VictimPlayerState->GetTeam())
+	{
+		return 0;
+	}
+
+	return CurrentDamage;
+}

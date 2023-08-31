@@ -265,7 +265,8 @@ void ABlasterCharacter::MulticastEliminate_Implementation(const bool bInLeftGame
 
 void ABlasterCharacter::EliminateTimerFinished()
 {
-	if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameModeBase>())
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
+	if(BlasterGameMode)
 	{
 		if(!bLeftGame)
 		{
@@ -331,7 +332,8 @@ void ABlasterCharacter::HandleWeaponOnElimination(AWeapon* Weapon)
 
 void ABlasterCharacter::ServerLeaveGame_Implementation()
 {
-	if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameModeBase>())
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
+	if(BlasterGameMode)
 	{
 		BlasterPlayerState = BlasterPlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
 		BlasterGameMode->PlayerLeftGame(BlasterPlayerState);
@@ -468,7 +470,7 @@ void ABlasterCharacter::Destroyed()
 		EliminationBotComponent->DestroyComponent();
 	}
 
-	const ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
 	const bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
 	
 	if(Combat && Combat->EquippedWeapon && bMatchNotInProgress)
@@ -708,7 +710,16 @@ void ABlasterCharacter::PlayHitReactMontage()
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatorController, AActor* DamageCauser)
 {
-	if(bEliminated)
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
+
+	if(bEliminated || BlasterGameMode == nullptr)
+	{
+		return;
+	}
+
+	Damage = BlasterGameMode->CalculateDamage(InstigatorController, Controller, Damage);
+
+	if(Damage <= 0)
 	{
 		return;
 	}
@@ -740,12 +751,9 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 
 	if(Health <= 0.0f)
 	{
-		if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>())
-		{
-			BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
-			const auto AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
-			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
-		}
+		BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+		const auto AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
+		BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
 	}
 }
 
@@ -753,7 +761,8 @@ void ABlasterCharacter::KillZOverlap(AActor* OverlappedActor, AActor* OtherActor
 {
 	if(Cast<AKillZVolume>(OtherActor))
 	{
-		if(const auto BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>())
+		BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
+		if(BlasterGameMode)
 		{
 			BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
 			BlasterGameMode->PlayerFell(this, BlasterPlayerController);
@@ -1202,7 +1211,8 @@ void ABlasterCharacter::UpdateHUDAmmo()
 void ABlasterCharacter::SpawnDefaultWeapon()
 {
 	UWorld* World = GetWorld();
-	if(World && !bEliminated && DefaultWeaponClass && Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this)))
+	BlasterGameMode = BlasterGameMode == nullptr ? GetWorld()->GetAuthGameMode<ABlasterGameMode>() : BlasterGameMode;
+	if(World && !bEliminated && DefaultWeaponClass && BlasterGameMode)
 	{
 		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
 		StartingWeapon->SetIsDefaultWeapon(true);

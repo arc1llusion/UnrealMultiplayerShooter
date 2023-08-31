@@ -13,6 +13,7 @@
 #include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
+class ABlasterGameMode;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
 
 class ULagCompensationComponent;
@@ -381,6 +382,9 @@ private:
 	 * Other
 	 */
 	bool bIsFinishedSwapping = false;
+
+	UPROPERTY()
+	ABlasterGameMode* BlasterGameMode;
 	
 public:
 	void SetOverlappingWeapon(AWeapon* Weapon);

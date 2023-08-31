@@ -200,3 +200,8 @@ void ABlasterGameMode::HandleTopScoreChange(const TArray<ABlasterPlayerState*>& 
 		}
 	}
 }
+
+float ABlasterGameMode::CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage)
+{
+	return BaseDamage;
+}

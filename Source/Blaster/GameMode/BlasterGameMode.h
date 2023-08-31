@@ -40,6 +40,8 @@ public:
 	FORCEINLINE float GetLevelStartingTime() const { return LevelStartingTime; }
 	FORCEINLINE float GetCountdownTime() const { return CountdownTime; }
 
+	virtual float CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage);
+
 protected:
 	virtual void BeginPlay() override;
 
