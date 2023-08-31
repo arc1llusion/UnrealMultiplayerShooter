@@ -34,7 +34,7 @@ public:
 	virtual void OnRep_Defeats();
 
 	FORCEINLINE ETeam GetTeam() const { return Team; }
-	FORCEINLINE void SetTeam(const ETeam InTeam) { Team = InTeam; }
+	void SetTeam(const ETeam InTeam);
 
 private:
 	UPROPERTY()
@@ -45,6 +45,9 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Defeats)
 	int32 Defeats;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Team)
 	ETeam Team = ETeam::ET_NoTeam;
+
+	UFUNCTION()
+	void OnRep_Team();
 };

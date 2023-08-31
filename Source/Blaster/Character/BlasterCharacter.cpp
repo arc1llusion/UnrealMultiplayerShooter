@@ -187,6 +187,41 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 	TimeSinceLastMovementReplication = 0;
 }
 
+void ABlasterCharacter::SetTeamColor(ETeam Team)
+{
+	if(GetMesh() == nullptr)
+	{
+		return;
+	}
+	
+	switch(Team)
+	{
+		case ETeam::ET_NoTeam:
+			GetMesh()->SetRenderCustomDepth(false);
+			DissolveMaterialInstance = BlueDissolveMaterialInstance;
+			break;
+
+		case ETeam::ET_BlueTeam:
+			GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+			GetMesh()->MarkRenderStateDirty();
+			GetMesh()->SetRenderCustomDepth(true);
+			DissolveMaterialInstance = BlueDissolveMaterialInstance;
+			break;
+
+		case ETeam::ET_RedTeam:
+			GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
+			GetMesh()->MarkRenderStateDirty();
+			GetMesh()->SetRenderCustomDepth(true);
+			DissolveMaterialInstance = RedDissolveMaterialInstance;
+			break;
+
+		default:
+			GetMesh()->SetRenderCustomDepth(false);
+			DissolveMaterialInstance = BlueDissolveMaterialInstance;
+			break;
+	}
+}
+
 void ABlasterCharacter::Eliminate(const bool bInLeftGame)
 {
 	if(Combat)
@@ -735,7 +770,8 @@ void ABlasterCharacter::PollInit()
 		if(BlasterPlayerState)
 		{
 			BlasterPlayerState->AddToScore(0.0f);
-			BlasterPlayerState->AddToDefeats(0);			
+			BlasterPlayerState->AddToDefeats(0);
+			SetTeamColor(BlasterPlayerState->GetTeam());
 
 			if(const auto BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this)))
 			{

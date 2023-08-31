@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include "Blaster/BlasterTypes/CombatState.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "Blaster/BlasterTypes/TurningInPlace.h"
 #include "Blaster/Interfaces//InteractWithCrosshairsInterface.h"
 #include "Components/TimelineComponent.h"
@@ -84,6 +85,8 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastLostTheLead();
+
+	void SetTeamColor(ETeam Team);
 	
 protected:
 
@@ -309,12 +312,22 @@ private:
 	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
 
 	//Material instance set on the blueprint, used with the dynamic material instance
-	UPROPERTY(EditAnywhere, Category = "Elimination")
+	UPROPERTY(VisibleAnywhere, Category = "Elimination")
 	UMaterialInstance* DissolveMaterialInstance;
 
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);
 	void StartDissolve();
+
+	/*
+	 * Team Colors
+	 */
+	
+	UPROPERTY(EditAnywhere, Category = "Elimination")
+	UMaterialInstance* RedDissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, Category = "Elimination")
+	UMaterialInstance* BlueDissolveMaterialInstance;
 
 	/*
 	 * Elimination Effects
