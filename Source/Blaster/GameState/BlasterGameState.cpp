@@ -60,3 +60,36 @@ void ABlasterGameState::OnRep_RedTeamScore()
 void ABlasterGameState::OnRep_BlueTeamScore()
 {
 }
+
+void ABlasterGameState::AddPlayerToBlueTeam(ABlasterPlayerState* Player)
+{
+	if(Player)
+	{
+		BlueTeam.AddUnique(Player);
+	}
+}
+
+void ABlasterGameState::AddPlayerToRedTeam(ABlasterPlayerState* Player)
+{
+	if(Player)
+	{
+		RedTeam.AddUnique(Player);
+	}
+}
+
+void ABlasterGameState::RemovePlayerFromTeam(ABlasterPlayerState* Player)
+{
+	if(Player == nullptr)
+	{
+		return;
+	}
+	
+	if(RedTeam.Contains(Player))
+	{
+		RedTeam.Remove(Player);
+	}
+	else if(BlueTeam.Contains(Player))
+	{
+		 BlueTeam.Remove(Player);
+	}
+}

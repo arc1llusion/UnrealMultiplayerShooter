@@ -22,6 +22,14 @@ public:
 	void RemovePlayer(ABlasterPlayerState* LeavingPlayer);
 
 	virtual void GetTopScoringPlayers(TArray<ABlasterPlayerState*>& OutTopScoringPlayers);
+
+	FORCEINLINE int32 GetBlueTeamCount() const { return BlueTeam.Num(); }
+	FORCEINLINE int32 GetRedTeamCount() const { return RedTeam.Num(); }
+
+	void AddPlayerToBlueTeam(ABlasterPlayerState* Player);
+	void AddPlayerToRedTeam(ABlasterPlayerState* Player);
+
+	void RemovePlayerFromTeam(ABlasterPlayerState* Player);
 	
 private:
 	

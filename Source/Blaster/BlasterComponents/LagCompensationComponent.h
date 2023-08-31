@@ -7,7 +7,6 @@
 #include "LagCompensationComponent.generated.h"
 
 
-class AProjectile;
 class AWeapon;
 class ABlasterPlayerController;
 class ABlasterCharacter;
