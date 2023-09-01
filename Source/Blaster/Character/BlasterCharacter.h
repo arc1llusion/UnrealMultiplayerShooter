@@ -53,6 +53,7 @@ public:
 	void UpdateHUDHealth();
 	void UpdateHUDShield();
 	void UpdateHUDAmmo();
+	void UpdateHUDTeamScores();
 
 	void SpawnDefaultWeapon();
 

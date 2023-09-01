@@ -53,8 +53,19 @@ void ABlasterGameState::GetTopScoringPlayers(TArray<ABlasterPlayerState*>& OutTo
 	}
 }
 
+void ABlasterGameState::AddToRedTeamScore()
+{
+	++RedTeamScore;
+}
+
 void ABlasterGameState::OnRep_RedTeamScore()
 {
+	
+}
+
+void ABlasterGameState::AddToBlueTeamScore()
+{
+	++BlueTeamScore;
 }
 
 void ABlasterGameState::OnRep_BlueTeamScore()

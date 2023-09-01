@@ -30,6 +30,11 @@ public:
 	void AddPlayerToRedTeam(ABlasterPlayerState* Player);
 
 	void RemovePlayerFromTeam(ABlasterPlayerState* Player);
+
+	
+	void AddToRedTeamScore();	
+
+	void AddToBlueTeamScore();
 	
 private:
 	

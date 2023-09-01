@@ -34,6 +34,8 @@ public:
 	
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
+	FORCEINLINE bool IsTeamsMatch() const { return bIsTeamsMatch; }
+
 	FORCEINLINE float GetWarmupTime() const { return WarmupTime; }
 	FORCEINLINE float GetCooldownTime() const { return CooldownTime; }
 	FORCEINLINE float GetMatchTime() const { return MatchTime; }
@@ -45,7 +47,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void OnMatchStateSet() override;
+	virtual void OnMatchStateSet() override;	
+
+	bool bIsTeamsMatch = false;
 	
 private:	
 	UPROPERTY(EditDefaultsOnly)

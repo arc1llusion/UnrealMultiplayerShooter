@@ -51,6 +51,9 @@ public:
 	void SetHUDMatchCountdown(float CountdownTime);
 	void SetHUDAnnouncementCountdown(float CountdownTime);	
 	void SetHUDTime();
+	void HideTeamScores();
+	void InitializeTeamScores();
+	void SetHUDTeamScores(int32 RedScore, int32 BlueScore);
 	
 	void BroadcastElimination(APlayerState* Attacker, APlayerState* Victim);
 	void BroadcastFallElimination(APlayerState* Victim);
@@ -60,7 +63,7 @@ public:
 	//Sync with server clock as soon as possible
 	virtual void ReceivedPlayer() override;
 
-	void OnMatchStateSet(FName InMatchState);
+	void OnMatchStateSet(FName InMatchState, bool bIsTeamsMatch = false);
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void AcknowledgePossession(APawn* P) override;
@@ -139,14 +142,14 @@ protected:
 
 	void CheckTimeSync(float DeltaSeconds);
 
-	void HandleMatchHasStarted();
+	void HandleMatchHasStarted(bool bIsTeamsMatch = false);
 	void HandleCooldown();
 
 	UFUNCTION(Server, Reliable)
 	void ServerCheckMatchState();
 
 	UFUNCTION(Client, Reliable)
-	void ClientJoinMidGame(FName InMatchState, float InWarmupTime, float InCooldownTime, float InMatchTime, float InStartingTime);
+	void ClientJoinMidGame(FName InMatchState, float InWarmupTime, float InCooldownTime, float InMatchTime, float InStartingTime, bool bIsTeamsMatch);
 
 	void CheckPing(float DeltaSeconds);
 	void StartHighPingWarning();
@@ -162,6 +165,12 @@ protected:
 
 	UFUNCTION(Client, Reliable)
 	void ClientEliminationAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
+	UPROPERTY(ReplicatedUsing = OnRep_ShowTeamScores)
+	bool bShowTeamScores = false;
+
+	UFUNCTION()
+	void OnRep_ShowTeamScores();
 	
 private:
 	UPROPERTY()

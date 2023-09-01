@@ -105,6 +105,7 @@ void ABlasterCharacter::BeginPlay()
 	UpdateHUDAmmo();
 	UpdateHUDHealth();
 	UpdateHUDShield();
+	UpdateHUDTeamScores();
 
 	if(HasAuthority())
 	{
@@ -1205,6 +1206,23 @@ void ABlasterCharacter::UpdateHUDAmmo()
 	{
 		BlasterPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
 		BlasterPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+	}
+}
+
+void ABlasterCharacter::UpdateHUDTeamScores()
+{
+	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	BlasterGameMode = !BlasterGameMode ? Cast<ABlasterGameMode>(GetWorld()->GetAuthGameMode()) : BlasterGameMode;
+	if(BlasterPlayerController && BlasterGameMode)
+	{
+		if(BlasterGameMode->IsTeamsMatch())
+		{
+			BlasterPlayerController->InitializeTeamScores();
+		}
+		else
+		{
+			BlasterPlayerController->HideTeamScores();
+		}
 	}
 }
 
