@@ -26,6 +26,9 @@ public:
 	FORCEINLINE int32 GetBlueTeamCount() const { return BlueTeam.Num(); }
 	FORCEINLINE int32 GetRedTeamCount() const { return RedTeam.Num(); }
 
+	FORCEINLINE int32 GetRedTeamScore() const { return RedTeamScore; }
+	FORCEINLINE int32 GetBlueTeamScore() const { return BlueTeamScore; }
+
 	void AddPlayerToBlueTeam(ABlasterPlayerState* Player);
 	void AddPlayerToRedTeam(ABlasterPlayerState* Player);
 

@@ -200,6 +200,7 @@ private:
 	float GetTimeLeft() const;
 
 	void SetWinnerText();
+	void SetTeamsWinnerText();
 
 	UPROPERTY(ReplicatedUsing = OnRep_PlayersReady)
 	TArray<FPlayersReady> PlayersReady;

@@ -1212,16 +1212,20 @@ void ABlasterCharacter::UpdateHUDAmmo()
 void ABlasterCharacter::UpdateHUDTeamScores()
 {
 	BlasterPlayerController = !BlasterPlayerController ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
-	BlasterGameMode = !BlasterGameMode ? Cast<ABlasterGameMode>(GetWorld()->GetAuthGameMode()) : BlasterGameMode;
-	if(BlasterPlayerController && BlasterGameMode)
+
+	if(BlasterPlayerController)
 	{
-		if(BlasterGameMode->IsTeamsMatch())
-		{
-			BlasterPlayerController->InitializeTeamScores();
-		}
-		else
-		{
-			BlasterPlayerController->HideTeamScores();
+		BlasterGameMode = !BlasterGameMode ? Cast<ABlasterGameMode>(GetWorld()->GetAuthGameMode()) : BlasterGameMode;
+		if(BlasterGameMode)
+		{			
+			if(BlasterGameMode->IsTeamsMatch())
+			{
+				BlasterPlayerController->InitializeTeamScores();
+			}
+			else
+			{
+				BlasterPlayerController->HideTeamScores();
+			}
 		}
 	}
 }
