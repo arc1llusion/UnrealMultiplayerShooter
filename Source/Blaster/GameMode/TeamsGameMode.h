@@ -24,6 +24,8 @@ public:
 
 	virtual float CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage) override;
 
+	virtual void PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController) override;
+
 protected:
 	virtual void HandleMatchHasStarted() override;
 

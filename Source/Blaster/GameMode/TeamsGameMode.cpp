@@ -99,3 +99,30 @@ float ATeamsGameMode::CalculateDamage(AController* Attacker, AController* Victim
 
 	return CurrentDamage;
 }
+
+void ATeamsGameMode::PlayerEliminated(ABlasterCharacter* EliminatedCharacter,
+	ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController)
+{
+	Super::PlayerEliminated(EliminatedCharacter, VictimController, AttackerController);
+
+	if(AttackerController == nullptr || VictimController == nullptr)
+	{
+		return;
+	}
+
+	BlasterGameState = BlasterGameState == nullptr ? Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this)) : BlasterGameState;
+	const auto AttackerPlayerState = Cast<ABlasterPlayerState>(AttackerController->PlayerState);
+	
+	if(BlasterGameState && AttackerPlayerState)
+	{
+		if(AttackerPlayerState->GetTeam() == ETeam::ET_BlueTeam)
+		{
+			BlasterGameState->AddToBlueTeamScore();
+		}
+
+		if(AttackerPlayerState->GetTeam() == ETeam::ET_RedTeam)
+		{
+			BlasterGameState->AddToRedTeamScore();
+		}
+	}
+}

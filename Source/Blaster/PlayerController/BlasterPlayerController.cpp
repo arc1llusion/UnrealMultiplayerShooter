@@ -601,13 +601,12 @@ void ABlasterPlayerController::SetHUDTeamScores(int32 RedScore, int32 BlueScore)
 	const bool bHudValid = BlasterHUD &&
 		BlasterHUD->CharacterOverlay &&
 		BlasterHUD->CharacterOverlay->RedTeamScore &&
-		BlasterHUD->CharacterOverlay->BlueTeamScore &&
-		BlasterHUD->CharacterOverlay->ScoreSpacerText;
+		BlasterHUD->CharacterOverlay->BlueTeamScore;
 
 	if(bHudValid)
 	{
 		BlasterHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(FString::Printf(TEXT("%d"), RedScore)));
-		BlasterHUD->CharacterOverlay->RedTeamScore->SetText(FText::FromString(FString::Printf(TEXT("%d"), BlueScore)));
+		BlasterHUD->CharacterOverlay->BlueTeamScore->SetText(FText::FromString(FString::Printf(TEXT("%d"), BlueScore)));
 	}
 }
 

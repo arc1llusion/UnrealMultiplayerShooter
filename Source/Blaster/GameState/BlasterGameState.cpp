@@ -3,6 +3,7 @@
 
 #include "BlasterGameState.h"
 
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "Net/UnrealNetwork.h"
 
@@ -56,20 +57,39 @@ void ABlasterGameState::GetTopScoringPlayers(TArray<ABlasterPlayerState*>& OutTo
 void ABlasterGameState::AddToRedTeamScore()
 {
 	++RedTeamScore;
+
+	if(const auto BlasterPlayerController = Cast<ABlasterPlayerController>(GetWorld()->GetFirstPlayerController()))
+	{
+		BlasterPlayerController->SetHUDTeamScores(RedTeamScore, BlueTeamScore);
+	}
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void ABlasterGameState::OnRep_RedTeamScore()
 {
-	
+	if(const auto BlasterPlayerController = Cast<ABlasterPlayerController>(GetWorld()->GetFirstPlayerController()))
+	{
+		BlasterPlayerController->SetHUDTeamScores(RedTeamScore, BlueTeamScore);
+	}
 }
 
 void ABlasterGameState::AddToBlueTeamScore()
 {
 	++BlueTeamScore;
+	
+	if(const auto BlasterPlayerController = Cast<ABlasterPlayerController>(GetWorld()->GetFirstPlayerController()))
+	{
+		BlasterPlayerController->SetHUDTeamScores(RedTeamScore, BlueTeamScore);
+	}
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void ABlasterGameState::OnRep_BlueTeamScore()
 {
+	if(const auto BlasterPlayerController = Cast<ABlasterPlayerController>(GetWorld()->GetFirstPlayerController()))
+	{
+		BlasterPlayerController->SetHUDTeamScores(RedTeamScore, BlueTeamScore);
+	}
 }
 
 void ABlasterGameState::AddPlayerToBlueTeam(ABlasterPlayerState* Player)
