@@ -138,6 +138,7 @@ private:
 	
 	void AttachActorToRightHandSocket(AActor* ActorToAttach) const;
 	void AttachActorToLeftHandSocket(AActor* ActorToAttach) const;
+	void AttachFlagToLeftHandSocket(AWeapon* Flag) const;
 	void AttachActorToSecondaryWeaponSocket(AActor* ActorToAttach) const;
 
 	void UpdateAmmoValues();
@@ -172,6 +173,8 @@ private:
 	FName PistolSocketName{TEXT("PistolSocket")};
 	UPROPERTY(EditAnywhere, Category = "Sockets")
 	FName SecondaryWeaponSocketName{TEXT("SecondaryWeaponSocket")};
+	UPROPERTY(EditAnywhere, Category = "Sockets")
+	FName FlagSocket{TEXT("FlagSocket")};
 
 	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
 	bool bIsAiming = false;
@@ -265,7 +268,11 @@ private:
 	 * Flag
 	 */
 
+	UPROPERTY(ReplicatedUsing = OnRep_IsHoldingTheFlag)
 	bool bIsHoldingTheFlag = false;
+
+	UFUNCTION()
+	void OnRep_IsHoldingTheFlag();
 
 	//Carried ammo for the currently equipped weapon
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_CarriedAmmo)

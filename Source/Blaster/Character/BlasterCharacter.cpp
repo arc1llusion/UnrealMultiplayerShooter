@@ -482,6 +482,14 @@ void ABlasterCharacter::Destroyed()
 
 void ABlasterCharacter::RotateInPlace(float DeltaTime)
 {
+	if(Combat && Combat->bIsHoldingTheFlag)
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+	
 	if(GetDisableGameplayFromController())
 	{
 		bUseControllerRotationYaw = false;

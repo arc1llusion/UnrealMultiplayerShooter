@@ -30,6 +30,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, CombatState);
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(UCombatComponent, Grenades);
+	DOREPLIFETIME(UCombatComponent, bIsHoldingTheFlag);
 }
 
 void UCombatComponent::BeginPlay()
@@ -271,17 +272,28 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		return;
 	}
 
-	if(EquippedWeapon && !SecondaryWeapon)
+	if(WeaponToEquip->GetWeaponType() == EWeaponType::EWT_Flag)
 	{
-		EquipSecondaryWeapon(WeaponToEquip);
+		Character->Crouch();
+		bIsHoldingTheFlag = true;
+		AttachFlagToLeftHandSocket(WeaponToEquip);
+		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+		WeaponToEquip->SetOwner(Character);
 	}
 	else
-	{
-		EquipPrimaryWeapon(WeaponToEquip);
-	}	
+	{	
+		if(EquippedWeapon && !SecondaryWeapon)
+		{
+			EquipSecondaryWeapon(WeaponToEquip);
+		}
+		else
+		{
+			EquipPrimaryWeapon(WeaponToEquip);
+		}	
 	
-	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	Character->bUseControllerRotationYaw = true;
+		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
+		Character->bUseControllerRotationYaw = true;
+	}
 }
 
 void UCombatComponent::SwapWeapons()
@@ -1016,6 +1028,19 @@ void UCombatComponent::AttachActorToLeftHandSocket(AActor* ActorToAttach) const
 	}
 }
 
+void UCombatComponent::AttachFlagToLeftHandSocket(AWeapon* Flag) const
+{
+	if(!Character || !Flag || !Character->GetMesh())
+	{
+		return;
+	}
+	
+	if(const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FlagSocket))
+	{
+		HandSocket->AttachActor(Flag, Character->GetMesh());
+	}
+}
+
 void UCombatComponent::AttachActorToSecondaryWeaponSocket(AActor* ActorToAttach) const
 {
 	if(!Character || !ActorToAttach || !Character->GetMesh())
@@ -1093,5 +1118,13 @@ void UCombatComponent::InitializeCarriedAmmo()
 		{
 			CarriedAmmoMap.Emplace(MapElement.Key, MapElement.Value);
 		}
+	}
+}
+
+void UCombatComponent::OnRep_IsHoldingTheFlag()
+{
+	if(bIsHoldingTheFlag && Character && Character->IsLocallyControlled())
+	{
+		Character->Crouch();
 	}
 }
