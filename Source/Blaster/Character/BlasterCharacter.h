@@ -137,6 +137,10 @@ protected:
 	void PollInit();
 	void RotateInPlace(float DeltaTime);
 
+	void OnPlayerStateInitialized();
+
+	void SetSpawnPoint();
+
 	/** Input Assets **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext *DefaultMappingContext;

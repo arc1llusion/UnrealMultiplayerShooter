@@ -27,6 +27,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 #include "Blaster/HUD/OverheadWidget.h"
+#include "Blaster/PlayerStart/TeamPlayerStart.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/KillZVolume.h"
 
@@ -525,6 +526,35 @@ void ABlasterCharacter::RotateInPlace(float DeltaTime)
 	}
 }
 
+void ABlasterCharacter::OnPlayerStateInitialized()
+{
+	BlasterPlayerState->AddToScore(0.0f);
+	BlasterPlayerState->AddToDefeats(0);
+	SetTeamColor(BlasterPlayerState->GetTeam());
+	SetSpawnPoint();
+}
+
+void ABlasterCharacter::SetSpawnPoint()
+{
+	if(HasAuthority() && BlasterPlayerState->GetTeam() != ETeam::ET_NoTeam)
+	{		
+		TArray<AActor*> PlayerStarts;
+		UGameplayStatics::GetAllActorsOfClass(this, ATeamPlayerStart::StaticClass(), PlayerStarts);
+
+		const auto FilteredTeamPlayerStarts = PlayerStarts.FilterByPredicate([&](const AActor* Actor)
+		{
+			const auto TeamPlayerStart = Cast<ATeamPlayerStart>(Actor);
+			return TeamPlayerStart && TeamPlayerStart->GetTeam() == BlasterPlayerState->GetTeam();
+		});;
+
+		if(FilteredTeamPlayerStarts.Num() > 0)
+		{
+			const auto ChosenPlayerStart = FilteredTeamPlayerStarts[FMath::RandRange(0, FilteredTeamPlayerStarts.Num() - 1)];
+			SetActorLocationAndRotation(ChosenPlayerStart->GetActorLocation(), ChosenPlayerStart->GetActorRotation());
+		}
+	}
+}
+
 void ABlasterCharacter::PlayFireMontage(bool bAiming)
 {
 	if(!Combat || !Combat->EquippedWeapon)
@@ -799,9 +829,7 @@ void ABlasterCharacter::PollInit()
 
 		if(BlasterPlayerState)
 		{
-			BlasterPlayerState->AddToScore(0.0f);
-			BlasterPlayerState->AddToDefeats(0);
-			SetTeamColor(BlasterPlayerState->GetTeam());
+			OnPlayerStateInitialized();
 
 			if(const auto BlasterGameState = Cast<ABlasterGameState>(UGameplayStatics::GetGameState(this)))
 			{
