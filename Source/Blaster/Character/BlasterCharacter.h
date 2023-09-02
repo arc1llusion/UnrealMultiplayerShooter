@@ -404,6 +404,8 @@ public:
 	FORCEINLINE ULagCompensationComponent* GetLagCompensationComponent() const { return LagCompensation; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 	FORCEINLINE FName GetHeadHitBoxName() const { return HeadHitBoxName; }
+	FORCEINLINE bool IsHoldingTheFlag() const;
+	
 
 	FVector GetHitTarget() const;
 

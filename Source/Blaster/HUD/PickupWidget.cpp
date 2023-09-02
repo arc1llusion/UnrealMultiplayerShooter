@@ -32,6 +32,9 @@ void UPickupWidget::SetWeaponText(const EWeaponType WeaponType) const
 		case EWeaponType::EWT_AssaultRifle:
 			Output = "Assault Rifle";
 			break;
+		case EWeaponType::EWT_Flag:
+			Output = "Flag";
+			break;
 		default:
 			Output = "I dunno";
 			break;

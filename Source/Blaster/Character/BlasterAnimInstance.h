@@ -91,6 +91,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
 	bool bTransformRightHand;
 
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = true))
+	bool bIsHoldingTheFlag;
+
 	UPROPERTY(EditAnywhere)
 	FName LeftHandSocket{TEXT("LeftHandSocket")};
 	UPROPERTY(EditAnywhere)

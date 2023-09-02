@@ -261,6 +261,12 @@ private:
 
 	bool CanFire() const;
 
+	/*
+	 * Flag
+	 */
+
+	bool bIsHoldingTheFlag = false;
+
 	//Carried ammo for the currently equipped weapon
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_CarriedAmmo)
 	int32 CarriedAmmo = 0;

@@ -52,6 +52,7 @@ void UBlasterAnimInstance::SetAnimationVariables()
 	bUseFabrik = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
 	bUseAimOffsets = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplayFromController();
 	bTransformRightHand = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplayFromController();
+	bIsHoldingTheFlag = BlasterCharacter->IsHoldingTheFlag();
 
 	AimOffsetYaw = BlasterCharacter->GetAimOffsetYaw();
 	AimOffsetPitch = BlasterCharacter->GetAimOffsetPitch();

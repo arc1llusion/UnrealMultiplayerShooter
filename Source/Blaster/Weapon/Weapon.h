@@ -277,6 +277,7 @@ public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 
 	FORCEINLINE USoundCue* GetZoomInSound() const { return ZoomInSound; }
 	FORCEINLINE USoundCue* GetZoomOutSound() const { return ZoomOutSound; }
