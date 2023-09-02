@@ -838,6 +838,11 @@ void ABlasterCharacter::EquipAction(const FInputActionValue& Value)
 {
 	if(Combat)
 	{
+		if(Combat->bIsHoldingTheFlag)
+		{
+			return;
+		}
+		
 		if(Combat->CombatState == ECombatState::ECS_Unoccupied)
 		{
 			ServerEquipButtonPressed();
@@ -857,6 +862,11 @@ void ABlasterCharacter::EquipAction(const FInputActionValue& Value)
 
 void ABlasterCharacter::CrouchAction(const FInputActionValue& Value)
 {
+	if(Combat && Combat->bIsHoldingTheFlag)
+	{
+		return;
+	}
+	
 	if(bIsCrouched)
 	{
 		UnCrouch();
@@ -871,6 +881,11 @@ void ABlasterCharacter::AimAction(const FInputActionValue& Value)
 {
 	if(Combat)
 	{
+		if(Combat->bIsHoldingTheFlag)
+		{
+			return;
+		}
+		
 		Combat->SetAiming(true);
 	}
 }
@@ -879,6 +894,11 @@ void ABlasterCharacter::StopAimAction(const FInputActionValue& Value)
 {
 	if(Combat)
 	{
+		if(Combat->bIsHoldingTheFlag)
+		{
+			return;
+		}
+		
 		Combat->SetAiming(false);
 	}
 }
@@ -887,6 +907,11 @@ void ABlasterCharacter::FireAction(const FInputActionValue& Value)
 {
 	if(Combat)
 	{
+		if(Combat->bIsHoldingTheFlag)
+		{
+			return;
+		}
+		
 		Combat->FireButtonPressed(true);
 	}
 }
@@ -895,6 +920,11 @@ void ABlasterCharacter::StopFireAction(const FInputActionValue& Value)
 {
 	if(Combat)
 	{
+		if(Combat->bIsHoldingTheFlag)
+		{
+			return;
+		}
+		
 		Combat->FireButtonPressed(false);
 	}
 }
@@ -933,6 +963,11 @@ void ABlasterCharacter::ReloadAction(const FInputActionValue& Value)
 {
 	if(Combat)
 	{
+		if(Combat->bIsHoldingTheFlag)
+		{
+			return;
+		}
+		
 		Combat->Reload();
 	}
 }
@@ -941,6 +976,11 @@ void ABlasterCharacter::ThrowGrenadeAction(const FInputActionValue& Value)
 {
 	if(Combat)
 	{
+		if(Combat->bIsHoldingTheFlag)
+		{
+			return;
+		}
+		
 		Combat->ThrowGrenade();
 	}
 }
@@ -1068,6 +1108,11 @@ void ABlasterCharacter::SimProxiesTurn()
 
 void ABlasterCharacter::Jump()
 {
+	if(Combat && Combat->bIsHoldingTheFlag)
+	{
+		return;
+	}
+	
 	if(bIsCrouched)
 	{
 		UnCrouch();
