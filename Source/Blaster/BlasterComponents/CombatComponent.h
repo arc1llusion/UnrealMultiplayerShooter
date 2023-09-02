@@ -274,6 +274,9 @@ private:
 	UFUNCTION()
 	void OnRep_IsHoldingTheFlag();
 
+	UPROPERTY()
+	AWeapon* EquippedFlag;
+
 	//Carried ammo for the currently equipped weapon
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_CarriedAmmo)
 	int32 CarriedAmmo = 0;

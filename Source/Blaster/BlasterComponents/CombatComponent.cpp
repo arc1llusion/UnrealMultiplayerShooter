@@ -276,9 +276,10 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	{
 		Character->Crouch();
 		bIsHoldingTheFlag = true;
-		AttachFlagToLeftHandSocket(WeaponToEquip);
 		WeaponToEquip->SetWeaponState(EWeaponState::EWS_Equipped);
+		AttachFlagToLeftHandSocket(WeaponToEquip);
 		WeaponToEquip->SetOwner(Character);
+		EquippedFlag = WeaponToEquip;
 	}
 	else
 	{	
@@ -1033,6 +1034,11 @@ void UCombatComponent::AttachFlagToLeftHandSocket(AWeapon* Flag) const
 	if(!Character || !Flag || !Character->GetMesh())
 	{
 		return;
+	}
+
+	if(Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Attaching Flag"), *Character->GetActorNameOrLabel());
 	}
 	
 	if(const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FlagSocket))

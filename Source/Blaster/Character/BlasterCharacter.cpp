@@ -229,6 +229,7 @@ void ABlasterCharacter::Eliminate(const bool bInLeftGame)
 	{
 		HandleWeaponOnElimination(Combat->EquippedWeapon);
 		HandleWeaponOnElimination(Combat->SecondaryWeapon);
+		HandleWeaponOnElimination(Combat->EquippedFlag);
 	}
 	
 	MulticastEliminate(bInLeftGame);

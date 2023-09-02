@@ -55,7 +55,7 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 
 	virtual void Fire(const TArray<FVector_NetQuantize>& HitTargets);
-	void Drop();
+	virtual void Drop();
 
 	void AddAmmo(int32 AmmoToAdd);
 
