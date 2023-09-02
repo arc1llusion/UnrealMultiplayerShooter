@@ -223,6 +223,17 @@ void ABlasterCharacter::SetTeamColor(ETeam Team)
 	}
 }
 
+ETeam ABlasterCharacter::GetTeam()
+{
+	BlasterPlayerState = BlasterPlayerState == nullptr ? GetPlayerState<ABlasterPlayerState>() : BlasterPlayerState;
+	if(BlasterPlayerState == nullptr)
+	{
+		return ETeam::ET_NoTeam;
+	}
+
+	return BlasterPlayerState->GetTeam();
+}
+
 void ABlasterCharacter::Eliminate(const bool bInLeftGame)
 {
 	if(Combat)

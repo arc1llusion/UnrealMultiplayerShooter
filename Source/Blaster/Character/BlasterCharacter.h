@@ -89,6 +89,8 @@ public:
 	void MulticastLostTheLead();
 
 	void SetTeamColor(ETeam Team);
+
+	ETeam GetTeam();
 	
 protected:
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "WeaponTypes.h"
+#include "Blaster/BlasterTypes/Team.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
@@ -272,6 +273,13 @@ private:
 	bool bIsBurst = false;
 
 	void AddOrRemoveHighPingDelegate(bool bAddDelegate);
+
+	/*
+	 * Team
+	 */
+
+	UPROPERTY(EditAnywhere)
+	ETeam Team = ETeam::ET_NoTeam;
 
 public:
 	void SetWeaponState(EWeaponState State);
