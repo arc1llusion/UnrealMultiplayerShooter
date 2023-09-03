@@ -22,6 +22,8 @@ public:
 	virtual void OnWeaponStateEquipped() override;
 	virtual void OnWeaponStateDropped() override;
 
+	virtual void RespawnWeapon() override;
+
 private:
 
 	UPROPERTY(EditAnywhere)

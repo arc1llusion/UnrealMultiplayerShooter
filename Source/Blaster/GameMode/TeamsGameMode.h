@@ -29,10 +29,10 @@ public:
 protected:
 	virtual void HandleMatchHasStarted() override;
 
-
-private:
 	UPROPERTY()
 	ABlasterGameState* BlasterGameState;
+
+private:
 	
 	void SortPlayerIntoTeam(ABlasterPlayerState* BlasterPlayerState);
 };

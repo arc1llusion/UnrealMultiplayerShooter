@@ -447,6 +447,8 @@ public:
 	 * Player Controller Functions
 	 */
 	bool GetDisableGameplayFromController();
+
+	void SetHoldingTheFlag(bool bInHolding) const;
 	
 private:
 	void CalculateAimOffsetYaw(float DeltaTime);

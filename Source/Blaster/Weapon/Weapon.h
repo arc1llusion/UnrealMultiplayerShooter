@@ -66,6 +66,8 @@ public:
 	void BurstTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& Result) const;
 	FVector TraceEndWithScatter(const FVector& HitTarget, const FVector& TraceStart) const;
 	FORCEINLINE bool UseScatter() const { return bUseScatter; }
+
+	virtual void RespawnWeapon();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -265,7 +267,6 @@ private:
 	FTimerHandle RespawnOnDropTimer;
 
 	void StartRespawnOnDrop();
-	void RespawnWeapon();
 	void ClearRespawnTimer();
 
 	bool bIsDefaultWeapon = false;
@@ -318,4 +319,6 @@ public:
 	FORCEINLINE float GetAimScaleFactor() const { return AimScaleFactor; }
 
 	FORCEINLINE bool IsBurst() const { return bIsBurst; }
+
+	FORCEINLINE ETeam GetTeam() const { return Team; }
 };

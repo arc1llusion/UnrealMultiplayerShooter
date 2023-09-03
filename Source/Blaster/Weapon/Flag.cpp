@@ -3,6 +3,7 @@
 
 #include "Flag.h"
 
+#include "Blaster/Character/BlasterCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 
@@ -31,13 +32,45 @@ void AFlag::OnWeaponStateEquipped()
 
 	FlagMesh->SetSimulatePhysics(false);
 	FlagMesh->SetEnableGravity(false);
-	FlagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	FlagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 }
 
 void AFlag::OnWeaponStateDropped()
 {
 	Super::OnWeaponStateDropped();
 
+	FlagMesh->SetSimulatePhysics(true);
+	FlagMesh->SetEnableGravity(true);
+	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	FlagMesh->SetCollisionResponseToAllChannels(ECR_Block);
+	FlagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	FlagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+}
+
+void AFlag::RespawnWeapon()
+{
+	if(const auto FlagBearer = Cast<ABlasterCharacter>(GetOwner()))
+	{
+		FlagBearer->SetHoldingTheFlag(false);
+		FlagBearer->SetOverlappingWeapon(nullptr);
+		FlagBearer->UnCrouch();
+	}
+	
+	if(HasAuthority())
+	{
+		FlagMesh->SetSimulatePhysics(false);
+		FlagMesh->SetEnableGravity(false);
+		FlagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		const FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+		FlagMesh->DetachFromComponent(DetachRules);
+	}
+	
+	Super::RespawnWeapon();
+
+	//I don't know why this is needed for the teleport to work
 	FlagMesh->SetSimulatePhysics(true);
 	FlagMesh->SetEnableGravity(true);
 	FlagMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

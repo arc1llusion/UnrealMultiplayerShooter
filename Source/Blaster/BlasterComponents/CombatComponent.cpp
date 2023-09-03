@@ -1129,6 +1129,11 @@ void UCombatComponent::InitializeCarriedAmmo()
 
 void UCombatComponent::OnRep_IsHoldingTheFlag()
 {
+	if(Character)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Replicated Holding the Flag %d"), *Character->GetActorNameOrLabel(), bIsHoldingTheFlag);
+	}
+	
 	if(bIsHoldingTheFlag && Character && Character->IsLocallyControlled())
 	{
 		Character->Crouch();

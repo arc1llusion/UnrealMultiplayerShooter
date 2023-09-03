@@ -502,6 +502,12 @@ void ABlasterCharacter::RotateInPlace(float DeltaTime)
 		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 		return;
 	}
+
+	if(Combat && Combat->EquippedWeapon)
+	{
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
 	
 	if(GetDisableGameplayFromController())
 	{
@@ -1375,6 +1381,17 @@ bool ABlasterCharacter::GetDisableGameplayFromController()
 	}
 
 	return false;
+}
+
+void ABlasterCharacter::SetHoldingTheFlag(bool bInHolding) const
+{
+	if(Combat == nullptr)
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("%s: Setting holding the flag: %d, %d"), *GetActorNameOrLabel(), Combat->bIsHoldingTheFlag, bInHolding);
+	Combat->bIsHoldingTheFlag = bInHolding;
 }
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)

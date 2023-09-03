@@ -58,7 +58,6 @@ void AWeapon::BeginPlay()
 	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
 	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 
-
 	StartingLocation = GetActorLocation();
 	StartingRotation = GetActorRotation();
 
@@ -103,7 +102,7 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 {
 	if(ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor))
 	{
-		if(WeaponType == EWeaponType::EWT_Flag && BlasterCharacter->GetTeam() != Team)
+		if(WeaponType == EWeaponType::EWT_Flag && BlasterCharacter->GetTeam() == Team)
 		{
 			return;
 		}
@@ -354,20 +353,38 @@ void AWeapon::StartRespawnOnDrop()
 
 void AWeapon::RespawnWeapon()
 {
-	WeaponMesh->SetSimulatePhysics(false);
-	WeaponMesh->SetEnableGravity(false);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetReplicateMovement(true);
+	if(HasAuthority())
+	{
+		SetWeaponState(EWeaponState::EWS_Initial);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+		if(GetOwner())
+		{
+			const FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+			WeaponMesh->DetachFromComponent(DetachRules);
+			SetOwner(nullptr);
+			BlasterOwnerCharacter = nullptr;
+			BlasterOwnerController = nullptr;
+		}
 	
-	SetActorLocationAndRotation(StartingLocation, StartingRotation, false, nullptr, ETeleportType::ResetPhysics);
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetEnableGravity(false);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	WeaponMesh->SetSimulatePhysics(true);
-	WeaponMesh->SetEnableGravity(true);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
-	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+		UE_LOG(LogTemp, Warning, TEXT("%s: Starting Location: %s, %s"), *GetActorNameOrLabel(), *StartingLocation.ToString(), *StartingRotation.ToString());
+		SetActorLocationAndRotation(StartingLocation, StartingRotation, false, nullptr, ETeleportType::ResetPhysics);
 
-	Ammo = AmmoCapacity;
+		WeaponMesh->SetSimulatePhysics(true);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECR_Block);
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+		Ammo = AmmoCapacity;
+	}
 }
 
 void AWeapon::ClearRespawnTimer()
