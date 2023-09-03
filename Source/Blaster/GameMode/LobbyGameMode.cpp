@@ -51,15 +51,15 @@ void ALobbyGameMode::GoToMainLevel()
 
 			if(MatchType == TEXT("FreeForAll"))
 			{
-				World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap1?listen")));
+				World->ServerTravel(FString(TEXT("/Game/Maps/FreeForAll?listen")));
 			}
 			else if(MatchType == TEXT("Teams"))
 			{
-				World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
+				World->ServerTravel(FString(TEXT("/Game/Maps/Teams?listen")));
 			}
 			else if(MatchType == TEXT("CaptureTheFlag"))
 			{
-				World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
+				World->ServerTravel(FString(TEXT("/Game/Maps/CaptureTheFlag?listen")));
 			}
 		}
 	}
