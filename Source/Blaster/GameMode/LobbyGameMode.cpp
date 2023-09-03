@@ -3,6 +3,8 @@
 
 #include "LobbyGameMode.h"
 
+#include "MultiplayerSessionsSubsystem.h"
+#include "Blaster/GameInstance/BlasterGameInstance.h"
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/PlayerState/BlasterPlayerState.h"
 #include "GameFramework/GameStateBase.h"
@@ -37,7 +39,29 @@ void ALobbyGameMode::GoToMainLevel()
 {
 	if(UWorld* World = GetWorld())
 	{
-		World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
+		BlasterGameInstance = BlasterGameInstance == nullptr ? Cast<UBlasterGameInstance>(GetGameInstance()) : BlasterGameInstance;
+
+		if(BlasterGameInstance)
+		{
+			MultiplayerSessionsSubsystem = MultiplayerSessionsSubsystem == nullptr ? BlasterGameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>() : MultiplayerSessionsSubsystem;
+			check(MultiplayerSessionsSubsystem);
+
+
+			const FString MatchType = MultiplayerSessionsSubsystem->GetDesiredMatchType();
+
+			if(MatchType == TEXT("FreeForAll"))
+			{
+				World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap1?listen")));
+			}
+			else if(MatchType == TEXT("Teams"))
+			{
+				World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
+			}
+			else if(MatchType == TEXT("CaptureTheFlag"))
+			{
+				World->ServerTravel(FString(TEXT("/Game/Maps/BlasterMap?listen")));
+			}
+		}
 	}
 }
 

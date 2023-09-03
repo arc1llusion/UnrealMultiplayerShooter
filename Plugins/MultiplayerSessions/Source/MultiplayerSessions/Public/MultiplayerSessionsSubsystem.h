@@ -47,6 +47,8 @@ public:
 	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
 	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
 
+	FORCEINLINE FString GetDesiredMatchType() const { return DesiredMatchType; }
+
 protected:
 	/*
 	 * Internal callbacks for the delegates we'll add to the online session interface delegate list
@@ -87,4 +89,7 @@ private:
 	bool bCreateSessionOnDestroy{false};
 	int32 LastNumPublicConnections;
 	FString LastMatchType;
+
+	int32 DesiredNumberOfPublicConnections = 4;
+	FString DesiredMatchType{"FreeForAll"};
 };

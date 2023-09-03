@@ -6,6 +6,8 @@
 #include "BlasterGameModeBase.h"
 #include "LobbyGameMode.generated.h"
 
+class UBlasterGameInstance;
+class UMultiplayerSessionsSubsystem;
 class ABlasterPlayerController;
 /**
  * 
@@ -34,4 +36,10 @@ private:
 	TMap<ABlasterPlayerController*, bool> PlayersReady;
 
 	bool AreAllPlayersReady();
+
+	UPROPERTY()
+	UBlasterGameInstance* BlasterGameInstance;
+	
+	UPROPERTY()
+	UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 };
